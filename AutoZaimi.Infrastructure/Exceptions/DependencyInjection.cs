@@ -1,11 +1,11 @@
-﻿using AutoZaimi.Application.Interfaces.Repositories;
-using AutoZaimi.Infrastructure.Persistence;
-using AutoZaimi.Infrastructure.Repositories;
+﻿using CarRentalZaimi.Application.Interfaces.Repositories;
+using CarRentalZaimi.Infrastructure.Persistence;
+using CarRentalZaimi.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AutoZaimi.Infrastructure;
+namespace CarRentalZaimi.Infrastructure;
 
 public static class DependencyInjection
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoZaimi.Infrastructure.Identity
+namespace CarRentalZaimi.Infrastructure.Identity
 {
     internal class JwtTokenGenerator
     {

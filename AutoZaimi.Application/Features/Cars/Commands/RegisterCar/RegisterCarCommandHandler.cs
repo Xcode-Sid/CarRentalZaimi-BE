@@ -1,8 +1,8 @@
-﻿using AutoZaimi.Application.DTOs;
-using AutoZaimi.Application.Interfaces.Command;
+﻿using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.Interfaces.Command;
 using MediatR;
 
-namespace AutoZaimi.Application.Features.Cars.Commands.RegisterCar;
+namespace CarRentalZaimi.Application.Features.Cars.Commands.RegisterCar;
 
 public class RegisterCarCommandHandler : ICommandHandler<RegisterCarCommand, CarDto>
 {

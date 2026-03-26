@@ -1,6 +1,6 @@
-﻿using AutoZaimi.Domain.Entities;
+﻿using CarRentalZaimi.Domain.Entities;
 
-namespace AutoZaimi.Application.Interfaces.Repositories;
+namespace CarRentalZaimi.Application.Interfaces.Repositories;
 
 public interface ICarRepository
 {

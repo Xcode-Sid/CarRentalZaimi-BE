@@ -1,8 +1,8 @@
-﻿using AutoZaimi.Application.Features.Cars.Commands.RegisterCar;
+﻿using CarRentalZaimi.Application.Features.Cars.Commands.RegisterCar;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AutoZaimi.API.Controllers;
+namespace CarRentalZaimi.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

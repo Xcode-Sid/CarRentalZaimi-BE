@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace AutoZaimi.Application.Interfaces.Command;
+namespace CarRentalZaimi.Application.Interfaces.Command;
 
 public interface ICommand<out TResponse> : IRequest<TResponse>
 {

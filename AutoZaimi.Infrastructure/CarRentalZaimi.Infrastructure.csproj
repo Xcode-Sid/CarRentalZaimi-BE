@@ -7,11 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AutoZaimi.Application\AutoZaimi.Application.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Persistence\Migrations\" />
+    <Compile Remove="Persistence\Migrations\**" />
+    <EmbeddedResource Remove="Persistence\Migrations\**" />
+    <None Remove="Persistence\Migrations\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +19,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="MySql.EntityFrameworkCore" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoZaimi.Application\CarRentalZaimi.Application.csproj" />
+    <ProjectReference Include="..\AutoZaimi.Logging\CarRentalZaimi.Logging.csproj" />
   </ItemGroup>
 
 </Project>

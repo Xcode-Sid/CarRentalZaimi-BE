@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace AutoZaimi.API.Extensions;
+namespace CarRentalZaimi.API.Extensions;
 
 public static class DependencyInjection
 {

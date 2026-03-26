@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AutoZaimi.Domain.Common;
+namespace CarRentalZaimi.Domain.Common;
 
 public class AuditedEntity<TIdentity> : AuditedEntity, IAuditedEntity<TIdentity>
 {

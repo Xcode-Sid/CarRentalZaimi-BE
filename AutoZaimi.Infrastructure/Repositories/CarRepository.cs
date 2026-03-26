@@ -1,8 +1,8 @@
-﻿using AutoZaimi.Application.Interfaces.Repositories;
-using AutoZaimi.Domain.Entities;
-using AutoZaimi.Infrastructure.Persistence;
+﻿using CarRentalZaimi.Application.Interfaces.Repositories;
+using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Infrastructure.Persistence;
 
-namespace AutoZaimi.Infrastructure.Repositories;
+namespace CarRentalZaimi.Infrastructure.Repositories;
 
 public class CarRepository(ApplicationDbContext _context) : ICarRepository
 {

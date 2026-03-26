@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace AutoZaimi.Infrastructure.Persistence;
+namespace CarRentalZaimi.Infrastructure.Persistence;
 
 public class ApplicationDbContext : DbContext
 {

@@ -1,7 +1,7 @@
-﻿using AutoZaimi.Domain.Common;
-using AutoZaimi.Domain.Enums;
+﻿using CarRentalZaimi.Domain.Common;
+using CarRentalZaimi.Domain.Enums;
 
-namespace AutoZaimi.Application.DTOs;
+namespace CarRentalZaimi.Application.DTOs;
 
 public class CarDto 
 {

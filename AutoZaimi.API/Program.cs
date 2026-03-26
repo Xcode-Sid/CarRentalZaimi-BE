@@ -1,6 +1,6 @@
-using AutoZaimi.API.Extensions;
-using AutoZaimi.API.Middleware;
-using AutoZaimi.Infrastructure;
+using CarRentalZaimi.API.Extensions;
+using CarRentalZaimi.API.Middleware;
+using CarRentalZaimi.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 

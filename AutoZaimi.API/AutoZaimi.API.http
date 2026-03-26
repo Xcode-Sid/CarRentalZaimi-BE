@@ -1,6 +1,0 @@
-@AutoZaimi.API_HostAddress = http://localhost:5078
-
-GET {{AutoZaimi.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
