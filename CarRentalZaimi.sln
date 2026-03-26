@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Logging", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Migrations", "CarRentalZaimi.Migrations\CarRentalZaimi.Migrations.csproj", "{BB0059C6-6567-48B1-8122-08C172DA11B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.SignalR", "CarRentalZaimi.SignalR\CarRentalZaimi.SignalR.csproj", "{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{BB0059C6-6567-48B1-8122-08C172DA11B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB0059C6-6567-48B1-8122-08C172DA11B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB0059C6-6567-48B1-8122-08C172DA11B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,5 +72,6 @@ Global
 		{D77F4980-5B37-4E69-926B-4825D1594838} = {4256DF75-CDF3-422D-A5EE-A7327307E1A0}
 		{01AC7BF1-8E3A-446B-AAE1-0D02E1CC1353} = {8B31DB4B-3AEF-49EF-86C2-763B84BC2F2C}
 		{BB0059C6-6567-48B1-8122-08C172DA11B6} = {8B983F40-C56B-436C-A2BB-DC9285A8AC98}
+		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3} = {6EE65B2B-F810-45D1-9F5F-228C67584C8B}
 	EndGlobalSection
 EndGlobal

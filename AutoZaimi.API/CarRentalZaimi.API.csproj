@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AutoZaimi.Application\CarRentalZaimi.Application.csproj" />
     <ProjectReference Include="..\AutoZaimi.Infrastructure\CarRentalZaimi.Infrastructure.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.SignalR\CarRentalZaimi.SignalR.csproj" />
   </ItemGroup>
 
 </Project>
