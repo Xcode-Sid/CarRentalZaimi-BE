@@ -1,0 +1,59 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# dotnet tools & sentinels
+.dotnet/
+*.sentinel
+*.workloadAdvertisingManifestSentinel*
+*.aspNetCertificateSentinel
+*.dotnetFirstUseSentinel
+*.toolpath.sentinel
+
+# Copilot / AI indices
+CopilotIndices/
+
+# Design time build
+DesignTimeBuild/
+FileContentIndex/
+
+# Runtime artifacts
+*.deps.json
+*.runtimeconfig.json
+*.runtimeconfig.dev.json
+*.staticwebassets.endpoints.json
+
+# Debug symbols
+*.pdb
+
+# Compiled binaries
+*.dll
+*.exe
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Test results
+TestResults/
+coverage/
+
+# User secrets
+secrets.json
+appsettings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
