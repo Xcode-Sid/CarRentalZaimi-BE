@@ -4,5 +4,5 @@ namespace CarRentalZaimi.Application.Interfaces.Repositories;
 
 public interface ICarRepository
 {
-    Task<Car> AddAsync(Car car, CancellationToken ct);
+    Task AddAsync(Car car, CancellationToken cancellationToken = default);
 }

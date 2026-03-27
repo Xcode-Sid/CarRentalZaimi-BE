@@ -1,5 +1,4 @@
-﻿using CarRentalZaimi.SignalR.Extentions;
-using CarRentalZaimi.SignalR.Hubs;
+﻿using CarRentalZaimi.SignalR.Hubs;
 using CarRentalZaimi.SignalR.Services;
 
 namespace CarRentalZaimi.SignalR.Extentions;

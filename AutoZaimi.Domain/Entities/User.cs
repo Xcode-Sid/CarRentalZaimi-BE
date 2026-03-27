@@ -23,7 +23,6 @@ public class User : IdentityUser, IAuditedEntity<string>
     public Guid? ModifiedBy { get; set; }
     public string? ModifiedIP { get; set; }
     public DateTime? ModifiedOn { get; set; }
-
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? Email { get; set; }

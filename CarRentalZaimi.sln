@@ -27,6 +27,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Migrations",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.SignalR", "CarRentalZaimi.SignalR\CarRentalZaimi.SignalR.csproj", "{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Tests.Unit", "tests\CarRentalZaimi.Tests.Unit\CarRentalZaimi.Tests.Unit.csproj", "{845A1CB2-BB01-4062-82BA-8082C6DF6DC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Tests.Integration", "tests\CarRentalZaimi.Tests.Integration\CarRentalZaimi.Tests.Integration.csproj", "{B982B6A4-DB0D-4799-8386-AD7F5B8D9CD4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +67,14 @@ Global
 		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{845A1CB2-BB01-4062-82BA-8082C6DF6DC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{845A1CB2-BB01-4062-82BA-8082C6DF6DC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{845A1CB2-BB01-4062-82BA-8082C6DF6DC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{845A1CB2-BB01-4062-82BA-8082C6DF6DC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B982B6A4-DB0D-4799-8386-AD7F5B8D9CD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B982B6A4-DB0D-4799-8386-AD7F5B8D9CD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B982B6A4-DB0D-4799-8386-AD7F5B8D9CD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B982B6A4-DB0D-4799-8386-AD7F5B8D9CD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,5 +87,7 @@ Global
 		{01AC7BF1-8E3A-446B-AAE1-0D02E1CC1353} = {8B31DB4B-3AEF-49EF-86C2-763B84BC2F2C}
 		{BB0059C6-6567-48B1-8122-08C172DA11B6} = {8B983F40-C56B-436C-A2BB-DC9285A8AC98}
 		{B718BCA9-EFA3-4E81-86C4-57408BCF57F3} = {6EE65B2B-F810-45D1-9F5F-228C67584C8B}
+		{845A1CB2-BB01-4062-82BA-8082C6DF6DC5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{B982B6A4-DB0D-4799-8386-AD7F5B8D9CD4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 EndGlobal

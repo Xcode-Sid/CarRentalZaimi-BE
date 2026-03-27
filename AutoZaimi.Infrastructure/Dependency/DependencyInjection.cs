@@ -1,6 +1,10 @@
 ﻿using CarRentalZaimi.Application.Interfaces.Repositories;
+using CarRentalZaimi.Application.Interfaces.Services;
+using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Infrastructure.Persistence;
+using CarRentalZaimi.Infrastructure.Persistence.UnitOfWork;
 using CarRentalZaimi.Infrastructure.Repositories;
+using CarRentalZaimi.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +22,10 @@ public static class DependencyInjection
                 configuration.GetConnectionString("Default")!
             ));
 
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICarRepository, CarRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ICarService, CarService>();
 
         return services;
     }

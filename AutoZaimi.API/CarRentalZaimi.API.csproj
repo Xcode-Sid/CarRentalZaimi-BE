@@ -18,4 +18,8 @@
     <ProjectReference Include="..\CarRentalZaimi.SignalR\CarRentalZaimi.SignalR.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Base\" />
+  </ItemGroup>
+
 </Project>
