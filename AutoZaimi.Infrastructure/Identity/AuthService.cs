@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace CarRentalZaimi.Infrastructure.Identity;
 
-namespace AutoZaimi.Infrastructure.Identity
+internal class AuthService
 {
-    internal class AuthService
-    {
-    }
 }

@@ -1,4 +1,4 @@
-﻿namespace AutoZaimi.Domain.Enums;
+﻿namespace CarRentalZaimi.Domain.Enums;
 
 public enum CarStatus
 {

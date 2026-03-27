@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 
-namespace AutoZaimi.API.Middleware;
+namespace CarRentalZaimi.API.Middleware;
 
 public class ExceptionHandlingMiddleware
 {

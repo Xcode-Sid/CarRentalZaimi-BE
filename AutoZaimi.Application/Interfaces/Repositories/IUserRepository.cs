@@ -1,4 +1,4 @@
-﻿namespace AutoZaimi.Application.Interfaces.Repositories;
+﻿namespace CarRentalZaimi.Application.Interfaces.Repositories;
 
 public interface IUserRepository
 {

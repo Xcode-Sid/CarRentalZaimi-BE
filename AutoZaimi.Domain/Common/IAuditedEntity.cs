@@ -1,4 +1,4 @@
-﻿namespace AutoZaimi.Domain.Common;
+﻿namespace CarRentalZaimi.Domain.Common;
 
 public interface IAuditedEntity<TIdentity> : IAuditedEntity
 {

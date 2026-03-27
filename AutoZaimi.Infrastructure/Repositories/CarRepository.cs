@@ -1,13 +1,18 @@
-﻿using AutoZaimi.Application.Interfaces.Repositories;
-using AutoZaimi.Domain.Entities;
-using AutoZaimi.Infrastructure.Persistence;
+﻿using CarRentalZaimi.Application.Interfaces.Repositories;
+using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Infrastructure.Persistence;
 
-namespace AutoZaimi.Infrastructure.Repositories;
+namespace CarRentalZaimi.Infrastructure.Repositories;
 
-public class CarRepository(ApplicationDbContext _context) : ICarRepository
+public class CarRepository : ICarRepository
 {
-    public Task<Car> AddAsync(Car car, CancellationToken ct)
+    private readonly ApplicationDbContext _context;
+
+    public CarRepository(ApplicationDbContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
     }
+
+    public async Task AddAsync(Car car, CancellationToken cancellationToken = default)
+        => await _context.Cars.AddAsync(car, cancellationToken);
 }

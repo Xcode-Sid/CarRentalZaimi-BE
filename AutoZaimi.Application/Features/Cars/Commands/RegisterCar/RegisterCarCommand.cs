@@ -1,7 +1,7 @@
-﻿using AutoZaimi.Application.DTOs;
-using AutoZaimi.Application.Interfaces.Command;
+﻿using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.Interfaces.Command;
 
-namespace AutoZaimi.Application.Features.Cars.Commands.RegisterCar;
+namespace CarRentalZaimi.Application.Features.Cars.Commands.RegisterCar;
 
 public class RegisterCarCommand : ICommand<CarDto>
 {

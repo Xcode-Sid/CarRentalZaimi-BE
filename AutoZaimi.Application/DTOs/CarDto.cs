@@ -1,11 +1,10 @@
-﻿using AutoZaimi.Domain.Common;
-using AutoZaimi.Domain.Enums;
+﻿using CarRentalZaimi.Application.DTOs.Base;
+using CarRentalZaimi.Domain.Enums;
 
-namespace AutoZaimi.Application.DTOs;
+namespace CarRentalZaimi.Application.DTOs;
 
-public class CarDto 
+public class CarDto : BaseDto<Guid>
 {
-    public Guid Id { get; set; }
     public string? Make { get; set; }
     public string? Model { get; set; }
     public int? Year { get; set; }

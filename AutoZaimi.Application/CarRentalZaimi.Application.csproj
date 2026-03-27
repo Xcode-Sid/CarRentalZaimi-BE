@@ -7,17 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AutoZaimi.Domain\AutoZaimi.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Features\Cars\Queries\" />
     <Folder Include="Features\Users\Commands\" />
     <Folder Include="Features\Users\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoZaimi.Domain\CarRentalZaimi.Domain.csproj" />
   </ItemGroup>
 
 </Project>

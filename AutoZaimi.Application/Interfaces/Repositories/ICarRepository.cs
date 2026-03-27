@@ -1,8 +1,8 @@
-﻿using AutoZaimi.Domain.Entities;
+﻿using CarRentalZaimi.Domain.Entities;
 
-namespace AutoZaimi.Application.Interfaces.Repositories;
+namespace CarRentalZaimi.Application.Interfaces.Repositories;
 
 public interface ICarRepository
 {
-    Task<Car> AddAsync(Car car, CancellationToken ct);
+    Task AddAsync(Car car, CancellationToken cancellationToken = default);
 }

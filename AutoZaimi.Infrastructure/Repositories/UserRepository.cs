@@ -1,7 +1,8 @@
-﻿using AutoZaimi.Application.Interfaces.Repositories;
+﻿using CarRentalZaimi.Application.Interfaces.Repositories;
+using Microsoft.Extensions.Logging;
 
-namespace AutoZaimi.Infrastructure.Repositories;
+namespace CarRentalZaimi.Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository(ILogger<UserRepository> _logger) : IUserRepository
 {
 }

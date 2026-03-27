@@ -1,8 +1,8 @@
-﻿using AutoZaimi.Domain.Common;
+﻿using CarRentalZaimi.Domain.Common;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AutoZaimi.Domain.Entities;
+namespace CarRentalZaimi.Domain.Entities;
 
 public class User : IdentityUser, IAuditedEntity<string>
 {
@@ -23,7 +23,6 @@ public class User : IdentityUser, IAuditedEntity<string>
     public Guid? ModifiedBy { get; set; }
     public string? ModifiedIP { get; set; }
     public DateTime? ModifiedOn { get; set; }
-
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? Email { get; set; }
