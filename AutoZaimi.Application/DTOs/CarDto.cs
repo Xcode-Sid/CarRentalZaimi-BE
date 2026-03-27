@@ -10,8 +10,8 @@ public class CarDto : BaseDto<Guid>
     public int? Year { get; set; }
     public string? LicensePlate { get; set; }
     public string? Color { get; set; }
-    public CarCategory? Category { get; set; }
-    public CarStatus? Status { get; set; }
+    public string? Category { get; set; }
+    public string? Status { get; set; }
     public decimal? PricePerDay { get; set; }
     public int? Mileage { get; set; }
 }

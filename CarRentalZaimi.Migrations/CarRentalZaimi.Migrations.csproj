@@ -7,15 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AutoZaimi.Application\CarRentalZaimi.Application.csproj" />
+    <ProjectReference Include="..\AutoZaimi.Domain\CarRentalZaimi.Domain.csproj" />
     <ProjectReference Include="..\AutoZaimi.Infrastructure\CarRentalZaimi.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.14">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.14" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>
