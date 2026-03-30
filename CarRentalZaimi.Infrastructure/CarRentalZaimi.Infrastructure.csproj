@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AutoZaimi.Application\CarRentalZaimi.Application.csproj" />
-    <ProjectReference Include="..\AutoZaimi.Logging\CarRentalZaimi.Logging.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.Application\CarRentalZaimi.Application.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.Logging\CarRentalZaimi.Logging.csproj" />
   </ItemGroup>
 
 </Project>

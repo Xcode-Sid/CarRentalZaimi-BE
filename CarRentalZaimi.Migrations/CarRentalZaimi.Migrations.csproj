@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AutoZaimi.Application\CarRentalZaimi.Application.csproj" />
-    <ProjectReference Include="..\AutoZaimi.Domain\CarRentalZaimi.Domain.csproj" />
-    <ProjectReference Include="..\AutoZaimi.Infrastructure\CarRentalZaimi.Infrastructure.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.Application\CarRentalZaimi.Application.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.Domain\CarRentalZaimi.Domain.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.Infrastructure\CarRentalZaimi.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AutoZaimi.Application\CarRentalZaimi.Application.csproj" />
-    <ProjectReference Include="..\AutoZaimi.Infrastructure\CarRentalZaimi.Infrastructure.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.Application\CarRentalZaimi.Application.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.Infrastructure\CarRentalZaimi.Infrastructure.csproj" />
     <ProjectReference Include="..\CarRentalZaimi.SignalR\CarRentalZaimi.SignalR.csproj" />
   </ItemGroup>
 
