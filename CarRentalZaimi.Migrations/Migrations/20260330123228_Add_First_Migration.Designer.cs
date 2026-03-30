@@ -3,7 +3,6 @@ using System;
 using CarRentalZaimi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -12,18 +11,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalZaimi.Migrations.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260329205333_Add_Missing_Tables")]
-    partial class Add_Missing_Tables
+    [Migration("20260330123228_Add_First_Migration")]
+    partial class Add_First_Migration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.14")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
-
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.AdditionalService", b =>
                 {
@@ -72,7 +69,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("PricePerDay")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -122,9 +119,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<DateTime?>("ModifiedOn")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("PaymentMethod")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime(6)");
 
@@ -132,7 +126,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
@@ -190,7 +184,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("PricePerDay")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -210,26 +204,11 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<bool?>("ABS")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("AdaptiveCruiseControl")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("AndroidAuto")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("AppleCarPlay")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("Autopilot")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("Bluetooth")
+                    b.Property<bool?>("AirConditioner")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
-
-                    b.Property<bool?>("ClimateControl")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("char(36)");
@@ -240,9 +219,6 @@ namespace CarRentalZaimi.Migrations.Migrations
 
                     b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<bool?>("CruiseControl")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("char(36)");
@@ -256,11 +232,8 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<int>("Doors")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("DrivingAssistant")
+                    b.Property<bool?>("ElectricWindows")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Engine")
-                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("ExteriorColorTypeId")
                         .HasColumnType("char(36)");
@@ -268,10 +241,10 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<Guid?>("FuelTypeId")
                         .HasColumnType("char(36)");
 
-                    b.Property<bool?>("GlassRoof")
+                    b.Property<bool?>("GPS")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("HarmanKardon")
+                    b.Property<bool?>("HeatedSeats")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int?>("HorsePower")
@@ -283,11 +256,8 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("LEDHeadlights")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("LaneDepartureAlert")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<string>("LicensePlate")
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("Mileage")
                         .HasColumnType("int");
@@ -307,35 +277,17 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<Guid?>("NameId")
                         .HasColumnType("char(36)");
 
-                    b.Property<bool?>("ParkingAssistantPlus")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("ParkingSensors")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<decimal>("PricePerDay")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Seats")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("SportBoost")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int?>("Status")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("Supercharging")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("ToyotaSafetySense")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<Guid?>("TransmissionTypeId")
                         .HasColumnType("char(36)");
-
-                    b.Property<bool?>("WirelessCharging")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("Year")
                         .HasColumnType("int");
@@ -1253,7 +1205,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("DiscountPercentage")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime(6)");
@@ -1517,20 +1469,11 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("ExternalProvider")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ExternalProviderId")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("FirstName")
                         .HasColumnType("longtext");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<Guid?>("LanguageId")
-                        .HasColumnType("char(36)");
 
                     b.Property<string>("LastName")
                         .HasColumnType("longtext");
@@ -1539,7 +1482,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime");
 
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("char(36)");
@@ -1578,8 +1521,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LanguageId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -1706,8 +1647,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<string>("ClaimType")
                         .HasColumnType("longtext");
 
@@ -1730,8 +1669,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("longtext");
@@ -1828,7 +1765,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasForeignKey("AdditionalServiceId");
 
                     b.HasOne("CarRentalZaimi.Domain.Entities.Booking", "Booking")
-                        .WithMany("BookingServices")
+                        .WithMany()
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1969,15 +1906,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.User", b =>
-                {
-                    b.HasOne("CarRentalZaimi.Domain.Entities.Language", "Language")
-                        .WithMany()
-                        .HasForeignKey("LanguageId");
-
-                    b.Navigation("Language");
-                });
-
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.UserImage", b =>
                 {
                     b.HasOne("CarRentalZaimi.Domain.Entities.User", "User")
@@ -2048,11 +1976,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                 });
 
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.AdditionalService", b =>
-                {
-                    b.Navigation("BookingServices");
-                });
-
-            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.Booking", b =>
                 {
                     b.Navigation("BookingServices");
                 });
