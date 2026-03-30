@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{DA0EB3F2-39AA-4EBF-9B56-9D7C5C59A96B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Domain", "AutoZaimi.Domain\CarRentalZaimi.Domain.csproj", "{E91B7FE4-3089-4828-BD64-974DE970B950}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Domain", "CarRentalZaimi.Domain\CarRentalZaimi.Domain.csproj", "{E91B7FE4-3089-4828-BD64-974DE970B950}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{8B31DB4B-3AEF-49EF-86C2-763B84BC2F2C}"
 EndProject
@@ -13,15 +13,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{6EE65B2B-F810-45D1-9F5F-228C67584C8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Application", "AutoZaimi.Application\CarRentalZaimi.Application.csproj", "{1C1FC478-0142-454A-926C-E69D8A257FBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Application", "CarRentalZaimi.Application\CarRentalZaimi.Application.csproj", "{1C1FC478-0142-454A-926C-E69D8A257FBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.API", "AutoZaimi.API\CarRentalZaimi.API.csproj", "{AEB1155A-3E43-4092-859B-1AC81D505FA5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.API", "CarRentalZaimi.API\CarRentalZaimi.API.csproj", "{AEB1155A-3E43-4092-859B-1AC81D505FA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Infrastructure", "AutoZaimi.Infrastructure\CarRentalZaimi.Infrastructure.csproj", "{D77F4980-5B37-4E69-926B-4825D1594838}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Infrastructure", "CarRentalZaimi.Infrastructure\CarRentalZaimi.Infrastructure.csproj", "{D77F4980-5B37-4E69-926B-4825D1594838}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Migrations", "Migrations", "{8B983F40-C56B-436C-A2BB-DC9285A8AC98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Logging", "AutoZaimi.Logging\CarRentalZaimi.Logging.csproj", "{01AC7BF1-8E3A-446B-AAE1-0D02E1CC1353}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Logging", "CarRentalZaimi.Logging\CarRentalZaimi.Logging.csproj", "{01AC7BF1-8E3A-446B-AAE1-0D02E1CC1353}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRentalZaimi.Migrations", "CarRentalZaimi.Migrations\CarRentalZaimi.Migrations.csproj", "{BB0059C6-6567-48B1-8122-08C172DA11B6}"
 EndProject
