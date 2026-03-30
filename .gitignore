@@ -52,7 +52,6 @@ coverage/
 
 # User secrets
 secrets.json
-appsettings.local.json
 
 # OS
 .DS_Store
