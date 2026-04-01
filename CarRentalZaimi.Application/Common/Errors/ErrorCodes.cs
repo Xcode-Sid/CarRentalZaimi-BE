@@ -27,4 +27,59 @@ public static class ErrorCodes
     public const string USER_STATUS_INVALID = "ERR_3010";
     public const string USER_STATUS_CHANGE_NOT_ALLOWED = "ERR_3011";
     public const string USER_ADMIN_PERMISSION_REQUIRED = "ERR_3012";
+
+    // Authentication Errors (3100-3199)
+    public const string AUTH_INVALID_TOKEN = "ERR_3101";
+    public const string AUTH_TOKEN_EXPIRED = "ERR_3102";
+    public const string AUTH_REFRESH_TOKEN_INVALID = "ERR_3103";
+    public const string AUTH_REFRESH_TOKEN_EXPIRED = "ERR_3104";
+    public const string AUTH_PASSWORD_RESET_TOKEN_INVALID = "ERR_3105";
+    public const string AUTH_PASSWORD_RESET_TOKEN_EXPIRED = "ERR_3106";
+    public const string AUTH_EMAIL_NOT_CONFIRMED = "ERR_3107";
+    public const string AUTH_EMAIL_ALREADY_CONFIRMED = "ERR_3108";
+    public const string AUTH_ACCOUNT_LOCKED = "ERR_3109";
+    public const string AUTH_ACCOUNT_SUSPENDED = "ERR_3110";
+    public const string AUTH_INVALID_REFRESH_TOKEN = "ERR_3111";
+    public const string AUTH_TOKEN_BLACKLISTED = "ERR_3112";
+
+
+    // Google OAuth Errors (ERR_9005-9007)
+    public const string GOOGLE_TOKEN_EXCHANGE_FAILED = "ERR_9005";
+    public const string GOOGLE_INVALID_TOKEN = "ERR_9006";
+    public const string GOOGLE_USER_PROFILE_FAILED = "ERR_9007";
+    public const string GOOGLE_AUTHORIZATION_CODE_REQUIRES = "ERR_9008";
+    public const string GOOGLE_REDIRECT_URI_REQUIRED = "ERR_9009";
+    public const string GOOGLE_INVALID_USER_DATA = "ERR_9010";
+
+
+    // Facebook OAuth Errors (ERR_9011-9016)
+    public const string FACEBOOK_TOKEN_EXCHANGE_FAILED = "ERR_9011";
+    public const string FACEBOOK_INVALID_TOKEN = "ERR_9012";
+    public const string FACEBOOK_USER_PROFILE_FAILED = "ERR_9013";
+    public const string FACEBOOK_AUTHORIZATION_CODE_REQUIRES = "ERR_9014";
+    public const string FACEBOOK_REDIRECT_URI_REQUIRED = "ERR_9015";
+    public const string FACEBOOK_INVALID_USER_DATA = "ERR_9016";
+
+
+    // Microsoft OAuth Errors (ERR_9011-9016)
+    public const string MICROSOFT_TOKEN_EXCHANGE_FAILED = "ERR_9017";
+    public const string MICROSOFT_INVALID_TOKEN = "ERR_9018";
+    public const string MICROSOFT_USER_PROFILE_FAILED = "ERR_9019";
+    public const string MICROSOFT_AUTHORIZATION_CODE_REQUIRES = "ERR_9020";
+    public const string MICROSOFT_REDIRECT_URI_REQUIRED = "ERR_9021";
+    public const string MICROSOFT_INVALID_USER_DATA = "ERR_9022";
+    public const string MICROSOFT_CODE_VERIFIER_REQUIRED = "ERR_9023";
+
+    // Microsoft OAuth Errors (ERR_9024-9030)
+    public const string YAHOO_TOKEN_EXCHANGE_FAILED = "ERR_9024";
+    public const string YAHOO_INVALID_TOKEN = "ERR_9025";
+    public const string YAHOO_USER_PROFILE_FAILED = "ERR_9026";
+    public const string YAHOO_AUTHORIZATION_CODE_REQUIRES = "ERR_9027";
+    public const string YAHOO_REDIRECT_URI_REQUIRED = "ERR_9028";
+    public const string YAHOO_INVALID_USER_DATA = "ERR_9029";
+    public const string YAHOO_CODE_VERIFIER_REQUIRED = "ERR_9030";
+
+
+    public const string TOKEN_EXPIRED = "ERR_1040";
+    public const string INVALID_TOKEN = "ERR_1041";
 }

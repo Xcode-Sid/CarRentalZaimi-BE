@@ -1,7 +1,14 @@
 using CarRentalZaimi.API.Handlers;
+using CarRentalZaimi.Application.Common.Facebook;
+using CarRentalZaimi.Application.Common.Google;
+using CarRentalZaimi.Application.Common.Microsoft;
+using CarRentalZaimi.Application.Common.Yahoo;
 using CarRentalZaimi.Application.Extensions;
+using CarRentalZaimi.Application.Interfaces.Services;
+using CarRentalZaimi.Application.Services;
 using CarRentalZaimi.Infrastructure;
 using CarRentalZaimi.Infrastructure.Seed;
+using Microsoft.AspNetCore.Authentication.Google;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -20,6 +27,65 @@ try
         .WriteTo.MySQL(
             ctx.Configuration.GetConnectionString("Default")!,
             "AppLogs"));
+
+
+    builder.Services
+        .AddAuthentication(options =>
+        {
+            options.DefaultScheme = "GoogleAuth";
+            options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+        })
+        .AddCookie("GoogleAuth", options =>
+        {
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        })
+        .AddGoogle(options =>
+        {
+            options.SignInScheme = "GoogleAuth";
+            options.ClientId = builder.Configuration.GetValue<string>("Authentication:Google:ClientId")!;
+            options.ClientSecret = builder.Configuration.GetValue<string>("Authentication:Google:ClientSecret")!;
+            options.CallbackPath = "/api/v1/Auth/google-response";
+            options.SaveTokens = true;
+        });
+
+
+    builder.Services.AddSingleton(new GoogleOAuthSettings
+    {
+        ClientId = builder.Configuration["Authentication:Google:ClientId"]!,
+        ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!,
+        TokenUrl = builder.Configuration["Authentication:Google:TokenUrl"]!,
+        UserInfoUrl = builder.Configuration["Authentication:Google:UserInfoUrl"]!
+    });
+    builder.Services.AddHttpClient<IGoogleOAuthService, GoogleOAuthService>();
+
+    builder.Services.AddSingleton(new FacebookOAuthSettings
+    {
+        AppId = builder.Configuration["Authentication:Facebook:AppId"]!,
+        AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!,
+        TokenUrl = builder.Configuration["Authentication:Facebook:TokenUrl"]!,
+        UserInfoUrl = builder.Configuration["Authentication:Facebook:UserInfoUrl"]!,
+        ApiVersion = builder.Configuration["Authentication:Facebook:ApiVersion"]!
+    });
+    builder.Services.AddHttpClient<IFacebookOAuthService, FacebookOAuthService>();
+
+    builder.Services.AddSingleton(new MicrosoftOAuthSettings
+    {
+        ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!,
+        TenantId = builder.Configuration["Authentication:Microsoft:TenantId"]!,
+        TokenUrl = builder.Configuration["Authentication:Microsoft:TokenUrl"]!,
+        UserInfoUrl = builder.Configuration["Authentication:Microsoft:UserInfoUrl"]!
+    });
+    builder.Services.AddHttpClient<IMicrosoftOAuthService, MicrosoftOAuthService>();
+
+    builder.Services.AddSingleton(new YahooOAuthSettings
+    {
+        ClientId = builder.Configuration["Authentication:Yahoo:ClientId"]!,
+        TokenUrl = builder.Configuration["Authentication:Yahoo:TokenUrl"]!,
+        UserInfoUrl = builder.Configuration["Authentication:Yahoo:UserInfoUrl"]!
+    });
+    builder.Services.AddHttpClient<IYahooOAuthService, YahooOAuthService>();
+
 
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();

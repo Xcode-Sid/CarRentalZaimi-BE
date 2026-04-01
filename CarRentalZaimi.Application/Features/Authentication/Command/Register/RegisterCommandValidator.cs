@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace CarRentalZaimi.Application.Features.Authentication;
+namespace CarRentalZaimi.Application.Features.Authentication.Command.Register;
 
 public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {

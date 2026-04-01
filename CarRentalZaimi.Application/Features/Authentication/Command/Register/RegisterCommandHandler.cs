@@ -6,7 +6,7 @@ using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace CarRentalZaimi.Application.Features.Authentication;
+namespace CarRentalZaimi.Application.Features.Authentication.Command.Register;
 
 
 public class RegisterCommandHandler(
