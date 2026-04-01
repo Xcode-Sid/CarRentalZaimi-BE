@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace CarRentalZaimi.Domain.Common;
 
@@ -13,7 +13,7 @@ public class AuditedEntity : IAuditedEntity
 
     public Guid? CreatedBy { get; set; }
 
-    public string CreatedIP { get; set; } = null!;
+    public string? CreatedIP { get; set; }
 
     public DateTime? CreatedOn { get; set; }
 

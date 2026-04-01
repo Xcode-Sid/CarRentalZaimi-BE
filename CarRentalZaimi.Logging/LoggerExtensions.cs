@@ -1,32 +1,33 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace CarRentalZaimi.Logging;
 
 public static class LoggerExtensions
 {
-    private static readonly Action<ILogger, Exception, Exception> LoggerErrorException;
-    private static readonly Action<ILogger, string, Exception> LoggerInfo;
+    private static readonly Action<ILogger, string, Exception?> LogDebug =
+        LoggerMessage.Define<string>(LogLevel.Debug, new EventId(1, "Debug"), "{Message}");
 
-    static LoggerExtensions()
-    {
-        LoggerErrorException = LoggerMessage.Define<Exception>(LogLevel.Error, new EventId(9), "ERROR: {Exception}");
-        LoggerInfo = LoggerMessage.Define<string>(LogLevel.Information, new EventId(3), "Information : {Message}");
-    }
+    private static readonly Action<ILogger, string, Exception?> LogInfo =
+        LoggerMessage.Define<string>(LogLevel.Information, new EventId(2, "Info"), "{Message}");
 
+    private static readonly Action<ILogger, string, Exception?> LogWarn =
+        LoggerMessage.Define<string>(LogLevel.Warning, new EventId(3, "Warn"), "{Message}");
 
-    public static void Error(this ILogger logger,
-        Exception ex)
-    {
-        Console.WriteLine($"{ex.Message}{Environment.NewLine}{ex.StackTrace}");
-        LoggerErrorException(logger, ex, null!);
-    }
+    private static readonly Action<ILogger, string, Exception?> LogErr =
+        LoggerMessage.Define<string>(LogLevel.Error, new EventId(4, "Error"), "{Message}");
 
-    public static void Info(this ILogger logger,
-        string message,
-        int eventId = 3)
-    {
-        Console.WriteLine(message);
-        LoggerInfo(logger, message, null!);
-    }
+    public static void Debug(this ILogger logger, string message)
+        => LogDebug(logger, message, null);
+
+    public static void Info(this ILogger logger, string message)
+        => LogInfo(logger, message, null);
+
+    public static void Warn(this ILogger logger, string message)
+        => LogWarn(logger, message, null);
+
+    public static void Error(this ILogger logger, Exception ex)
+        => LogErr(logger, ex.Message, ex);
+
+    public static void Error(this ILogger logger, string message, Exception ex)
+        => LogErr(logger, message, ex);
 }
-

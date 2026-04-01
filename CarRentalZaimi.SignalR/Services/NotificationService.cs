@@ -1,14 +1,16 @@
-﻿
 using CarRentalZaimi.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
-namespace CarRentalZaimi.SignalR.Services
+namespace CarRentalZaimi.SignalR.Services;
+
+public class NotificationService(
+    IHubContext<NotificationHub> _hubContext,
+    ILogger<NotificationService> _logger) : INotificationService
 {
-    public class NotificationService(IHubContext<NotificationHub> _hubContext) : INotificationService
+    public Task SendNotificationAsync(string message)
     {
-        public Task SendNotificationAsync(string message)
-        {
-            throw new NotImplementedException();
-        }
+        _logger.LogInformation("Sending notification: {Message}", message);
+        throw new NotImplementedException();
     }
 }

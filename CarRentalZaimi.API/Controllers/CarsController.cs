@@ -1,12 +1,11 @@
-﻿using CarRentalZaimi.Application.Features.Cars.Commands.RegisterCar;
+using CarRentalZaimi.API.Controllers.Base;
+using CarRentalZaimi.Application.Features.Cars.Commands.RegisterCar;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentalZaimi.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class CarsController(IMediator _mediator) : ControllerBase
+public class CarsController(IMediator _mediator) : ApiControllerBase
 {
     [HttpPost]
     //TODO later
@@ -16,6 +15,6 @@ public class CarsController(IMediator _mediator) : ControllerBase
          CancellationToken ct)
     {
         var result = await _mediator.Send(command, ct);
-        return Ok(result); //TODO later
+        return FromResult(result, StatusCodes.Status201Created);
     }
 }
