@@ -33,6 +33,7 @@ public class RegisterCommandHandler(
                 request.Password,
                 request.Name,
                 request.Data,
+                request.Role,
                 userAgent);
 
 

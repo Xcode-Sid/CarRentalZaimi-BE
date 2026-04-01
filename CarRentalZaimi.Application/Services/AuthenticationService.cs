@@ -8,9 +8,13 @@ using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Common.Constants;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Data;
 using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace CarRentalZaimi.Application.Services;
 
@@ -23,6 +27,7 @@ public class AuthenticationService : IAuthenticationService
     private readonly IJwtTokenService _jwtTokenService; 
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
+    private readonly UserManager<User> _userManager;
 
     public AuthenticationService(
         IUserRepository userRepository, 
@@ -31,7 +36,8 @@ public class AuthenticationService : IAuthenticationService
         ILogger<AuthenticationService> logger,
         IUnitOfWork unitOfWork,
         IConfiguration configuration,
-        IJwtTokenService jwtTokenService)
+        IJwtTokenService jwtTokenService,
+        UserManager<User> userManager)
     {
         _userRepository = userRepository;   
         _errorService = errorService;
@@ -40,9 +46,10 @@ public class AuthenticationService : IAuthenticationService
         _unitOfWork = unitOfWork;
         _configuration = configuration;
         _jwtTokenService = jwtTokenService;
+        _userManager = userManager;
     }
     public async Task<Result<UserDto>> RegisterAsync(string firstname, string lastname, DateTime? dateOfBirth, string username, string email, 
-        string phone, string password, string? name, string? data, string? deviceInfo = null)
+        string phone, string password, string? name, string? data, string? role, string? deviceInfo = null)
     {
         try
         {
@@ -136,8 +143,18 @@ public class AuthenticationService : IAuthenticationService
 
             _logger.LogInformation("User {UserId} registered successfully", user.Id);
 
+            if (role != null)
+            {
 
-            var response = new UserDto
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<UserDto>(ErrorCodes.VALIDATION_FAILED);
+                }
+            }
+
+                var response = new UserDto
             {
                 Id = user.Id,
                 FirstName = user.FirstName,

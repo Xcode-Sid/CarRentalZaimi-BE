@@ -1,10 +1,6 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CarRentalZaimi.Application.Features.Authentication;
-
 
 public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
@@ -42,6 +38,10 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .NotEmpty().WithMessage("Confirm password is required")
             .Equal(x => x.Password)
             .WithMessage("Passwords do not match");
+
+        RuleFor(x => x.Role)
+            .NotEmpty().WithMessage("Role name is required")
+            .Must(role => role == "User").WithMessage("User type must be User."); //TODO check later not static
 
     }
 }
