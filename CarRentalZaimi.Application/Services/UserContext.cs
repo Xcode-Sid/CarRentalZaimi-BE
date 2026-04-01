@@ -2,7 +2,7 @@ using System.Security.Claims;
 using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 
-namespace CarRentalZaimi.Infrastructure.Services;
+namespace CarRentalZaimi.Application.Services;
 
 public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
 {

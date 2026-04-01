@@ -3,7 +3,7 @@ using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
-namespace CarRentalZaimi.Infrastructure.Services;
+namespace CarRentalZaimi.Application.Services;
 
 public class CarService(
     IUnitOfWork _uow,

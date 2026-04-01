@@ -26,7 +26,6 @@ public class MappingProfile : Profile
         CreateMap<Promotion, PromotionDto>().ReverseMap();
         CreateMap<CompanyProfile, CompanyProfileDto>().ReverseMap();
         CreateMap<ContactMessage, ContactMessageDto>().ReverseMap();
-        CreateMap<GoogleReview, GoogleReviewDto>().ReverseMap();
         CreateMap<Language, LanguageDto>().ReverseMap();
         CreateMap<UserNotification, UserNotificationDto>().ReverseMap();
         CreateMap<UserImage, UserImageDto>().ReverseMap();

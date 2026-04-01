@@ -1,11 +1,9 @@
 using CarRentalZaimi.Application.Interfaces.Repositories;
-using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Infrastructure.Persistence;
 using CarRentalZaimi.Infrastructure.Persistence.UnitOfWork;
 using CarRentalZaimi.Infrastructure.Repositories;
-using CarRentalZaimi.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,13 +27,11 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
 
         services.AddHttpContextAccessor();
-        services.AddScoped<IUserContext, UserContext>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICarRepository, CarRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ICarService, CarService>();
-        services.AddScoped<IDeviceDetector, DeviceDetector>();
+                services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         return services;
     }

@@ -1,5 +1,5 @@
-using CarRentalZaimi.API.Extensions;
 using CarRentalZaimi.API.Handlers;
+using CarRentalZaimi.Application.Extensions;
 using CarRentalZaimi.Infrastructure;
 using CarRentalZaimi.Infrastructure.Seed;
 using Scalar.AspNetCore;
@@ -27,6 +27,7 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
+    builder.Services.AddHttpContextAccessor();
 
     var app = builder.Build();
 

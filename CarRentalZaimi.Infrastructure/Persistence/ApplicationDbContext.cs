@@ -73,7 +73,6 @@ public class ApplicationDbContext(
     public DbSet<CompanyProfile> CompanyProfiles { get; set; }
     public DbSet<ContactMessage> ContactMessages { get; set; }
     public DbSet<EmailConfirmationToken> EmailConfirmationTokens { get; set; }
-    public DbSet<GoogleReview> GoogleReviews { get; set; }
     public DbSet<Language> Languages { get; set; }
     public DbSet<PhoneConfirmationToken> PhoneConfirmationTokens { get; set; }
     public DbSet<Promotion> Promotions { get; set; }

@@ -1,10 +1,12 @@
-using System.Text.RegularExpressions;
+
+
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
-namespace CarRentalZaimi.Infrastructure.Services;
+namespace CarRentalZaimi.Application.Services;
 
 public partial class DeviceDetector(ILogger<DeviceDetector> _logger) : IDeviceDetector
 {

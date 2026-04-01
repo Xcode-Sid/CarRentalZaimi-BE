@@ -1,5 +1,9 @@
-﻿namespace CarRentalZaimi.Application.Interfaces.Repositories;
+﻿using CarRentalZaimi.Domain.Entities;
 
-public interface IUserRepository
+namespace CarRentalZaimi.Application.Interfaces.Repositories;
+
+public interface IUserRepository : IRepository<User>
 {
+    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task AddRefreshTokenAsync(RefreshToken refreshToken);
 }
