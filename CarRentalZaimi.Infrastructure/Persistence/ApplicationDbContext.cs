@@ -1,13 +1,59 @@
-﻿using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Application.Interfaces.Services;
+using CarRentalZaimi.Domain.Common;
+using CarRentalZaimi.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Infrastructure.Persistence;
 
-public class ApplicationDbContext : IdentityDbContext<User, Role, string>
+public class ApplicationDbContext(
+    DbContextOptions<ApplicationDbContext> options,
+    IUserContext userContext) : IdentityDbContext<User, Role, string>(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-      : base(options) { }
+    public override int SaveChanges()
+    {
+        ApplyAuditInfo();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ApplyAuditInfo();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void ApplyAuditInfo()
+    {
+        var now = DateTime.UtcNow;
+        var userId = userContext.UserId;
+        var ip = userContext.IpAddress;
+
+        foreach (var entry in ChangeTracker.Entries<IAuditedEntity>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.CreatedOn = now;
+                    entry.Entity.CreatedBy = userId;
+                    entry.Entity.CreatedIP = ip;
+                    break;
+
+                case EntityState.Modified:
+                    entry.Entity.ModifiedOn = now;
+                    entry.Entity.ModifiedBy = userId;
+                    entry.Entity.ModifiedIP = ip;
+                    break;
+
+                case EntityState.Deleted:
+                    entry.State = EntityState.Modified;
+                    entry.Entity.IsDeleted = true;
+                    entry.Entity.DeletedOn = now;
+                    entry.Entity.DeletedBy = userId;
+                    entry.Entity.DeletedIP = ip;
+                    break;
+            }
+        }
+    }
 
 
     //Entities
@@ -35,6 +81,8 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, string>
     public DbSet<SavedCar> SavedCars { get; set; }
     public DbSet<UserImage> UserImages { get; set; }
     public DbSet<UserNotification> UserNotifications { get; set; }
+    public DbSet<AppLog> AppLogs { get; set; }
+    public DbSet<UserDevice> UserDevices { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder builder)

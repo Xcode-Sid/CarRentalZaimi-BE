@@ -1,7 +1,8 @@
-﻿using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace CarRentalZaimi.Infrastructure.Seed;
 
@@ -9,9 +10,15 @@ public static class CarCategorySeeder
 {
     public static async Task SeedAsync(IServiceProvider services)
     {
+        var logger = services.GetRequiredService<ILoggerFactory>()
+            .CreateLogger(nameof(CarCategorySeeder));
         var db = services.GetRequiredService<ApplicationDbContext>();
 
-        if (await db.CarCategories.AnyAsync()) return; 
+        if (await db.CarCategories.AnyAsync())
+        {
+            logger.LogDebug("Car categories already seeded, skipping");
+            return;
+        }
 
         var categories = new List<CarCategory>
         {
@@ -24,5 +31,7 @@ public static class CarCategorySeeder
 
         await db.CarCategories.AddRangeAsync(categories);
         await db.SaveChangesAsync();
+
+        logger.LogInformation("Seeded {Count} car categories", categories.Count);
     }
 }

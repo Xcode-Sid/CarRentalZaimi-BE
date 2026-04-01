@@ -146,7 +146,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<Guid?>("AdditionalServiceId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("BookingId")
+                    b.Property<Guid?>("BookingId")
                         .HasColumnType("char(36)");
 
                     b.Property<Guid?>("CreatedBy")
@@ -204,8 +204,8 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<bool?>("AirConditioner")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("char(36)");
@@ -290,6 +290,8 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("ExteriorColorTypeId");
 
@@ -655,8 +657,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("Comment")
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("char(36)");
@@ -1763,9 +1764,7 @@ namespace CarRentalZaimi.Migrations.Migrations
 
                     b.HasOne("CarRentalZaimi.Domain.Entities.Booking", "Booking")
                         .WithMany()
-                        .HasForeignKey("BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BookingId");
 
                     b.Navigation("AdditionalService");
 
@@ -1774,6 +1773,10 @@ namespace CarRentalZaimi.Migrations.Migrations
 
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.Car", b =>
                 {
+                    b.HasOne("CarRentalZaimi.Domain.Entities.CarCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
                     b.HasOne("CarRentalZaimi.Domain.Entities.CarExteriorColor", "ExteriorColorType")
                         .WithMany()
                         .HasForeignKey("ExteriorColorTypeId");
@@ -1797,6 +1800,8 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.HasOne("CarRentalZaimi.Domain.Entities.CarTransmission", "TransmissionType")
                         .WithMany()
                         .HasForeignKey("TransmissionTypeId");
+
+                    b.Navigation("Category");
 
                     b.Navigation("ExteriorColorType");
 

@@ -1,4 +1,4 @@
-﻿namespace CarRentalZaimi.Domain.Common;
+namespace CarRentalZaimi.Domain.Common;
 
 public interface IAuditedEntity<TIdentity> : IAuditedEntity
 {
@@ -7,7 +7,7 @@ public interface IAuditedEntity<TIdentity> : IAuditedEntity
 public interface IAuditedEntity
 {
     Guid? CreatedBy { get; set; }
-    string CreatedIP { get; set; }
+    string? CreatedIP { get; set; }
     DateTime? CreatedOn { get; set; }
     Guid? DeletedBy { get; set; }
     string? DeletedIP { get; set; }

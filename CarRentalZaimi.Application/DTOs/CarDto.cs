@@ -1,18 +1,29 @@
-﻿using CarRentalZaimi.Application.DTOs.Base;
+using CarRentalZaimi.Application.DTOs.Base;
 using CarRentalZaimi.Domain.Enums;
 
 namespace CarRentalZaimi.Application.DTOs;
 
 public class CarDto : BaseDto<Guid>
 {
-    public string? Make { get; set; }
-    public string? Model { get; set; }
-    public int? Year { get; set; }
+    public int Year { get; set; }
     public string? LicensePlate { get; set; }
-    public string? Color { get; set; }
-    public string? Category { get; set; }
-    public string? Status { get; set; }
-    public decimal? PricePerDay { get; set; }
+    public decimal PricePerDay { get; set; }
+    public int Seats { get; set; }
+    public int Doors { get; set; }
     public int? Mileage { get; set; }
+    public int? HorsePower { get; set; }
+    public bool? AirConditioner { get; set; }
+    public bool? ABS { get; set; }
+    public bool? ElectricWindows { get; set; }
+    public bool? HeatedSeats { get; set; }
+    public bool? GPS { get; set; }
+    public CarStatus? Status { get; set; }
+    public CarCategoryDto? Category { get; set; }
+    public CarCompanyNameDto? Name { get; set; }
+    public CarCompanyModelDto? Model { get; set; }
+    public CarExteriorColorDto? ExteriorColorType { get; set; }
+    public CarInteriorColorDto? InteriorColorType { get; set; }
+    public CarTransmissionDto? TransmissionType { get; set; }
+    public CarFuelDto? FuelType { get; set; }
+    public ICollection<CarImagesDto>? CarImages { get; set; }
 }
-

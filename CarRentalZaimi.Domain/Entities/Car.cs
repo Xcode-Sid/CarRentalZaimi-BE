@@ -5,7 +5,6 @@ namespace CarRentalZaimi.Domain.Entities;
 
 public class Car : AuditedEntity<Guid>
 {
-    public int CategoryId { get; set; }
     public int Year { get; set; }
     public string? LicensePlate { get; set; } 
     public decimal PricePerDay { get; set; }
@@ -19,6 +18,7 @@ public class Car : AuditedEntity<Guid>
     public bool? HeatedSeats { get; set; }
     public bool? GPS { get; set; }
     public CarStatus? Status { get; set; }
+    public virtual CarCategory? Category { get; set; }
     public virtual CarCompanyName? Name { get; set; }
     public virtual CarCompanyModel? Model { get; set; }
     public virtual CarExteriorColor? ExteriorColorType { get; set; }

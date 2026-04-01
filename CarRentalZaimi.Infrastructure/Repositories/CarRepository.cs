@@ -1,18 +1,17 @@
-﻿using CarRentalZaimi.Application.Interfaces.Repositories;
+using CarRentalZaimi.Application.Interfaces.Repositories;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Infrastructure.Persistence;
+using Microsoft.Extensions.Logging;
 
 namespace CarRentalZaimi.Infrastructure.Repositories;
 
-public class CarRepository : ICarRepository
+public class CarRepository(
+    ApplicationDbContext _context,
+    ILogger<CarRepository> _logger) : ICarRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public CarRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task AddAsync(Car car, CancellationToken cancellationToken = default)
-        => await _context.Cars.AddAsync(car, cancellationToken);
+    {
+        _logger.LogDebug("Adding car to database: {LicensePlate}", car.LicensePlate);
+        await _context.Cars.AddAsync(car, cancellationToken);
+    }
 }

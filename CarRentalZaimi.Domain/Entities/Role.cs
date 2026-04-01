@@ -1,4 +1,4 @@
-﻿using CarRentalZaimi.Domain.Common;
+using CarRentalZaimi.Domain.Common;
 using Microsoft.AspNetCore.Identity;
 
 namespace CarRentalZaimi.Domain.Entities;
