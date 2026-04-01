@@ -512,6 +512,8 @@ public class AuthenticationService : IAuthenticationService
                 user = new User
                 {
                     Id = Guid.NewGuid().ToString(),
+                    FirstName = firstName,
+                    LastName = lastName,
                     Email = email,
                     UserName = email.Split('@')[0],
                     PasswordHash = null, // External users have no pass
@@ -592,6 +594,86 @@ public class AuthenticationService : IAuthenticationService
     }
 
 
+    public async Task<Result<AuthenticationResponseDto>> LoginAsync(string login, string password, string? ipAddress = null, string? deviceInfo = null)
+    {
+        try
+        {
+            var user = await _userRepository.GetByEmailAsync(login)
+                       ?? await _userRepository.GetByUsernameAsync(login);
+            if (user == null)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INVALID_CREDENTIALS);
+
+            if (!_passwordService.VerifyPassword(password, user.PasswordHash!))
+                return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INVALID_CREDENTIALS);
+
+            // Check user status - banned and suspended users cannot login
+            if (user.Status == UserStatus.Banned)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_BANNED);
+
+            if (user.Status == UserStatus.Suspended)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_SUSPENDED);
+
+            if (user.Status != UserStatus.Active)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INACTIVE);
+
+            var loginRoleNames = await _userManager.GetRolesAsync(user);
+            var loginRoleName = loginRoleNames.FirstOrDefault();
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Email, user.Email!),
+                new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+                new(ClaimTypes.Role, loginRoleName ?? string.Empty),
+                new(ClaimNames.UserStatus, user.Status.ToString())
+            };
+
+            var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
+            var accessTokenExpiryMinutes = int.Parse(jwtSettings[ConfigurationKeys.JwtSettingKeys.ExpiryMinutes] ?? "60");
+            var refreshTokenExpiryDays = int.Parse(jwtSettings[ConfigurationKeys.JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
+
+            var accessToken = _jwtTokenService.GenerateAccessToken(claims);
+            var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
+            var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes);
+            var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
+
+            // Save refresh token to database
+            var refreshToken = new RefreshToken
+            {
+                User = user,
+                Token = refreshTokenValue,
+                ExpiresAt = refreshTokenExpiresAt,
+                IsRevoked = false,
+                IPAddress = ipAddress,
+                DeviceInfo = deviceInfo,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            await _userRepository.AddRefreshTokenAsync(refreshToken);
+
+            await _userRepository.UpdateAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("User {UserId} logged in successfully", user.Id);
+
+            var response = new AuthenticationResponseDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshTokenValue,
+                AccessTokenExpiresAt = accessTokenExpiresAt,
+                RefreshTokenExpiresAt = refreshTokenExpiresAt,
+                User = MapToUserDto(user),
+                Role = await GetRoleDtoAsync(user),
+            };
+
+            return Result<AuthenticationResponseDto>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Login failed for {Login}", login);
+            return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+    }
 
 
     private async Task SaveProfileImageAsync(User user, string name, string data)
@@ -627,4 +709,12 @@ public class AuthenticationService : IAuthenticationService
         return role != null ? _mapper.Map<RoleDto>(role) : null;
     }
 
+    private async Task<RoleDto?> GetRoleDtoAsync(User user)
+    {
+        var names = await _userManager.GetRolesAsync(user);
+        var name = names.FirstOrDefault();
+        if (name == null) return null;
+        var role = await _roleManager.FindByNameAsync(name);
+        return role != null ? _mapper.Map<RoleDto>(role) : null;
+    }
 }

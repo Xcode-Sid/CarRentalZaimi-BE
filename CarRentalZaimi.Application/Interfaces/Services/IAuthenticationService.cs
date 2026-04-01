@@ -15,4 +15,5 @@ public interface IAuthenticationService
         string? externalProviderId, string userType, string? deviceInfo = null, CancellationToken cancellationToken = default);
     Task<Result<AuthenticationResponseDto>> AuthenticateWithYahooAsync(string? email, string? firstName, string? lastName, string? picture, 
         string? externalProviderId, string userType, string? deviceInfo = null, CancellationToken cancellationToken = default);
+    Task<Result<AuthenticationResponseDto>> LoginAsync(string login, string password, string? ipAddress = null, string? deviceInfo = null);
 }

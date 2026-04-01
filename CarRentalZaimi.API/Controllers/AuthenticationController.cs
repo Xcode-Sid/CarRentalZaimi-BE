@@ -2,10 +2,12 @@
 using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Features.Authentication.Command.Facebook;
 using CarRentalZaimi.Application.Features.Authentication.Command.Google;
+using CarRentalZaimi.Application.Features.Authentication.Command.Login;
 using CarRentalZaimi.Application.Features.Authentication.Command.Microsoft;
 using CarRentalZaimi.Application.Features.Authentication.Command.Register;
 using CarRentalZaimi.Application.Features.Authentication.Command.Yahoo;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -22,6 +24,15 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase
         var result = await _mediator.Send(command);
 
         return FromResult(result, StatusCodes.Status201Created);
+    }
+
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Login([FromBody] LoginCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return FromResult(result, StatusCodes.Status200OK);
     }
 
     [HttpPost("google-verify")]
