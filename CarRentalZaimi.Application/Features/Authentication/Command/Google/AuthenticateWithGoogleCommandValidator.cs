@@ -11,10 +11,6 @@ public class AuthenticateWithGoogleCommandValidator : AbstractValidator<Authenti
 
         RuleFor(x => x.RedirectUri)
             .NotEmpty().WithMessage("RedirectUri is required");
-
-        RuleFor(x => x.Role)
-            .NotEmpty().WithMessage("Role is required")
-             .Must(role => role == "User").WithMessage("User type must be User.");
     }
 
 }

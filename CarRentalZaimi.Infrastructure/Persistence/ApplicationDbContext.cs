@@ -82,6 +82,8 @@ public class ApplicationDbContext(
     public DbSet<UserNotification> UserNotifications { get; set; }
     public DbSet<AppLog> AppLogs { get; set; }
     public DbSet<UserDevice> UserDevices { get; set; }
+    public DbSet<StatePrefix> StatePrefixes { get; set; }
+    
 
 
     protected override void OnModelCreating(ModelBuilder builder)

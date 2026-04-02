@@ -44,7 +44,6 @@ public class AuthenticateWithMicrosoftCommandHandler(
                 firstName,
                 lastName,
                 googleUser.Id,
-                request.Role!,
                 userAgent);
 
             if (result.IsSuccessful)

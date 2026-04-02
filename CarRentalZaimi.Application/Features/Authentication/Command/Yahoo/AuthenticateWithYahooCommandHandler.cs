@@ -45,7 +45,6 @@ IHttpContextAccessor _httpContextAccessor) : ICommandHandler<AuthenticateWithYah
                 lastName,
                 yahooUser.Picture,
                 yahooUser.Sub,
-                request.Role!,
                 userAgent);
 
             if (result.IsSuccessful)

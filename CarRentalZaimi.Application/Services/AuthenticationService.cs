@@ -102,7 +102,7 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Email, user.Email),
                 new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new(ClaimTypes.Role, user.Status.ToString()),
+                new(ClaimTypes.Role, SystemPolicies.User.ToString()),
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
@@ -149,6 +149,7 @@ public class AuthenticationService : IAuthenticationService
                 Email = user.Email,
                 Username = user.UserName,
                 PhoneNumber = user.PhoneNumber,
+                Role = role,
             };
 
             return Result<UserDto>.Success(response);
@@ -162,7 +163,7 @@ public class AuthenticationService : IAuthenticationService
     }
 
     public async Task<Result<AuthenticationResponseDto>> AuthenticateWithGoogleAsync(string? email, string? firstName, string? lastName, string? picture, 
-        string? externalProviderId, string userType, string? deviceInfo = null, CancellationToken cancellationToken = default)
+        string? externalProviderId, string? deviceInfo = null, CancellationToken cancellationToken = default)
     {
         await _unitOfWork.BeginTransactionAsync();
         try
@@ -200,7 +201,7 @@ public class AuthenticationService : IAuthenticationService
                         // Save profile image if provided
                         var name = $"profile_{user.Id}.jpg";
                         if (!string.IsNullOrEmpty(picture) && !string.IsNullOrEmpty(name))
-                            await SaveProfileImageAsync(user, name, picture);
+                            await SaveProfileImageAsync(user, name, base64Image);
                     }
                     catch (Exception ex)
                     {
@@ -233,7 +234,7 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Email, user.Email),
                 new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new(ClaimTypes.Role, user.Status.ToString()),
+                new(ClaimTypes.Role, SystemPolicies.User.ToString()),
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
@@ -268,7 +269,7 @@ public class AuthenticationService : IAuthenticationService
                 AccessTokenExpiresAt = accessTokenExpiresAt,
                 RefreshTokenExpiresAt = refreshTokenExpiresAt,
                 User = MapToUserDto(user),
-                Role = await GetRoleDtoByNameAsync(userType)
+                Role = await GetRoleDtoAsync(user)
             });
         }
         catch (Exception ex)
@@ -281,7 +282,7 @@ public class AuthenticationService : IAuthenticationService
 
 
     public async Task<Result<AuthenticationResponseDto>> AuthenticateWithFacebookAsync(string? email, string? firstName, string? lastName, string? picture, 
-        string? externalProviderId, string userType, string? deviceInfo = null, CancellationToken cancellationToken = default)
+        string? externalProviderId, string? deviceInfo = null, CancellationToken cancellationToken = default)
     {
         await _unitOfWork.BeginTransactionAsync();
         try
@@ -318,7 +319,7 @@ public class AuthenticationService : IAuthenticationService
                         // Save profile image if provided
                         var name = $"profile_{user.Id}.jpg";
                         if (!string.IsNullOrEmpty(picture) && !string.IsNullOrEmpty(name))
-                            await SaveProfileImageAsync(user, name, picture);
+                            await SaveProfileImageAsync(user, name, base64Image);
                     }
                     catch (Exception ex)
                     {
@@ -351,7 +352,7 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Email, user.Email!),
                 new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new(ClaimTypes.Role, user.Status.ToString()),
+                new(ClaimTypes.Role, SystemPolicies.User.ToString()),
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
@@ -388,7 +389,7 @@ public class AuthenticationService : IAuthenticationService
                 AccessTokenExpiresAt = accessTokenExpiresAt,
                 RefreshTokenExpiresAt = refreshTokenExpiresAt,
                 User = MapToUserDto(user),
-                Role = await GetRoleDtoByNameAsync(userType)
+                Role = await GetRoleDtoAsync(user)
             });
         }
         catch (Exception ex)
@@ -400,7 +401,7 @@ public class AuthenticationService : IAuthenticationService
     }
 
     public async Task<Result<AuthenticationResponseDto>> AuthenticateWithMicrosoftAsync(string? email, string? firstName, string? lastName, string? externalProviderId, 
-        string userType, string? deviceInfo = null, CancellationToken cancellationToken = default)
+        string? deviceInfo = null, CancellationToken cancellationToken = default)
     {
         await _unitOfWork.BeginTransactionAsync();
         try
@@ -450,7 +451,7 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Email, user.Email!),
                 new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new(ClaimTypes.Role, user.Status.ToString()),
+                new(ClaimTypes.Role, SystemPolicies.User.ToString()),
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
@@ -485,7 +486,7 @@ public class AuthenticationService : IAuthenticationService
                 AccessTokenExpiresAt = accessTokenExpiresAt,
                 RefreshTokenExpiresAt = refreshTokenExpiresAt,
                 User = MapToUserDto(user),
-                Role = await GetRoleDtoByNameAsync(userType)
+                Role = await GetRoleDtoAsync(user)
             });
         }
         catch (Exception ex)
@@ -496,7 +497,8 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
-    public async Task<Result<AuthenticationResponseDto>> AuthenticateWithYahooAsync(string? email, string? firstName, string? lastName, string? picture, string? externalProviderId, string userType, string? deviceInfo = null, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthenticationResponseDto>> AuthenticateWithYahooAsync(string? email, string? firstName, string? lastName, string? picture, 
+        string? externalProviderId, string? deviceInfo = null, CancellationToken cancellationToken = default)
     {
         await _unitOfWork.BeginTransactionAsync();
         try
@@ -547,7 +549,7 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Email, user.Email!),
                 new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new(ClaimTypes.Role, user.Status.ToString()),
+                new(ClaimTypes.Role, SystemPolicies.User.ToString()),
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
@@ -582,7 +584,7 @@ public class AuthenticationService : IAuthenticationService
                 AccessTokenExpiresAt = accessTokenExpiresAt,
                 RefreshTokenExpiresAt = refreshTokenExpiresAt,
                 User = MapToUserDto(user),
-                Role = await GetRoleDtoByNameAsync(userType)
+                Role = await GetRoleDtoAsync(user)
             });
         }
         catch (Exception ex)

@@ -44,7 +44,6 @@ public class AuthenticateWithFacebookCommandHandler(
                 lastName,
                 facebookUser.Picture?.Data?.Url,
                 facebookUser.Id,
-                request.Role!,
                 userAgent);
 
             if (result.IsSuccessful)

@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using CarRentalZaimi.Domain.Common.Constants;
+using FluentValidation;
 
 namespace CarRentalZaimi.Application.Features.Authentication.Command.Register;
 
@@ -41,7 +42,7 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 
         RuleFor(x => x.Role)
             .NotEmpty().WithMessage("Role name is required")
-            .Must(role => role == "User").WithMessage("User type must be User."); //TODO check later not static
+            .Must(role => role == SystemPolicies.User).WithMessage("User type must be User."); 
 
     }
 }

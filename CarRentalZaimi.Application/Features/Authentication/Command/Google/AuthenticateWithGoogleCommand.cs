@@ -13,6 +13,5 @@ public class AuthenticateWithGoogleCommand : ICommand<AuthenticationResponseDto>
     public string? OperatingSystem { get; set; }
     public string? Browser { get; set; }
     public string? LastIPAddress { get; set; }
-    public string? Role { get; set; }
 }
 

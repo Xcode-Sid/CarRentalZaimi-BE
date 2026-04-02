@@ -9,6 +9,7 @@ using CarRentalZaimi.Application.Services;
 using CarRentalZaimi.Infrastructure;
 using CarRentalZaimi.Infrastructure.Seed;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -87,6 +88,20 @@ try
     builder.Services.AddHttpClient<IYahooOAuthService, YahooOAuthService>();
 
 
+
+    // ================== CORS ==================
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .WithExposedHeaders("X-Pagination", "X-Request-Id");
+        });
+    });
+
+
     builder.Services.AddControllers();
     builder.Services.AddOpenApi();
     builder.Services.AddProblemDetails();
@@ -110,6 +125,7 @@ try
 
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
+    app.UseCors("AllowAll");
     app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapControllers();

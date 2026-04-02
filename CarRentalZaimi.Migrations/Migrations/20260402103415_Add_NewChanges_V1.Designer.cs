@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalZaimi.Migrations.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260331144347_AddNewChangesV1")]
-    partial class AddNewChangesV1
+    [Migration("20260402103415_Add_NewChanges_V1")]
+    partial class Add_NewChanges_V1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,7 +32,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -76,6 +75,35 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.ToTable("AdditionalServices");
                 });
 
+            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.AppLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Exception")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Level")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MessageTemplate")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("TimeStamp")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppLogs");
+                });
+
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.Booking", b =>
                 {
                     b.Property<Guid>("Id")
@@ -89,7 +117,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -156,7 +183,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -214,7 +240,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -321,7 +346,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -373,7 +397,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -421,7 +444,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -467,7 +489,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -513,7 +534,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -562,7 +582,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -617,7 +636,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -666,7 +684,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -721,7 +738,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -773,7 +789,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -857,7 +872,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -920,7 +934,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -970,72 +983,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.ToTable("EmailConfirmationTokens");
                 });
 
-            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.GoogleReview", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("AuthorName")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("AuthorPhotoUrl")
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("CreatedIP")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("DeletedIP")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("DeletedOn")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("GoogleReviewId")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsVisible")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<Guid?>("ModifiedBy")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("ModifiedIP")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("ModifiedOn")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("ProfileUrl")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("PublishedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("GoogleReviews");
-                });
-
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.Language", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1052,7 +999,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -1122,7 +1068,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -1187,7 +1132,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -1257,7 +1201,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -1391,7 +1334,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -1430,6 +1372,59 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.ToTable("SavedCars");
                 });
 
+            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.StatePrefix", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CountryName")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("DeletedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Flag")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ModifiedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PhonePrefix")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PhoneRegex")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StatePrefixes");
+                });
+
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
@@ -1451,7 +1446,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime(6)");
 
                     b.Property<Guid?>("DeletedBy")
@@ -1469,6 +1464,12 @@ namespace CarRentalZaimi.Migrations.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ExternalProvider")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ExternalProviderId")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("longtext");
@@ -1514,6 +1515,9 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -1533,6 +1537,79 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.UserDevice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Browser")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BrowserVersion")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("DeletedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("DeviceType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("LastLoginAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ModifiedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("OSVersion")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OperatingSystem")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDevices");
+                });
+
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.UserImage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1543,7 +1620,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -1596,7 +1672,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CreatedIP")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -1751,7 +1826,7 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasForeignKey("CarId");
 
                     b.HasOne("CarRentalZaimi.Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Bookings")
                         .HasForeignKey("UserId");
 
                     b.Navigation("Car");
@@ -1911,6 +1986,15 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.UserDevice", b =>
+                {
+                    b.HasOne("CarRentalZaimi.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.UserImage", b =>
                 {
                     b.HasOne("CarRentalZaimi.Domain.Entities.User", "User")
@@ -1993,6 +2077,11 @@ namespace CarRentalZaimi.Migrations.Migrations
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.CarCompanyName", b =>
                 {
                     b.Navigation("CarCompanyModels");
+                });
+
+            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }

@@ -1369,6 +1369,59 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.ToTable("SavedCars");
                 });
 
+            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.StatePrefix", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CountryName")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("DeletedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Flag")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ModifiedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PhonePrefix")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PhoneRegex")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StatePrefixes");
+                });
+
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")

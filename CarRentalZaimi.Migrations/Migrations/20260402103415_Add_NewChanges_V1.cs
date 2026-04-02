@@ -7,12 +7,17 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace CarRentalZaimi.Migrations.Migrations
 {
     /// <inheritdoc />
-    public partial class Add_NewChanges_V2 : Migration
+    public partial class Add_NewChanges_V1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("DROP TABLE IF EXISTS `GoogleReviews`;");
+            migrationBuilder.DropForeignKey(
+                name: "FK_BookingServices_Bookings_BookingId",
+                table: "BookingServices");
+
+            migrationBuilder.DropTable(
+                name: "GoogleReviews");
 
             migrationBuilder.AlterColumn<string>(
                 name: "CreatedIP",
@@ -110,6 +115,14 @@ namespace CarRentalZaimi.Migrations.Migrations
                 oldClrType: typeof(string),
                 oldType: "longtext");
 
+            migrationBuilder.AlterColumn<Guid>(
+                name: "CategoryId",
+                table: "Cars",
+                type: "char(36)",
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "int");
+
             migrationBuilder.AlterColumn<string>(
                 name: "CreatedIP",
                 table: "CarReviews",
@@ -117,6 +130,16 @@ namespace CarRentalZaimi.Migrations.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "longtext");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Comment",
+                table: "CarReviews",
+                type: "longtext",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "varchar(1000)",
+                oldMaxLength: 1000,
+                oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "CreatedIP",
@@ -181,6 +204,14 @@ namespace CarRentalZaimi.Migrations.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "longtext");
+
+            migrationBuilder.AlterColumn<Guid>(
+                name: "BookingId",
+                table: "BookingServices",
+                type: "char(36)",
+                nullable: true,
+                oldClrType: typeof(Guid),
+                oldType: "char(36)");
 
             migrationBuilder.AlterColumn<string>(
                 name: "CreatedIP",
@@ -225,18 +256,50 @@ namespace CarRentalZaimi.Migrations.Migrations
                 oldClrType: typeof(string),
                 oldType: "longtext");
 
-            migrationBuilder.Sql(@"
-                CREATE TABLE IF NOT EXISTS `AppLogs` (
-                    `Id` int NOT NULL AUTO_INCREMENT,
-                    `Message` longtext NULL,
-                    `MessageTemplate` longtext NULL,
-                    `Level` longtext NULL,
-                    `TimeStamp` datetime(6) NOT NULL,
-                    `Exception` longtext NULL,
-                    `Properties` longtext NULL,
-                PRIMARY KEY (`Id`)
-                ) CHARACTER SET=utf8mb4;
-            ");
+            migrationBuilder.CreateTable(
+                name: "AppLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Message = table.Column<string>(type: "longtext", nullable: true),
+                    MessageTemplate = table.Column<string>(type: "longtext", nullable: true),
+                    Level = table.Column<string>(type: "longtext", nullable: true),
+                    TimeStamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Exception = table.Column<string>(type: "longtext", nullable: true),
+                    Properties = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppLogs", x => x.Id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "StatePrefixes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    CountryName = table.Column<string>(type: "longtext", nullable: true),
+                    PhonePrefix = table.Column<string>(type: "longtext", nullable: true),
+                    Flag = table.Column<string>(type: "longtext", nullable: true),
+                    PhoneRegex = table.Column<string>(type: "longtext", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "char(36)", nullable: true),
+                    CreatedIP = table.Column<string>(type: "longtext", nullable: true),
+                    CreatedOn = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "char(36)", nullable: true),
+                    DeletedIP = table.Column<string>(type: "longtext", nullable: true),
+                    DeletedOn = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    ModifiedBy = table.Column<Guid>(type: "char(36)", nullable: true),
+                    ModifiedIP = table.Column<string>(type: "longtext", nullable: true),
+                    ModifiedOn = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StatePrefixes", x => x.Id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "UserDevices",
@@ -276,18 +339,53 @@ namespace CarRentalZaimi.Migrations.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Cars_CategoryId",
+                table: "Cars",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserDevices_UserId",
                 table: "UserDevices",
                 column: "UserId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_BookingServices_Bookings_BookingId",
+                table: "BookingServices",
+                column: "BookingId",
+                principalTable: "Bookings",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Cars_CarCategories_CategoryId",
+                table: "Cars",
+                column: "CategoryId",
+                principalTable: "CarCategories",
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("DROP TABLE IF EXISTS `GoogleReviews`;");
+            migrationBuilder.DropForeignKey(
+                name: "FK_BookingServices_Bookings_BookingId",
+                table: "BookingServices");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Cars_CarCategories_CategoryId",
+                table: "Cars");
+
+            migrationBuilder.DropTable(
+                name: "AppLogs");
+
+            migrationBuilder.DropTable(
+                name: "StatePrefixes");
 
             migrationBuilder.DropTable(
                 name: "UserDevices");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Cars_CategoryId",
+                table: "Cars");
 
             migrationBuilder.DropColumn(
                 name: "ExternalProvider",
@@ -421,12 +519,32 @@ namespace CarRentalZaimi.Migrations.Migrations
                 oldType: "longtext",
                 oldNullable: true);
 
+            migrationBuilder.AlterColumn<int>(
+                name: "CategoryId",
+                table: "Cars",
+                type: "int",
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(Guid),
+                oldType: "char(36)",
+                oldNullable: true);
+
             migrationBuilder.AlterColumn<string>(
                 name: "CreatedIP",
                 table: "CarReviews",
                 type: "longtext",
                 nullable: false,
                 defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "longtext",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Comment",
+                table: "CarReviews",
+                type: "varchar(1000)",
+                maxLength: 1000,
+                nullable: true,
                 oldClrType: typeof(string),
                 oldType: "longtext",
                 oldNullable: true);
@@ -509,6 +627,16 @@ namespace CarRentalZaimi.Migrations.Migrations
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "longtext",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<Guid>(
+                name: "BookingId",
+                table: "BookingServices",
+                type: "char(36)",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
+                oldClrType: typeof(Guid),
+                oldType: "char(36)",
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
@@ -570,6 +698,14 @@ namespace CarRentalZaimi.Migrations.Migrations
                     table.PrimaryKey("PK_GoogleReviews", x => x.Id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_BookingServices_Bookings_BookingId",
+                table: "BookingServices",
+                column: "BookingId",
+                principalTable: "Bookings",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }

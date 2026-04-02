@@ -25,8 +25,8 @@ public class AuthenticateWithGoogleCommandHandler(
 
             var googleUser = googleResult.Data;
 
-            string firstName = googleUser.GivenName!;
-            string lastName = googleUser.FamilyName!;
+            string firstName = googleUser.FamilyName!;
+            string lastName = googleUser.GivenName!;
 
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
             {
@@ -44,7 +44,6 @@ public class AuthenticateWithGoogleCommandHandler(
                 lastName,
                 googleUser.Picture,
                 googleUser.Id,
-                request.Role!,
                 userAgent);
 
             if (result.IsSuccessful)
