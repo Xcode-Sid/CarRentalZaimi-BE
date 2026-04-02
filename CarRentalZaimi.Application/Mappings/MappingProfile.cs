@@ -1,4 +1,5 @@
 using AutoMapper;
+using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Domain.Entities;
 
@@ -34,5 +35,7 @@ public class MappingProfile : Profile
         CreateMap<PhoneConfirmationToken, PhoneConfirmationTokenDto>().ReverseMap();
         CreateMap<AppLog, AppLogDto>().ReverseMap();
         CreateMap<UserDevice, UserDeviceDto>().ReverseMap();
+        CreateMap<StatePrefix, StatePrefixDto>().ReverseMap();
+        CreateMap<Result<List<StatePrefix>>, Result<List<StatePrefixDto>>>();
     }
 }

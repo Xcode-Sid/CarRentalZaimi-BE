@@ -1,5 +1,6 @@
 ﻿using CarRentalZaimi.API.Controllers.Base;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.Features.Authentication.Command.Facebook;
 using CarRentalZaimi.Application.Features.Authentication.Command.Google;
 using CarRentalZaimi.Application.Features.Authentication.Command.Login;
@@ -7,13 +8,11 @@ using CarRentalZaimi.Application.Features.Authentication.Command.Microsoft;
 using CarRentalZaimi.Application.Features.Authentication.Command.Register;
 using CarRentalZaimi.Application.Features.Authentication.Command.Yahoo;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace CarRentalZaimi.API.Controllers;
 
-public class AuthenticationController(IMediator _mediator) : ApiControllerBase
+public class AuthenticationController(IMediator _mediator) : ApiControllerBase(_mediator)
 {
 
     [HttpPost("register")]
@@ -21,9 +20,7 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase
     [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        var result = await _mediator.Send(command);
-
-        return FromResult(result, StatusCodes.Status201Created);
+        return await SendCommand(command);
     }
 
     [HttpPost("login")]
@@ -31,8 +28,7 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
-        var result = await _mediator.Send(command);
-        return FromResult(result, StatusCodes.Status200OK);
+        return await SendCommand(command);
     }
 
     [HttpPost("google-verify")]
@@ -40,8 +36,7 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase
     [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyGoogleAuth([FromBody] AuthenticateWithGoogleCommand command)
     {
-        var result = await _mediator.Send(command);
-        return FromResult(result, StatusCodes.Status201Created);
+        return await SendCommand(command);
     }
 
     [HttpPost("facebook-verify")]
@@ -49,8 +44,7 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase
     [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyFacebookAuth([FromBody] AuthenticateWithFacebookCommand command)
     {
-        var result = await _mediator.Send(command);
-        return FromResult(result, StatusCodes.Status201Created);
+        return await SendCommand(command);
     }
 
     [HttpPost("microsoft-verify")]
@@ -58,8 +52,7 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase
     [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyMicrosoftAuth([FromBody] AuthenticateWithMicrosoftCommand command)
     {
-        var result = await _mediator.Send(command);
-        return FromResult(result, StatusCodes.Status201Created);
+        return await SendCommand(command);
     }
 
     [HttpPost("yahoo-verify")]
@@ -67,7 +60,6 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase
     [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyYahooAuth([FromBody] AuthenticateWithYahooCommand command)
     {
-        var result = await _mediator.Send(command);
-        return FromResult(result, StatusCodes.Status201Created);
+        return await SendCommand(command);
     }
 }

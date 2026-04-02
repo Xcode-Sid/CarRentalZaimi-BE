@@ -15,6 +15,7 @@ public class Result
     [JsonIgnore]
     public Exception? Exception { get; set; }
 
+    public static Result<T> Success<T>(T data) => Result<T>.Success(data);
     public static Result Success() => new() { IsSuccessful = true };
 
     public static Result Error(string errorResult)

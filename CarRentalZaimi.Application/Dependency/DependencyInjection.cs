@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<ICarService, CarService>();
         services.AddScoped<IDeviceDetector, DeviceDetector>();
+        services.AddScoped<IStatePrefixService, StatePrefixService>();
         return services;
     }
 }
