@@ -1,5 +1,7 @@
 using CarRentalZaimi.Application.Interfaces.Repositories;
+using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
+using CarRentalZaimi.Application.Services;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Infrastructure.Persistence;
 using CarRentalZaimi.Infrastructure.Persistence.UnitOfWork;
@@ -31,7 +33,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICarRepository, CarRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-                services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<ICarService, CarService>();
 
         return services;
     }
