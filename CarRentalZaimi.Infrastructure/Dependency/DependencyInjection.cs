@@ -35,7 +35,7 @@ public static class DependencyInjection
         services.AddScoped<ICarRepository, CarRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ICarService, CarService>();
-        services.AddScoped<IDeviceDetector, DeviceDetector>();
+        services.AddScoped<IDeviceDetectorService, DeviceDetectorService>();
 
         return services;
     }
