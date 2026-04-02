@@ -96,5 +96,11 @@ public class ApplicationDbContext(
         builder.Entity<CompanyProfile>()
          .Property(e => e.WorkingHours)
          .HasColumnType("json");
+
+        builder.Entity<UserDevice>(entity =>
+        {
+            entity.Property(d => d.Browser).HasConversion<string>();
+            entity.Property(d => d.OperatingSystem).HasConversion<string>();
+        });
     }
 }
