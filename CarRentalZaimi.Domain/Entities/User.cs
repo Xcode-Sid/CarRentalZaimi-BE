@@ -1,4 +1,5 @@
 using CarRentalZaimi.Domain.Common;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,6 +26,10 @@ public class User : IdentityUser, IAuditedEntity<string>
     public DateTime? ModifiedOn { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
-    public DateTime DateOfBirth { get; set; }
-  
+    public DateTime? DateOfBirth { get; set; }
+    public UserStatus Status { get; set; }
+    public string? ExternalProvider { get; set; }
+    public string? ExternalProviderId { get; set; }
+    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
 }

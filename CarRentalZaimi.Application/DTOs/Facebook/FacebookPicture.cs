@@ -1,0 +1,7 @@
+﻿namespace CarRentalZaimi.Application.DTOs.Facebook;
+
+public class FacebookPicture
+{
+    public FacebookPictureData? Data { get; set; }
+}
+

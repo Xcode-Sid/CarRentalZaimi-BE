@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Common\SystemPolicies\**" />
+    <EmbeddedResource Remove="Common\SystemPolicies\**" />
+    <None Remove="Common\SystemPolicies\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.5" />
   </ItemGroup>
 

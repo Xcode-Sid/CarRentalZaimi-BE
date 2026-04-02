@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentalZaimi.API.Controllers;
 
-public class CarsController(IMediator _mediator) : ApiControllerBase
+public class CarsController(IMediator mediator) : ApiControllerBase(mediator)
 {
     [HttpPost]
     //TODO later

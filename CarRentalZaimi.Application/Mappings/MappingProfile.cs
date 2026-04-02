@@ -1,4 +1,5 @@
 using AutoMapper;
+using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Domain.Entities;
 
@@ -26,7 +27,6 @@ public class MappingProfile : Profile
         CreateMap<Promotion, PromotionDto>().ReverseMap();
         CreateMap<CompanyProfile, CompanyProfileDto>().ReverseMap();
         CreateMap<ContactMessage, ContactMessageDto>().ReverseMap();
-        CreateMap<GoogleReview, GoogleReviewDto>().ReverseMap();
         CreateMap<Language, LanguageDto>().ReverseMap();
         CreateMap<UserNotification, UserNotificationDto>().ReverseMap();
         CreateMap<UserImage, UserImageDto>().ReverseMap();
@@ -35,5 +35,7 @@ public class MappingProfile : Profile
         CreateMap<PhoneConfirmationToken, PhoneConfirmationTokenDto>().ReverseMap();
         CreateMap<AppLog, AppLogDto>().ReverseMap();
         CreateMap<UserDevice, UserDeviceDto>().ReverseMap();
+        CreateMap<StatePrefix, StatePrefixDto>().ReverseMap();
+        CreateMap<Result<List<StatePrefix>>, Result<List<StatePrefixDto>>>();
     }
 }
