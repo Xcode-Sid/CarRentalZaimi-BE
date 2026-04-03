@@ -9,6 +9,13 @@ public static class SuccessMessages
         public const string ResourceUpdated = "Resource updated successfully";
         public const string ResourceDeleted = "Resource deleted successfully";
     }
+
+    public static class Car
+    {
+        public const string CarCreated = "Car created successfully";
+        public const string CarUpdated = "Car updated successfully";
+        public const string CarDeleted = "Car deleted successfully";
+    }
     public static class StatePrefix
     {
         public const string StatePrefixCreated = "State prefix created successfully";
