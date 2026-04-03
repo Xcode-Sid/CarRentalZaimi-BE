@@ -19,7 +19,7 @@ public class ResetPasswordCommandHandler(
             _logger.LogInformation("Password reset request for email {Email}", request.Email);
 
             //TODO get userId from _userService // user_update branch
-            string userId = "";
+            string userId = "2182f170-987a-4b6f-be8f-d36cc65fb4c2";
 
             var result = await _passwordResetService.ResetPasswordAsync(request.Token, userId, request.NewPassword);
 

@@ -11,6 +11,7 @@ public class MappingProfile : Profile
     {
         CreateMap<Car, CarDto>().ReverseMap();
         CreateMap<User, UserDto>().ReverseMap();
+        CreateMap<Role, RoleDto>().ReverseMap();
         CreateMap<Booking, BookingDto>().ReverseMap();
         CreateMap<BookingService, BookingServiceDto>().ReverseMap();
         CreateMap<AdditionalService, AdditionalServiceDto>().ReverseMap();

@@ -61,7 +61,7 @@ public class PasswordResetService(
                 return _errorService.CreateFailure<string>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
             }
 
-            var resetLink = $"{parsedBaseUrl}reset-password?token={token}&email={email}&userId={user.Id}";
+            var resetLink = $"{parsedBaseUrl}reset-password?token={token}&email={email}";
 
             var emailData = new Dictionary<string, object>
             {
