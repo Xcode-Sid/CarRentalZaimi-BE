@@ -12,6 +12,7 @@ using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Data;
 using System.Security.Claims;
 
 namespace CarRentalZaimi.Application.Services;
@@ -64,6 +65,11 @@ public class AuthenticationService : IAuthenticationService
             var existingUser = await _userRepository.GetByEmailAsync(email);
             if (existingUser != null)
                 return _errorService.CreateFailure<UserDto>(ErrorCodes.USER_EMAIL_ALREADY_EXISTS);
+
+            var existingUserByPhone = await _userRepository.GetByPhoneAsync(phone);
+            if (existingUserByPhone != null)
+                return _errorService.CreateFailure<UserDto>(ErrorCodes.USER_PHONE_ALREADY_EXISTS);
+
 
             // Validate password strength
             if (!_passwordService.IsPasswordStrong(password))
@@ -149,7 +155,7 @@ public class AuthenticationService : IAuthenticationService
                 Email = user.Email,
                 Username = user.UserName,
                 PhoneNumber = user.PhoneNumber,
-                Role = role,
+                Role =  await GetRoleDtoAsync(user),
             };
 
             return Result<UserDto>.Success(response);
@@ -209,6 +215,14 @@ public class AuthenticationService : IAuthenticationService
                     }
                 }
 
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
 
                 await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
@@ -327,6 +341,14 @@ public class AuthenticationService : IAuthenticationService
                     }
                 }
 
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
 
                 await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
@@ -427,6 +449,15 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true, 
                 };
 
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
+
                 await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Microsoft user {UserId} created successfully", user.Id);
@@ -524,6 +555,15 @@ public class AuthenticationService : IAuthenticationService
                     ExternalProviderId = externalProviderId,
                     EmailConfirmed = true,
                 };
+
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
 
                 await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
@@ -704,12 +744,6 @@ public class AuthenticationService : IAuthenticationService
 
     private UserDto MapToUserDto(User user)
        => _mapper.Map<UserDto>(user);
-
-    private async Task<RoleDto?> GetRoleDtoByNameAsync(string roleName)
-    {
-        var role = await _roleManager.FindByNameAsync(roleName);
-        return role != null ? _mapper.Map<RoleDto>(role) : null;
-    }
 
     private async Task<RoleDto?> GetRoleDtoAsync(User user)
     {
