@@ -31,13 +31,9 @@ public class UserController(IMediator _mediator) : ApiControllerBase(_mediator)
     [HttpPost("user/{userId}/phone", Name = nameof(AddPhoneNumber))]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AddPhoneNumber(string userId, string phoneNumber)
+    public async Task<IActionResult> AddPhoneNumber(string userId, [FromBody] AddPhoneNumberCommand command)
     {
-        var command = new AddPhoneNumberCommand
-        {
-            UserId = userId,
-            PhoneNumber = phoneNumber,
-        };
-        return await SendCommandCreated(command, nameof(GetUserById), new { userId }, SuccessMessages.User.UserProfileUpdated);
+        var updatedCommand = command with { UserId = userId };
+        return await SendCommandCreated(updatedCommand, nameof(GetUserById), new { userId }, SuccessMessages.User.UserProfileUpdated);
     }
 }
