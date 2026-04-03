@@ -196,6 +196,19 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true, // Google already confirmed the email
                 };
 
+                await _userRepository.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+
+
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
+
                 // Download profile picture and convert to base64
                 if (!string.IsNullOrEmpty(picture))
                 {
@@ -215,16 +228,6 @@ public class AuthenticationService : IAuthenticationService
                     }
                 }
 
-                //add automatiacaly user role
-                string role = SystemPolicies.User;
-                var roleResult = await _userManager.AddToRoleAsync(user, role);
-                if (!roleResult.Succeeded)
-                {
-                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
-                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
-                }
-
-                await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Google user {UserId} created successfully", user.Id);
             }
@@ -322,6 +325,21 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true, 
                 };
 
+
+                await _userRepository.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+
+
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
+
+
                 // Download profile picture and convert to base64
                 if (!string.IsNullOrEmpty(picture))
                 {
@@ -341,16 +359,6 @@ public class AuthenticationService : IAuthenticationService
                     }
                 }
 
-                //add automatiacaly user role
-                string role = SystemPolicies.User;
-                var roleResult = await _userManager.AddToRoleAsync(user, role);
-                if (!roleResult.Succeeded)
-                {
-                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
-                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
-                }
-
-                await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Facebook user {UserId} created successfully", user.Id);
             }
@@ -449,6 +457,10 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true, 
                 };
 
+
+                await _userRepository.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+
                 //add automatiacaly user role
                 string role = SystemPolicies.User;
                 var roleResult = await _userManager.AddToRoleAsync(user, role);
@@ -458,8 +470,8 @@ public class AuthenticationService : IAuthenticationService
                     return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
                 }
 
-                await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
+
                 _logger.LogInformation("New Microsoft user {UserId} created successfully", user.Id);
             }
             else
@@ -556,6 +568,10 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true,
                 };
 
+
+                await _userRepository.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+
                 //add automatiacaly user role
                 string role = SystemPolicies.User;
                 var roleResult = await _userManager.AddToRoleAsync(user, role);
@@ -565,7 +581,6 @@ public class AuthenticationService : IAuthenticationService
                     return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
                 }
 
-                await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Yahoo user {UserId} created successfully", user.Id);
             }
