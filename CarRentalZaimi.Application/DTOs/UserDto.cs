@@ -13,4 +13,5 @@ public class UserDto : BaseDto<Guid>
     public RoleDto? Role { get; set; }
     public UserImageDto? Image { get; set; }
     public DateTime? DateOfBirth { get; set; }
+    public string? Location { get; set; }
 }

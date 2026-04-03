@@ -34,6 +34,7 @@ public class RegisterCommandHandler(
                 request.Name,
                 request.Data,
                 request.Role,
+                request.Location,
                 userAgent);
 
 

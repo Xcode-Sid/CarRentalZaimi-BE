@@ -55,7 +55,7 @@ public class AuthenticationService : IAuthenticationService
     }
 
     public async Task<Result<UserDto>> RegisterAsync(string firstname, string lastname, DateTime? dateOfBirth, string username, string email, 
-        string phone, string password, string? name, string? data, string? role, string? deviceInfo = null)
+        string phone, string password, string? name, string? data, string? role, string? location, string? deviceInfo = null)
     {
         await _unitOfWork.BeginTransactionAsync();
 
@@ -88,7 +88,8 @@ public class AuthenticationService : IAuthenticationService
                 PhoneNumber = phone,
                 PasswordHash = _passwordService.HashPassword(password),
                 Status = UserStatus.PendingVerification, // New users start as PendingVerification
-                EmailConfirmed = false
+                EmailConfirmed = false,
+                Location = location,
             };
 
             await _userRepository.AddAsync(user);
@@ -155,6 +156,7 @@ public class AuthenticationService : IAuthenticationService
                 Email = user.Email,
                 Username = user.UserName,
                 PhoneNumber = user.PhoneNumber,
+                Location = user.Location,
                 Role =  await GetRoleDtoAsync(user),
             };
 

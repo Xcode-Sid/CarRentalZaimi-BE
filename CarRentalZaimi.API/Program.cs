@@ -123,6 +123,7 @@ try
         app.MapScalarApiReference();
     }
 
+    app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
     app.UseCors("AllowAll");

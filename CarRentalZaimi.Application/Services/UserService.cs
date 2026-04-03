@@ -56,6 +56,7 @@ public class UserService : IUserService
             Email = user.Email,
             Username = user.UserName,
             PhoneNumber = user.PhoneNumber,
+            Location = user.Location,
             Role =  await GetRoleDtoAsync(user),
             Image = _mapper.Map<UserImageDto>(userImage)
         };
@@ -66,7 +67,7 @@ public class UserService : IUserService
     public async Task<Result<UserDto>> UpdateUserProfileAsync(UpdateUserCommand command, CancellationToken cancellationToken = default)
     {
         var user = await _unitOfWork.Repository<User>()
-        .FirstOrDefaultAsync(p => p.Id == command.UserId, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id == command.UserId, cancellationToken);
 
         if (user is null)
             return _errorService.CreateFailure<UserDto>(ErrorCodes.NOT_FOUND);
@@ -77,8 +78,48 @@ public class UserService : IUserService
         if (!string.IsNullOrWhiteSpace(command.Lastname))
             user.LastName = command.Lastname;
 
+        if (!string.IsNullOrWhiteSpace(command.Location))
+            user.Location = command.Location;
+
         if (command.DateOfBirth.HasValue)
             user.DateOfBirth = command.DateOfBirth.Value;
+
+        // Handle profile image update
+        if (!string.IsNullOrWhiteSpace(command.Name) && !string.IsNullOrWhiteSpace(command.Data))
+        {
+            var existingImage = await _unitOfWork.Repository<UserImage>()
+                .FirstOrDefaultAsync(p => p.User!.Id == command.UserId, cancellationToken);
+
+            if (existingImage is not null)
+            {
+                var oldImageFullPath = Path.Combine("wwwroot", existingImage.ImagePath);
+                if (File.Exists(oldImageFullPath))
+                    File.Delete(oldImageFullPath);
+
+                await _unitOfWork.Repository<UserImage>().DeleteAsync(existingImage);
+            }
+
+            var folderName = $"{user.UserName}_{user.Id}";
+            var folderPath = Path.Combine("wwwroot", "images", folderName);
+            Directory.CreateDirectory(folderPath);
+
+            byte[] imageData = Convert.FromBase64String(command.Data);
+            var imagePath = Path.Combine(folderPath, command.Name);
+
+            await using (var fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await fileStream.WriteAsync(imageData, 0, imageData.Length);
+            }
+
+            var profileImage = new UserImage
+            {
+                User = user,
+                ImageName = command.Name,
+                ImagePath = $"images/{folderName}/{command.Name}",
+            };
+
+            await _unitOfWork.Repository<UserImage>().AddAsync(profileImage);
+        }
 
         await _unitOfWork.Repository<User>().UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -95,6 +136,7 @@ public class UserService : IUserService
             Email = user.Email,
             Username = user.UserName,
             PhoneNumber = user.PhoneNumber,
+            Location = user.Location,
             Role = await GetRoleDtoAsync(user),
             Image = _mapper.Map<UserImageDto>(userImage)
         };
@@ -130,6 +172,7 @@ public class UserService : IUserService
             Email = user.Email,
             Username = user.UserName,
             PhoneNumber = user.PhoneNumber,
+            Location = user.Location,
             Role = await GetRoleDtoAsync(user)
         };
 
