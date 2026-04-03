@@ -71,7 +71,6 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase(_
 
     [HttpPost("change-password")]
     [Authorize]
-    [EnableRateLimiting("api")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
