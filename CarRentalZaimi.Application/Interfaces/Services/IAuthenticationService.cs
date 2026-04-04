@@ -6,7 +6,7 @@ namespace CarRentalZaimi.Application.Interfaces.Services;
 public interface IAuthenticationService
 {
     Task<Result<UserDto>> RegisterAsync(string firstname, string lastname, DateTime? dateOfBirth, 
-        string username, string email, string phone, string password, string? name, string? data, string? role, string? deviceInfo = null);
+        string username, string email, string phone, string password, string? name, string? data, string? role, string? location, string? deviceInfo = null);
     Task<Result<AuthenticationResponseDto>> AuthenticateWithGoogleAsync(string? email, string? firstName, string? lastName, string? picture, 
         string? externalProviderId, string? deviceInfo = null, CancellationToken cancellationToken = default);
     Task<Result<AuthenticationResponseDto>> AuthenticateWithFacebookAsync(string? email, string? firstName, string? lastName, string? picture, 

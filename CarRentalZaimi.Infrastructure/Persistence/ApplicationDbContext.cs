@@ -99,6 +99,10 @@ public class ApplicationDbContext(
          .Property(e => e.WorkingHours)
          .HasColumnType("json");
 
+        builder.Entity<User>()
+         .Property(e => e.Location)
+         .HasColumnType("json");
+
         builder.Entity<UserDevice>(entity =>
         {
             entity.Property(d => d.Browser).HasConversion<string>();
