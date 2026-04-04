@@ -734,6 +734,83 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
+    public async Task<Result<bool>> LogoutAsync(string userId)
+    {
+        try
+        {
+            // Revoke all refresh tokens for the user
+            var userRefreshTokens = await _userRepository.GetRefreshTokensByUserIdAsync(userId);
+
+            if (userRefreshTokens == null)
+                return _errorService.CreateFailure<bool>(ErrorCodes.USER_NOT_FOUND);
+
+            var activeTokens = userRefreshTokens.Where(t => !t.IsRevoked).ToList();
+            if (activeTokens.Any())
+            {
+                foreach (var token in activeTokens)
+                {
+                    token.IsRevoked = true;
+                    token.RevokedAt = DateTime.UtcNow;
+                    token.RevokedBy = "User logout";
+                }
+
+                await _userRepository.UpdateRefreshTokensAsync(activeTokens);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            _logger.LogInformation("User {UserId} logged out successfully", userId);
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Logout failed for user {UserId}", userId);
+            return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+    }
+
+
+
+    public async Task<Result<bool>> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        try
+        {
+            var user = await _userRepository.GetByIdAsync<string>(userId);
+            if (user == null)
+                return _errorService.CreateFailure<bool>(ErrorCodes.NOT_FOUND);
+
+            if (!_passwordService.VerifyPassword(currentPassword, user.PasswordHash!))
+                return _errorService.CreateFailure<bool>(ErrorCodes.VALIDATION_FAILED);
+
+            if (!_passwordService.IsPasswordStrong(newPassword))
+                return _errorService.CreateFailure<bool>(ErrorCodes.VALIDATION_FAILED);
+
+            // Check if new password is different from current
+            if (_passwordService.VerifyPassword(newPassword, user.PasswordHash!))
+                return _errorService.CreateFailure<bool>(ErrorCodes.VALIDATION_FAILED);
+
+            user.PasswordHash = _passwordService.HashPassword(newPassword);
+            await _userRepository.UpdateAsync(user);
+
+            // Invalidate all refresh tokens for security
+            var userRefreshTokens = await _userRepository.GetRefreshTokensByUserIdAsync(userId);
+            foreach (var refreshToken in userRefreshTokens.Where(t => !t.IsRevoked))
+            {
+                refreshToken.IsRevoked = true;
+                refreshToken.RevokedAt = DateTime.UtcNow;
+                refreshToken.RevokedBy = "Password change";
+            }
+
+            await _userRepository.UpdateRefreshTokensAsync(userRefreshTokens);
+
+            _logger.LogInformation("Password changed for user {UserId}", userId);
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Password change failed for user {UserId}", userId);
+            return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+    }
 
     private async Task SaveProfileImageAsync(User user, string name, string data)
     {

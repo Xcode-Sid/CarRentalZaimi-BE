@@ -1,8 +1,11 @@
+using CarRentalZaimi.Application.Common.Constants;
+using CarRentalZaimi.Application.Common.Email;
 using CarRentalZaimi.Application.Interfaces.Repositories;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Application.Services;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Infrastructure.Identity;
 using CarRentalZaimi.Infrastructure.Persistence;
 using CarRentalZaimi.Infrastructure.Persistence.UnitOfWork;
 using CarRentalZaimi.Infrastructure.Repositories;
@@ -35,6 +38,9 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<ICarService, CarService>();
+        services.Configure<EmailSettings>(configuration.GetSection(ConfigurationKeys.Sections.Email));
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IPasswordResetService, PasswordResetService>();
 
         return services;
     }
