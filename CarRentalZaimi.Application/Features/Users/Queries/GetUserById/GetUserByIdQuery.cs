@@ -1,7 +1,7 @@
 ﻿using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Interfaces.Query;
 
-namespace CarRentalZaimi.Application.Features.Users.Queries;
+namespace CarRentalZaimi.Application.Features.Users.Queries.GetUserById;
 
 public class GetUserByIdQuery() : IQuery<UserDto>
 {
