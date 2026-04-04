@@ -25,4 +25,7 @@
     <ProjectReference Include="..\CarRentalZaimi.Domain\CarRentalZaimi.Domain.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<EmbeddedResource Include="Files\CarRentalZaimiForgotPasswordEmailTemplate_en.html" />
+	</ItemGroup>
 </Project>
