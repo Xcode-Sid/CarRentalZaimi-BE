@@ -715,13 +715,30 @@ public class AuthenticationService : IAuthenticationService
 
             _logger.LogInformation("User {UserId} logged in successfully", user.Id);
 
+            var userImage = await _unitOfWork.Repository<UserImage>()
+                .FirstOrDefaultAsync(p => p.User!.Id == user.Id);
+
+            var newUser = new UserDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DateOfBirth = user.DateOfBirth,
+                Email = user.Email,
+                Username = user.UserName,
+                PhoneNumber = user.PhoneNumber,
+                Location = user.Location,
+                Role =  await GetRoleDtoAsync(user),
+                Image = _mapper.Map<UserImageDto>(userImage)
+            };
+
             var response = new AuthenticationResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshTokenValue,
                 AccessTokenExpiresAt = accessTokenExpiresAt,
                 RefreshTokenExpiresAt = refreshTokenExpiresAt,
-                User = MapToUserDto(user),
+                User = newUser,
                 Role = await GetRoleDtoAsync(user),
             };
 

@@ -88,11 +88,11 @@ public class PasswordResetService(
         }
     }
 
-    public async Task<Result<bool>> ResetPasswordAsync(string token, string userId, string newPassword)
+    public async Task<Result<bool>> ResetPasswordAsync(string token, string email, string newPassword)
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
             if (user == null)
                 return _errorService.CreateFailure<bool>(ErrorCodes.NOT_FOUND);
 
@@ -101,7 +101,7 @@ public class PasswordResetService(
 
             var tokenHash = HashToken(token);
             var resetToken = await _context.PasswordResetTokens
-                .FirstOrDefaultAsync(t => t.User != null && t.User.Id == userId && t.TokenHash == tokenHash && !t.IsUsed);
+                .FirstOrDefaultAsync(t => t.User != null && t.User.Id == user.Id && t.TokenHash == tokenHash && !t.IsUsed);
 
             if (resetToken == null)
                 return _errorService.CreateFailure<bool>(ErrorCodes.VALIDATION_FAILED);
@@ -115,7 +115,7 @@ public class PasswordResetService(
             user.PasswordHash = _passwordService.HashPassword(newPassword);
 
             var userRefreshTokens = await _context.RefreshTokens
-                .Where(t => t.User != null && t.User.Id == userId && !t.IsRevoked)
+                .Where(t => t.User != null && t.User.Id == user.Id && !t.IsRevoked)
                 .ToListAsync();
 
             foreach (var refreshToken in userRefreshTokens)
@@ -127,12 +127,12 @@ public class PasswordResetService(
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Password reset completed for user {UserId}", userId);
+            _logger.LogInformation("Password reset completed for user {UserId}", user.Id);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to reset password for user {UserId}", userId);
+            _logger.LogError(ex, "Failed to reset password for email {Email}", email);
             return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
