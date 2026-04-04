@@ -158,6 +158,7 @@ public class AuthenticationService : IAuthenticationService
                 PhoneNumber = user.PhoneNumber,
                 Location = user.Location,
                 Role =  await GetRoleDtoAsync(user),
+                Status = user.Status.ToString(),
             };
 
             return Result<UserDto>.Success(response);
@@ -729,7 +730,8 @@ public class AuthenticationService : IAuthenticationService
                 PhoneNumber = user.PhoneNumber,
                 Location = user.Location,
                 Role =  await GetRoleDtoAsync(user),
-                Image = _mapper.Map<UserImageDto>(userImage)
+                Image = _mapper.Map<UserImageDto>(userImage),
+                Status = user.Status.ToString(),
             };
 
             var response = new AuthenticationResponseDto

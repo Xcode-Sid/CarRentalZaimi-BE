@@ -20,6 +20,8 @@ public static class DependencyInjection
         services.AddScoped<IDeviceDetectorService, DeviceDetectorService>();
         services.AddScoped<IStatePrefixService, StatePrefixService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IPhoneService, PhoneService>();
+
         return services;
     }
 }
