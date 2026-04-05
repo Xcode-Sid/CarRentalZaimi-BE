@@ -24,9 +24,9 @@ public class PasswordResetService(
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
-                return Result<string>.Success("Password reset email sent if account exists");
+                return Result<string>.Error("Email does not exists");
 
             var token = GenerateSecureToken();
             var tokenHash = HashToken(token);

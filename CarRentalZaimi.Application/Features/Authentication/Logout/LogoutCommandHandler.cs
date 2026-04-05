@@ -25,7 +25,7 @@ public class LogoutCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("User {UserId} logged out successfully", request.UserId);
             else
-                _logger.LogWarning("Logout failed for user {UserId}: {Error}", request.UserId, result.ErrorMessage);
+                _logger.LogWarning("Logout failed for user {UserId}: {Error}", request.UserId, result.ErrorResult);
 
             return result;
         }

@@ -22,7 +22,7 @@ public class SendVerificationCodeCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Confirmation code sent successfully for user {User}", request.UserId);
             else
-                _logger.LogWarning("Confirmation code sent failed user {User}: {Error}", request.UserId, result.ErrorMessage);
+                _logger.LogWarning("Confirmation code sent failed user {User}: {Error}", request.UserId, result.ErrorResult);
 
             return result;
         }

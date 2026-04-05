@@ -11,7 +11,7 @@ public class UserRepository(ApplicationDbContext context) : Repository<User>(con
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await _dbSet
-            .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Email == email && u.Status == UserStatus.Active && !u.IsDeleted, cancellationToken);
     }
 
     public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
@@ -124,6 +124,6 @@ public class UserRepository(ApplicationDbContext context) : Repository<User>(con
     public async Task<User?> GetByPhoneAsync(string phone, CancellationToken cancellationToken = default)
     {
         return await _dbSet
-           .FirstOrDefaultAsync(u => u.PhoneNumber == phone && !u.IsDeleted, cancellationToken);
+           .FirstOrDefaultAsync(u => u.PhoneNumber == phone && u.Status == UserStatus.Active && !u.IsDeleted, cancellationToken);
     }
 }

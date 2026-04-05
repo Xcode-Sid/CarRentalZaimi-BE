@@ -25,7 +25,7 @@ public class ResetPasswordCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Password reset successful for email {Email}", request.Email);
             else
-                _logger.LogWarning("Password reset failed for email {Email}: {Error}", request.Email, result.ErrorMessage);
+                _logger.LogWarning("Password reset failed for email {Email}: {Error}", request.Email, result.ErrorResult);
 
             return result;
         }

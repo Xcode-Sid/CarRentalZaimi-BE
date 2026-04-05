@@ -22,7 +22,7 @@ public class ConfirmPhoneCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Phone confirmed successfully for user {UserId}", request.UserId);
             else
-                _logger.LogWarning("Phone confirmation failed for user {UserId}: {Error}", request.UserId, result.ErrorMessage);
+                _logger.LogWarning("Phone confirmation failed for user {UserId}: {Error}", request.UserId, result.ErrorResult);
 
             return result;
         }
