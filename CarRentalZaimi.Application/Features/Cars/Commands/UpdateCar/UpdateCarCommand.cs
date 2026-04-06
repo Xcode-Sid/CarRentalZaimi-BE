@@ -1,4 +1,5 @@
-﻿using CarRentalZaimi.Application.DTOs;
+﻿using CarRentalZaimi.Application.Common.Model;
+using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Interfaces.Command;
 using CarRentalZaimi.Domain.Enums;
 
@@ -14,12 +15,25 @@ public record UpdateCarCommand : ICommand<CarDto>
     public int Doors { get; init; }
     public int? Mileage { get; init; }
     public int? HorsePower { get; init; }
-    public bool? AirConditioner { get; init; }
-    public bool? ABS { get; init; }
-    public bool? ElectricWindows { get; init; }
-    public bool? HeatedSeats { get; init; }
-    public bool? GPS { get; init; }
-    public CarStatus? Status { get; init; }
+    public bool? ABS { get; set; }
+    public bool? Bluetooth { get; set; }
+    public bool? ParkingSensors { get; set; }
+    public bool? CruiseControl { get; set; }
+    public bool? ClimateControl { get; set; }
+    public bool? LEDHeadlights { get; set; }
+    public bool? AppleCarPlay { get; set; }
+    public bool? AndroidAuto { get; set; }
+    public bool? LaneDepartureAlert { get; set; }
+    public bool? AdaptiveCruiseControl { get; set; }
+    public bool? ToyotaSafetySense { get; set; }
+    public bool? HeatedSeats { get; set; }
+    public bool? PanoramicRoof { get; set; }
+    public bool? ThirdRowSeats { get; set; }
+    public bool? WirelessCharging { get; set; }
+    public bool? Camera { get; set; }
+    public bool? AirConditioner { get; set; }
+    public bool? ElectricWindows { get; set; }
+    public bool? GPS { get; set; }
     public Guid? CategoryId { get; init; }
     public Guid? NameId { get; init; }
     public Guid? ModelId { get; init; }
@@ -27,5 +41,5 @@ public record UpdateCarCommand : ICommand<CarDto>
     public Guid? InteriorColorTypeId { get; init; }
     public Guid? TransmissionTypeId { get; init; }
     public Guid? FuelTypeId { get; init; }
-    public List<CarImages>? CarImages { get; set; }
+    public List<CarImagesCommand>? CarImages { get; set; }
 }

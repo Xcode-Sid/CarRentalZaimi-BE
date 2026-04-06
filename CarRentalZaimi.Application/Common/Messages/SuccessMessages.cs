@@ -22,4 +22,11 @@ public static class SuccessMessages
         public const string StatePrefixUpdated = "State prefix updated successfully";
         public const string StatePrefixDeleted = "State prefix deleted successfully";
     }
+
+    public static class CarFuel
+    {
+        public const string CarFuelCreated = "Car fuel created successfully";
+        public const string CarFuelUpdated = "Car fuel updated successfully";
+        public const string CarFuelDeleted = "Car fuel deleted successfully";
+    }
 }

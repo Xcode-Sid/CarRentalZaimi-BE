@@ -3,4 +3,7 @@ using CarRentalZaimi.Application.Interfaces.Query;
 
 namespace CarRentalZaimi.Application.Features.Cars.Queries.GetCarById;
 
-public class GetCarByIdQuery(string? id) : IQuery<CarDto>;
+public class GetCarByIdQuery(string? id) : IQuery<CarDto>
+{
+    public string? Id { get; } = id;
+}
