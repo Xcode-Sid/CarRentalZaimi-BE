@@ -83,7 +83,8 @@ public class ApplicationDbContext(
     public DbSet<AppLog> AppLogs { get; set; }
     public DbSet<UserDevice> UserDevices { get; set; }
     public DbSet<StatePrefix> StatePrefixes { get; set; }
-    
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -96,6 +97,10 @@ public class ApplicationDbContext(
 
         builder.Entity<CompanyProfile>()
          .Property(e => e.WorkingHours)
+         .HasColumnType("json");
+
+        builder.Entity<User>()
+         .Property(e => e.Location)
          .HasColumnType("json");
 
         builder.Entity<UserDevice>(entity =>

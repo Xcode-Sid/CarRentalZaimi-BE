@@ -120,4 +120,10 @@ public class UserRepository(ApplicationDbContext context) : Repository<User>(con
         await context.RefreshTokens.AddAsync(refreshToken);
         await context.SaveChangesAsync();
     }
+
+    public async Task<User?> GetByPhoneAsync(string phone, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+           .FirstOrDefaultAsync(u => u.PhoneNumber == phone && !u.IsDeleted, cancellationToken);
+    }
 }

@@ -10,23 +10,15 @@ public static class SuccessMessages
         public const string ResourceDeleted = "Resource deleted successfully";
     }
 
-    public static class Car
+    public static class User
     {
-        public const string CarCreated = "Car created successfully";
-        public const string CarUpdated = "Car updated successfully";
-        public const string CarDeleted = "Car deleted successfully";
+        public const string UserProfileUpdated = "User profile updated successfully";
+        public const string UserPhoneNumberUpdated = "User phone number successfully";
     }
     public static class StatePrefix
     {
         public const string StatePrefixCreated = "State prefix created successfully";
         public const string StatePrefixUpdated = "State prefix updated successfully";
         public const string StatePrefixDeleted = "State prefix deleted successfully";
-    }
-
-    public static class CarFuel
-    {
-        public const string CarFuelCreated = "Car fuel created successfully";
-        public const string CarFuelUpdated = "Car fuel updated successfully";
-        public const string CarFuelDeleted = "Car fuel deleted successfully";
     }
 }

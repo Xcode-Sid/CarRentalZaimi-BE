@@ -1093,6 +1093,68 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.ToTable("Languages");
                 });
 
+            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CreatedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("DeletedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ModifiedIP")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TokenHash")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResetTokens");
+                });
+
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.PhoneConfirmationToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1518,6 +1580,9 @@ namespace CarRentalZaimi.Migrations.Migrations
 
                     b.Property<string>("LastName")
                         .HasColumnType("longtext");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("json");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
@@ -1971,6 +2036,15 @@ namespace CarRentalZaimi.Migrations.Migrations
                 });
 
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.EmailConfirmationToken", b =>
+                {
+                    b.HasOne("CarRentalZaimi.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CarRentalZaimi.Domain.Entities.PasswordResetToken", b =>
                 {
                     b.HasOne("CarRentalZaimi.Domain.Entities.User", "User")
                         .WithMany()

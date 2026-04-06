@@ -12,6 +12,7 @@ using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Data;
 using System.Security.Claims;
 
 namespace CarRentalZaimi.Application.Services;
@@ -54,7 +55,7 @@ public class AuthenticationService : IAuthenticationService
     }
 
     public async Task<Result<UserDto>> RegisterAsync(string firstname, string lastname, DateTime? dateOfBirth, string username, string email, 
-        string phone, string password, string? name, string? data, string? role, string? deviceInfo = null)
+        string phone, string password, string? name, string? data, string? role, string? location, string? deviceInfo = null)
     {
         await _unitOfWork.BeginTransactionAsync();
 
@@ -64,6 +65,11 @@ public class AuthenticationService : IAuthenticationService
             var existingUser = await _userRepository.GetByEmailAsync(email);
             if (existingUser != null)
                 return _errorService.CreateFailure<UserDto>(ErrorCodes.USER_EMAIL_ALREADY_EXISTS);
+
+            var existingUserByPhone = await _userRepository.GetByPhoneAsync(phone);
+            if (existingUserByPhone != null)
+                return _errorService.CreateFailure<UserDto>(ErrorCodes.USER_PHONE_ALREADY_EXISTS);
+
 
             // Validate password strength
             if (!_passwordService.IsPasswordStrong(password))
@@ -82,7 +88,8 @@ public class AuthenticationService : IAuthenticationService
                 PhoneNumber = phone,
                 PasswordHash = _passwordService.HashPassword(password),
                 Status = UserStatus.PendingVerification, // New users start as PendingVerification
-                EmailConfirmed = false
+                EmailConfirmed = false,
+                Location = location,
             };
 
             await _userRepository.AddAsync(user);
@@ -149,7 +156,8 @@ public class AuthenticationService : IAuthenticationService
                 Email = user.Email,
                 Username = user.UserName,
                 PhoneNumber = user.PhoneNumber,
-                Role = role,
+                Location = user.Location,
+                Role =  await GetRoleDtoAsync(user),
             };
 
             return Result<UserDto>.Success(response);
@@ -190,6 +198,19 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true, // Google already confirmed the email
                 };
 
+                await _userRepository.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+
+
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
+
                 // Download profile picture and convert to base64
                 if (!string.IsNullOrEmpty(picture))
                 {
@@ -209,8 +230,6 @@ public class AuthenticationService : IAuthenticationService
                     }
                 }
 
-
-                await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Google user {UserId} created successfully", user.Id);
             }
@@ -308,6 +327,21 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true, 
                 };
 
+
+                await _userRepository.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+
+
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
+
+
                 // Download profile picture and convert to base64
                 if (!string.IsNullOrEmpty(picture))
                 {
@@ -327,8 +361,6 @@ public class AuthenticationService : IAuthenticationService
                     }
                 }
 
-
-                await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Facebook user {UserId} created successfully", user.Id);
             }
@@ -427,8 +459,21 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true, 
                 };
 
+
                 await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
+
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+
                 _logger.LogInformation("New Microsoft user {UserId} created successfully", user.Id);
             }
             else
@@ -525,7 +570,19 @@ public class AuthenticationService : IAuthenticationService
                     EmailConfirmed = true,
                 };
 
+
                 await _userRepository.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+
+                //add automatiacaly user role
+                string role = SystemPolicies.User;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Yahoo user {UserId} created successfully", user.Id);
             }
@@ -677,6 +734,83 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
+    public async Task<Result<bool>> LogoutAsync(string userId)
+    {
+        try
+        {
+            // Revoke all refresh tokens for the user
+            var userRefreshTokens = await _userRepository.GetRefreshTokensByUserIdAsync(userId);
+
+            if (userRefreshTokens == null)
+                return _errorService.CreateFailure<bool>(ErrorCodes.USER_NOT_FOUND);
+
+            var activeTokens = userRefreshTokens.Where(t => !t.IsRevoked).ToList();
+            if (activeTokens.Any())
+            {
+                foreach (var token in activeTokens)
+                {
+                    token.IsRevoked = true;
+                    token.RevokedAt = DateTime.UtcNow;
+                    token.RevokedBy = "User logout";
+                }
+
+                await _userRepository.UpdateRefreshTokensAsync(activeTokens);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            _logger.LogInformation("User {UserId} logged out successfully", userId);
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Logout failed for user {UserId}", userId);
+            return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+    }
+
+
+
+    public async Task<Result<bool>> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        try
+        {
+            var user = await _userRepository.GetByIdAsync<string>(userId);
+            if (user == null)
+                return _errorService.CreateFailure<bool>(ErrorCodes.NOT_FOUND);
+
+            if (!_passwordService.VerifyPassword(currentPassword, user.PasswordHash!))
+                return _errorService.CreateFailure<bool>(ErrorCodes.VALIDATION_FAILED);
+
+            if (!_passwordService.IsPasswordStrong(newPassword))
+                return _errorService.CreateFailure<bool>(ErrorCodes.VALIDATION_FAILED);
+
+            // Check if new password is different from current
+            if (_passwordService.VerifyPassword(newPassword, user.PasswordHash!))
+                return _errorService.CreateFailure<bool>(ErrorCodes.VALIDATION_FAILED);
+
+            user.PasswordHash = _passwordService.HashPassword(newPassword);
+            await _userRepository.UpdateAsync(user);
+
+            // Invalidate all refresh tokens for security
+            var userRefreshTokens = await _userRepository.GetRefreshTokensByUserIdAsync(userId);
+            foreach (var refreshToken in userRefreshTokens.Where(t => !t.IsRevoked))
+            {
+                refreshToken.IsRevoked = true;
+                refreshToken.RevokedAt = DateTime.UtcNow;
+                refreshToken.RevokedBy = "Password change";
+            }
+
+            await _userRepository.UpdateRefreshTokensAsync(userRefreshTokens);
+
+            _logger.LogInformation("Password changed for user {UserId}", userId);
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Password change failed for user {UserId}", userId);
+            return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+    }
 
     private async Task SaveProfileImageAsync(User user, string name, string data)
     {
@@ -704,12 +838,6 @@ public class AuthenticationService : IAuthenticationService
 
     private UserDto MapToUserDto(User user)
        => _mapper.Map<UserDto>(user);
-
-    private async Task<RoleDto?> GetRoleDtoByNameAsync(string roleName)
-    {
-        var role = await _roleManager.FindByNameAsync(roleName);
-        return role != null ? _mapper.Map<RoleDto>(role) : null;
-    }
 
     private async Task<RoleDto?> GetRoleDtoAsync(User user)
     {
