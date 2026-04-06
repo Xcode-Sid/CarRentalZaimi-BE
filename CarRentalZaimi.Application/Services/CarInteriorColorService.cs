@@ -37,10 +37,16 @@ public class CarInteriorColorService(IUnitOfWork _unitOfWork, IMapper _mapper) :
     public async Task<Result<bool>> DeleteAsync(DeleteCarInteriorColorCommand request, CancellationToken cancellationToken = default)
     {
         var existingColor = await _unitOfWork.Repository<CarInteriorColor>()
-        .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingColor is null)
             return Result<bool>.Error("This interior color id does not exist");
+
+        var isUsedByCar = await _unitOfWork.Repository<Car>()
+            .AnyAsync(c => c.InteriorColorType != null && c.InteriorColorType.Id.ToString() == request.Id, cancellationToken);
+
+        if (isUsedByCar)
+            return Result<bool>.Error("This interior color cannot be deleted because it is assigned to one or more cars");
 
         existingColor.IsDeleted = true;
 

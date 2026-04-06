@@ -42,6 +42,12 @@ public class CarFuelService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarFuel
         if (existingFuel is null)
             return Result<bool>.Error("This fuel type id does not exist");
 
+        var isUsedByCar = await _unitOfWork.Repository<Car>()
+            .AnyAsync(c => c.FuelType != null && c.FuelType.Id.ToString() == request.Id, cancellationToken);
+
+        if (isUsedByCar)
+            return Result<bool>.Error("This fuel type cannot be deleted because it is assigned to one or more cars");
+
         existingFuel.IsDeleted = true;
 
         await _unitOfWork.Repository<CarFuel>().UpdateAsync(existingFuel, cancellationToken);

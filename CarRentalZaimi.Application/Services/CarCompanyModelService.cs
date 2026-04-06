@@ -23,7 +23,7 @@ public class CarCompanyModelService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
             return Result<CarCompanyModelDto>.Error("This car model already exists");
 
         var companyName = await _unitOfWork.Repository<CarCompanyName>()
-            .FirstOrDefaultAsync(p => p.Id == Guid.Parse(request.CompanyNameId!), cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id.ToString() == request.CompanyNameId, cancellationToken);
 
 
         if (companyName is null)
@@ -45,10 +45,16 @@ public class CarCompanyModelService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
     public async Task<Result<bool>> DeleteAsync(DeleteCarCompanyModelCommand request, CancellationToken cancellationToken = default)
     {
         var existingCompany = await _unitOfWork.Repository<CarCompanyModel>()
-        .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingCompany is null)
-            return Result<bool>.Error("This car mdel id does not exist");
+            return Result<bool>.Error("This car model id does not exist");
+
+        var isUsedByCar = await _unitOfWork.Repository<Car>()
+            .AnyAsync(c => c.Model != null && c.Model.Id.ToString() == request.Id, cancellationToken);
+
+        if (isUsedByCar)
+            return Result<bool>.Error("This car model cannot be deleted because it is assigned to one or more cars");
 
         existingCompany.IsDeleted = true;
 

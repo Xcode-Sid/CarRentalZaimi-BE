@@ -42,6 +42,12 @@ public class CarTransmissionService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
         if (existingTransmission is null)
             return Result<bool>.Error("This transmission type id does not exist");
 
+        var isUsedByCar = await _unitOfWork.Repository<Car>()
+            .AnyAsync(c => c.TransmissionType != null && c.TransmissionType.Id.ToString() == request.Id, cancellationToken);
+
+        if (isUsedByCar)
+            return Result<bool>.Error("This transmission type cannot be deleted because it is assigned to one or more cars");
+
         existingTransmission.IsDeleted = true;
 
         await _unitOfWork.Repository<CarTransmission>().UpdateAsync(existingTransmission, cancellationToken);

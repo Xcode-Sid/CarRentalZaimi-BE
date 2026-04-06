@@ -37,7 +37,7 @@ public abstract class ApiControllerBase(IMediator mediator) : ControllerBase
         if (!result.IsSuccessful)
             return StatusCode(
                 failureStatusCode,
-                ApiResponse<TResponse>.FailureResponse(result.ErrorMessage ?? ApiResponseMessages.InvalidRequest));
+                ApiResponse<TResponse>.FailureResponse(result.ErrorResult ?? ApiResponseMessages.InvalidRequest));
 
         return Ok(ApiResponse<TResponse>.SuccessResponse(result.Data!, successMessage));
     }
@@ -57,7 +57,7 @@ public abstract class ApiControllerBase(IMediator mediator) : ControllerBase
         if (!result.IsSuccessful)
             return StatusCode(
                 failureStatusCode,
-                ApiResponse<TResponse>.FailureResponse(result.ErrorMessage ?? ApiResponseMessages.InvalidRequest));
+                ApiResponse<TResponse>.FailureResponse(result.ErrorResult ?? ApiResponseMessages.InvalidRequest));
 
         return Ok(ApiResponse<TResponse>.SuccessResponse(result.Data!, successMessage ?? SuccessMessages.General.OperationCompleted));
     }
@@ -71,7 +71,7 @@ public abstract class ApiControllerBase(IMediator mediator) : ControllerBase
         if (!result.IsSuccessful)
             return StatusCode(
                 failureStatusCode,
-                ApiResponse.FailureResponse(result.ErrorMessage ?? ApiResponseMessages.InvalidRequest));
+                ApiResponse.FailureResponse(result.ErrorResult ?? ApiResponseMessages.InvalidRequest));
 
         return Ok(ApiResponse.SuccessResponse(successMessage ?? SuccessMessages.General.OperationCompleted));
     }

@@ -37,7 +37,8 @@ public class CarCompanyNameController(IMediator _mediator) : ApiControllerBase(_
     public async Task<IActionResult> DeleteCarCompanyName([FromRoute] string id)
     {
         var command = new DeleteCarCompanyNameCommand { Id = id };
-        return await SendCommand(command, SuccessMessages.CarCompanyName.CarCompanyNameDeleted);
+        var res = await SendCommand(command, SuccessMessages.CarCompanyName.CarCompanyNameDeleted);
+        return res;
     }
 
     [HttpGet("getAll", Name = nameof(GetAllCarCompanyName))]

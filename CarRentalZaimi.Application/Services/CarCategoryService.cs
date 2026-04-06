@@ -43,6 +43,12 @@ public class CarCategoryService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICar
         if (existingCategory is null)
             return Result<bool>.Error("This category id does not exist");
 
+        var isUsedByCar = await _unitOfWork.Repository<Car>()
+            .AnyAsync(c => c.Category != null && c.Category.Id.ToString() == request.Id, cancellationToken);
+
+        if (isUsedByCar)
+            return Result<bool>.Error("This category cannot be deleted because it is assigned to one or more cars");
+
         existingCategory.IsDeleted = true;
 
         await _unitOfWork.Repository<CarCategory>().UpdateAsync(existingCategory, cancellationToken);

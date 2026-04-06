@@ -37,10 +37,22 @@ public class CarCompanyNameService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
     public async Task<Result<bool>> DeleteAsync(DeleteCarCompanyNameCommand request, CancellationToken cancellationToken = default)
     {
         var existingCompany = await _unitOfWork.Repository<CarCompanyName>()
-        .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingCompany is null)
             return Result<bool>.Error("This car company id does not exist");
+
+        var isUsedByModel = await _unitOfWork.Repository<CarCompanyModel>()
+            .AnyAsync(m => m.CarCompanyName != null && m.CarCompanyName.Id.ToString() == request.Id, cancellationToken);
+
+        if (isUsedByModel)
+            return Result<bool>.Error("This car company cannot be deleted because it is assigned to one or more car models");
+
+        var isUsedByCar = await _unitOfWork.Repository<Car>()
+            .AnyAsync(c => c.Name != null && c.Name.Id.ToString() == request.Id, cancellationToken);
+
+        if (isUsedByCar)
+            return Result<bool>.Error("This car company cannot be deleted because it is assigned to one or more cars");
 
         existingCompany.IsDeleted = true;
 
