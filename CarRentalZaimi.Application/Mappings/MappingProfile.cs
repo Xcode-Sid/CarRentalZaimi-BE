@@ -32,7 +32,6 @@ public class MappingProfile : Profile
         CreateMap<UserNotification, UserNotificationDto>().ReverseMap();
         CreateMap<UserImage, UserImageDto>().ReverseMap();
         CreateMap<RefreshToken, RefreshTokenDto>().ReverseMap();
-        CreateMap<EmailConfirmationToken, EmailConfirmationTokenDto>().ReverseMap();
         CreateMap<PhoneConfirmationToken, PhoneConfirmationTokenDto>().ReverseMap();
         CreateMap<AppLog, AppLogDto>().ReverseMap();
         CreateMap<UserDevice, UserDeviceDto>().ReverseMap();

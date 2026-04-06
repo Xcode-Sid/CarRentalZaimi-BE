@@ -22,7 +22,7 @@ public class AuthenticateWithMicrosoftCommandHandler(
             var microsoftResult = await _microsoftOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.CodeVerifier, request.RedirectUri);
 
             if (!microsoftResult.IsSuccessful || microsoftResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(microsoftResult.ErrorMessage ?? "Failed to verify Microsoft authentication");
+                return _errorService.CreateFailure<AuthenticationResponseDto>(microsoftResult.ErrorResult ?? "Failed to verify Microsoft authentication");
 
             var googleUser = microsoftResult.Data;
 
@@ -49,7 +49,7 @@ public class AuthenticateWithMicrosoftCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Authentication successful for email {Email}", googleUser.Mail);
             else
-                _logger.LogWarning("Authentication failed for email {Email}: {Error}", googleUser.Mail, result.ErrorMessage);
+                _logger.LogWarning("Authentication failed for email {Email}: {Error}", googleUser.Mail, result.ErrorResult);
 
             return result;
         }
