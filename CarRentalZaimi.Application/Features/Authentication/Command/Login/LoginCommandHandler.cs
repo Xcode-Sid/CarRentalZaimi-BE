@@ -29,7 +29,7 @@ public class LoginCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Login successful for {Login}", request.Login);
             else
-                _logger.LogWarning("Login failed for {Login}: {Error}", request.Login, result.ErrorMessage);
+                _logger.LogWarning("Login failed for {Login}: {Error}", request.Login, result.ErrorResult);
 
             return result;
         }

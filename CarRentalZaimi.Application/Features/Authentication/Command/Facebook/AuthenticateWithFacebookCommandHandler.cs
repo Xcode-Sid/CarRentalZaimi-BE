@@ -21,7 +21,7 @@ public class AuthenticateWithFacebookCommandHandler(
             var facebookResult = await _facebookOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.RedirectUri);
 
             if (!facebookResult.IsSuccessful || facebookResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(facebookResult.ErrorMessage ?? "Failed to verify Facebook authentication");
+                return _errorService.CreateFailure<AuthenticationResponseDto>(facebookResult.ErrorResult ?? "Failed to verify Facebook authentication");
 
             var facebookUser = facebookResult.Data;
 
@@ -49,7 +49,7 @@ public class AuthenticateWithFacebookCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Authentication successful for email {Email}", facebookUser.Email);
             else
-                _logger.LogWarning("Authentication failed for email {Email}: {Error}", facebookUser.Email, result.ErrorMessage);
+                _logger.LogWarning("Authentication failed for email {Email}: {Error}", facebookUser.Email, result.ErrorResult);
 
             return result;
         }

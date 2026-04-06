@@ -31,7 +31,7 @@ public class ChangePasswordCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Password changed successfully for user {UserId}", userId);
             else
-                _logger.LogWarning("Password change failed for user {UserId}: {Error}", userId, result.ErrorMessage);
+                _logger.LogWarning("Password change failed for user {UserId}: {Error}", userId, result.ErrorResult);
 
             return result;
         }

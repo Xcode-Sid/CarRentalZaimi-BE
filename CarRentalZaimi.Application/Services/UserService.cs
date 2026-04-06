@@ -4,7 +4,8 @@ using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Users.Commands.AddPhoneNumber;
 using CarRentalZaimi.Application.Features.Users.Commands.UpdateUser;
-using CarRentalZaimi.Application.Features.Users.Queries;
+using CarRentalZaimi.Application.Features.Users.Queries.GetUserByEmail;
+using CarRentalZaimi.Application.Features.Users.Queries.GetUserById;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
@@ -58,12 +59,43 @@ public class UserService : IUserService
             PhoneNumber = user.PhoneNumber,
             Location = user.Location,
             Role =  await GetRoleDtoAsync(user),
-            Image = _mapper.Map<UserImageDto>(userImage)
+            Image = _mapper.Map<UserImageDto>(userImage),
+            Status = user.Status.ToString(),
         };
 
         return Result<UserDto>.Success(response);
     }
 
+    public async Task<Result<UserDto>> GetUserByEmailAsync(GetUserByEmailQuery request, CancellationToken cancellationToken = default)
+    {
+        var user = await _unitOfWork.Repository<User>()
+            .FirstOrDefaultAsync(p => p.Email == request.Email, cancellationToken);
+
+        if (user is null)
+            return _errorService.CreateFailure<UserDto>(ErrorCodes.NOT_FOUND);
+
+
+        var userImage = await _unitOfWork.Repository<UserImage>()
+            .FirstOrDefaultAsync(p => p.User!.Email == request.Email, cancellationToken);
+
+
+        var response = new UserDto
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            DateOfBirth = user.DateOfBirth,
+            Email = user.Email,
+            Username = user.UserName,
+            PhoneNumber = user.PhoneNumber,
+            Location = user.Location,
+            Role =  await GetRoleDtoAsync(user),
+            Image = _mapper.Map<UserImageDto>(userImage),
+            Status = user.Status.ToString(),
+        };
+
+        return Result<UserDto>.Success(response);
+    }
     public async Task<Result<UserDto>> UpdateUserProfileAsync(UpdateUserCommand command, CancellationToken cancellationToken = default)
     {
         var user = await _unitOfWork.Repository<User>()
@@ -138,7 +170,8 @@ public class UserService : IUserService
             PhoneNumber = user.PhoneNumber,
             Location = user.Location,
             Role = await GetRoleDtoAsync(user),
-            Image = _mapper.Map<UserImageDto>(userImage)
+            Image = _mapper.Map<UserImageDto>(userImage),
+            Status = user.Status.ToString(),
         };
 
         return Result<UserDto>.Success(response);
@@ -173,7 +206,8 @@ public class UserService : IUserService
             Username = user.UserName,
             PhoneNumber = user.PhoneNumber,
             Location = user.Location,
-            Role = await GetRoleDtoAsync(user)
+            Role = await GetRoleDtoAsync(user),
+            Status = user.Status.ToString(),
         };
 
         return Result<UserDto>.Success(response);
@@ -188,4 +222,5 @@ public class UserService : IUserService
         var role = await _roleManager.FindByNameAsync(name);
         return role != null ? _mapper.Map<RoleDto>(role) : null;
     }
+
 }

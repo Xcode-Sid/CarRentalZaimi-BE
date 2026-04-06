@@ -21,7 +21,7 @@ public class AuthenticateWithGoogleCommandHandler(
             var googleResult = await _googleOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.RedirectUri);
 
             if (!googleResult.IsSuccessful || googleResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(googleResult.ErrorMessage ?? "Failed to verify Google authentication");
+                return _errorService.CreateFailure<AuthenticationResponseDto>(googleResult.ErrorResult ?? "Failed to verify Google authentication");
 
             var googleUser = googleResult.Data;
 
@@ -49,7 +49,7 @@ public class AuthenticateWithGoogleCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Authentication successful for email {Email}", googleUser.Email);
             else
-                _logger.LogWarning("Authentication failed for email {Email}: {Error}", googleUser.Email, result.ErrorMessage);
+                _logger.LogWarning("Authentication failed for email {Email}: {Error}", googleUser.Email, result.ErrorResult);
 
             return result;
         }

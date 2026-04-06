@@ -21,7 +21,7 @@ IHttpContextAccessor _httpContextAccessor) : ICommandHandler<AuthenticateWithYah
             var yahooResult = await _yahooOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.CodeVerifier, request.RedirectUri);
 
             if (!yahooResult.IsSuccessful || yahooResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(yahooResult.ErrorMessage ?? "Failed to verify Yahoo authentication");
+                return _errorService.CreateFailure<AuthenticationResponseDto>(yahooResult.ErrorResult ?? "Failed to verify Yahoo authentication");
 
             var yahooUser = yahooResult.Data;
 
@@ -53,7 +53,7 @@ IHttpContextAccessor _httpContextAccessor) : ICommandHandler<AuthenticateWithYah
             else
                 _logger.LogWarning(
                     "Authentication failed for {Email}: {Error}",
-                    yahooUser.Email, result.ErrorMessage);
+                    yahooUser.Email, result.ErrorResult);
 
             return result;
         }
