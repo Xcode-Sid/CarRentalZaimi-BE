@@ -17,7 +17,7 @@ namespace CarRentalZaimi.Application.Services;
 
 public class CarService(
     IUnitOfWork _uow,
-    Mapper _mapper,
+    IMapper _mapper,
     ILogger<CarService> _logger) : ICarService
 {
 
