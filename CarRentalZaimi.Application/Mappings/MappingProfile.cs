@@ -43,5 +43,6 @@ public class MappingProfile : Profile
         CreateMap<Result<List<CarInteriorColor>>, Result<List<CarInteriorColorDto>>>();
         CreateMap<Result<List<CarExteriorColor>>, Result<List<CarExteriorColorDto>>>();
         CreateMap<Result<List<CarCategory>>, Result<List<CarCategoryDto>>>();
+        CreateMap<Result<List<CarCompanyName>>, Result<List<CarCompanyNameDto>>>();
     }
 }

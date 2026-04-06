@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<ICarInteriorColorService, CarInteriorColorService>();
         services.AddScoped<ICarExteriorColorService, CarExteriorColorService>();
         services.AddScoped<ICarCategoryService, CarCategoryService>();
+        services.AddScoped<ICarCompanyNameService, CarCompanyNameService>();
         return services;
     }
 }
