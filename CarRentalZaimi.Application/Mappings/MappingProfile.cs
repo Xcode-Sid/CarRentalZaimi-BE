@@ -41,5 +41,7 @@ public class MappingProfile : Profile
         CreateMap<Result<List<CarFuel>>, Result<List<CarFuelDto>>>();
         CreateMap<Result<List<CarTransmission>>, Result<List<CarTransmissionDto>>>();
         CreateMap<Result<List<CarInteriorColor>>, Result<List<CarInteriorColorDto>>>();
+        CreateMap<Result<List<CarExteriorColor>>, Result<List<CarExteriorColorDto>>>();
+        CreateMap<Result<List<CarCategory>>, Result<List<CarCategoryDto>>>();
     }
 }

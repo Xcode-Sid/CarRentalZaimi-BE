@@ -49,4 +49,18 @@ public static class SuccessMessages
         public const string CarInteriorColorUpdated = "Car interior color updated successfully";
         public const string CarInteriorColorDeleted = "Car interior color deleted successfully";
     }
+
+    public static class CarExteriorColor
+    {
+        public const string CarExteriorColorCreated = "Car exterior color created successfully";
+        public const string CarExteriorColorUpdated = "Car exterior color updated successfully";
+        public const string CarExteriorColorDeleted = "Car exterior color deleted successfully";
+    }
+
+    public static class CarCategory
+    {
+        public const string CarCategoryCreated = "Car category created successfully";
+        public const string CarCategoryUpdated = "Car category updated successfully";
+        public const string CarCategoryDeleted = "Car category deleted successfully";
+    }
 }

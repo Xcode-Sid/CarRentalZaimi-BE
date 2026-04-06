@@ -23,6 +23,8 @@ public static class DependencyInjection
         services.AddScoped<ICarFuelService, CarFuelService>();
         services.AddScoped<ICarTransmissionService, CarTransmissionService>();
         services.AddScoped<ICarInteriorColorService, CarInteriorColorService>();
+        services.AddScoped<ICarExteriorColorService, CarExteriorColorService>();
+        services.AddScoped<ICarCategoryService, CarCategoryService>();
         return services;
     }
 }
