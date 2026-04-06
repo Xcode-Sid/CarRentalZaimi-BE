@@ -19,7 +19,6 @@ public static class DependencyInjection
         services.AddScoped<ICarService, CarService>();
         services.AddScoped<IDeviceDetectorService, DeviceDetectorService>();
         services.AddScoped<IStatePrefixService, StatePrefixService>();
-        services.AddScoped<IUserService, UserService>();
         return services;
     }
 }
