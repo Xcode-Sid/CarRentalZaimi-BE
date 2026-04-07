@@ -3,6 +3,7 @@ using System;
 using CarRentalZaimi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalZaimi.Migrations.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260404172425_Remove_EmailConfirmationToken_Table")]
+    partial class Remove_EmailConfirmationToken_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,29 +230,11 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<bool?>("ABS")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("AdaptiveCruiseControl")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<bool?>("AirConditioner")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("AndroidAuto")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("AppleCarPlay")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("Bluetooth")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("Camera")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("char(36)");
-
-                    b.Property<bool?>("ClimateControl")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("char(36)");
@@ -260,9 +245,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool?>("CruiseControl")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("char(36)");
 
@@ -271,9 +253,6 @@ namespace CarRentalZaimi.Migrations.Migrations
 
                     b.Property<DateTime?>("DeletedOn")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
 
                     b.Property<int>("Doors")
                         .HasColumnType("int");
@@ -302,12 +281,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("LEDHeadlights")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("LaneDepartureAlert")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("LicensePlate")
                         .HasColumnType("longtext");
 
@@ -329,12 +302,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<Guid?>("NameId")
                         .HasColumnType("char(36)");
 
-                    b.Property<bool?>("PanoramicRoof")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool?>("ParkingSensors")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<decimal>("PricePerDay")
                         .HasColumnType("decimal(18,2)");
 
@@ -344,20 +311,8 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<int?>("Status")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("ThirdRowSeats")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool?>("ToyotaSafetySense")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<Guid?>("TransmissionTypeId")
                         .HasColumnType("char(36)");
-
-                    b.Property<bool?>("WirelessCharging")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("Year")
                         .HasColumnType("int");

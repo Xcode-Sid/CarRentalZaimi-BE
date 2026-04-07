@@ -24,7 +24,7 @@ public class ForgotPasswordCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Password reset token generated for email {Email}", request.Email);
             else
-                _logger.LogWarning("Failed to generate password reset token for email {Email}: {Error}", request.Email, result.ErrorMessage);
+                _logger.LogWarning("Failed to generate password reset token for email {Email}: {Error}", request.Email, result.ErrorResult);
 
             return result;
         }

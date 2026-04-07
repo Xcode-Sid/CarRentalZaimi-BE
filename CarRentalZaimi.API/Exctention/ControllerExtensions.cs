@@ -14,7 +14,7 @@ public static class ControllerExtensions
         if (result.IsSuccessful)
             return new OkObjectResult(ApiResponse.SuccessResponse(SuccessMessages.General.OperationCompleted));
 
-        return new BadRequestObjectResult(ApiResponse.FailureResponse(result.ErrorMessage));
+        return new BadRequestObjectResult(ApiResponse.FailureResponse(result.ErrorResult));
     }
 
     public static IActionResult ToActionResult<T>(this Result<T> result, string? successMessage = null)
@@ -22,7 +22,7 @@ public static class ControllerExtensions
         if (result.IsSuccessful)
             return new OkObjectResult(ApiResponse<T>.SuccessResponse(result.Data!, successMessage));
 
-        return new BadRequestObjectResult(ApiResponse<T>.FailureResponse(result.ErrorMessage));
+        return new BadRequestObjectResult(ApiResponse<T>.FailureResponse(result.ErrorResult));
     }
 
     public static IActionResult ToCreatedResult<T>(
@@ -37,14 +37,14 @@ public static class ControllerExtensions
                 routeValues,
                 ApiResponse<T>.SuccessResponse(result.Data!, successMessage ?? SuccessMessages.General.ResourceCreated));
 
-        return new BadRequestObjectResult(ApiResponse<T>.FailureResponse(result.ErrorMessage));
+        return new BadRequestObjectResult(ApiResponse<T>.FailureResponse(result.ErrorResult));
     }
 
     public static IActionResult ToNoContentResult(this Result result)
     {
         if (result.IsSuccessful)
             return new NoContentResult();
-        return new BadRequestObjectResult(ApiResponse.FailureResponse(result.ErrorMessage));
+        return new BadRequestObjectResult(ApiResponse.FailureResponse(result.ErrorResult));
     }
 
     public static IActionResult ToPaginatedResult<T>(

@@ -41,7 +41,7 @@ public class RegisterCommandHandler(
             if (result.IsSuccessful)
                 _logger.LogInformation("Registration successful for email {Email}", request.Email);
             else
-                _logger.LogWarning("Registration failed for email {Email}: {Error}", request.Email, result.ErrorMessage);
+                _logger.LogWarning("Registration failed for email {Email}: {Error}", request.Email, result.ErrorResult);
 
             return result;
         }
