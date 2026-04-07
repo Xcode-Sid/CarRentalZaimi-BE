@@ -36,6 +36,8 @@ public class CarService(
         var newCar = new Car
         {
             Id = Guid.NewGuid(),
+            Title = request.Title,
+            Description = request.Description,
             Year = request.Year,
             LicensePlate = request.LicensePlate,
             PricePerDay = request.PricePerDay,
@@ -176,6 +178,8 @@ public class CarService(
         }
 
         // Update scalar properties
+        existingCar.Title = request.Title;
+        existingCar.Description = request.Description;
         existingCar.Year = request.Year;
         existingCar.LicensePlate = request.LicensePlate;
         existingCar.PricePerDay = request.PricePerDay;
@@ -366,6 +370,8 @@ public class CarService(
         {
             var search = request.Search.ToLower();
             query = query.Where(c =>
+                (c.Title != null && c.Title.ToLower().Contains(search)) ||
+                (c.Description != null && c.Description.ToLower().Contains(search)) ||
                 (c.LicensePlate != null && c.LicensePlate.ToLower().Contains(search)) ||
                 (c.Name != null && c.Name.Name.ToLower().Contains(search)) ||
                 (c.Model != null && c.Model.Name.ToLower().Contains(search)) ||

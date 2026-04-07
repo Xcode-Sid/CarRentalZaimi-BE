@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -52,6 +53,12 @@ namespace CarRentalZaimi.Migrations.Migrations
                 type: "tinyint(1)",
                 nullable: true);
 
+            migrationBuilder.AddColumn<string>(
+                name: "Description",
+                table: "Cars",
+                type: "longtext",
+                nullable: true);
+
             migrationBuilder.AddColumn<bool>(
                 name: "LEDHeadlights",
                 table: "Cars",
@@ -80,6 +87,12 @@ namespace CarRentalZaimi.Migrations.Migrations
                 name: "ThirdRowSeats",
                 table: "Cars",
                 type: "tinyint(1)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "Title",
+                table: "Cars",
+                type: "longtext",
                 nullable: true);
 
             migrationBuilder.AddColumn<bool>(
@@ -127,6 +140,10 @@ namespace CarRentalZaimi.Migrations.Migrations
                 table: "Cars");
 
             migrationBuilder.DropColumn(
+                name: "Description",
+                table: "Cars");
+
+            migrationBuilder.DropColumn(
                 name: "LEDHeadlights",
                 table: "Cars");
 
@@ -144,6 +161,10 @@ namespace CarRentalZaimi.Migrations.Migrations
 
             migrationBuilder.DropColumn(
                 name: "ThirdRowSeats",
+                table: "Cars");
+
+            migrationBuilder.DropColumn(
+                name: "Title",
                 table: "Cars");
 
             migrationBuilder.DropColumn(

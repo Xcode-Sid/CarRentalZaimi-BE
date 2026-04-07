@@ -7,6 +7,8 @@ namespace CarRentalZaimi.Application.Features.Cars.Commands.UpdateCar;
 
 public record UpdateCarCommand : ICommand<CarDto>
 {
+    public string? Title { get; set; }
+    public string? Description { get; set; }
     public string? CarId { get; set; }
     public int Year { get; init; }
     public string? LicensePlate { get; init; }

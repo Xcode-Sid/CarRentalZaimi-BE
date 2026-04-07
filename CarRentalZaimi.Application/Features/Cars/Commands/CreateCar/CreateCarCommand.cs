@@ -7,6 +7,8 @@ namespace CarRentalZaimi.Application.Features.Cars.Commands.CreateCar
 {
     public class CreateCarCommand : ICommand<CarDto>
     {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
         public int Year { get; init; }
         public string? LicensePlate { get; init; }
         public decimal PricePerDay { get; init; }

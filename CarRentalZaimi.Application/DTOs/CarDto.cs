@@ -5,6 +5,8 @@ namespace CarRentalZaimi.Application.DTOs;
 
 public class CarDto : BaseDto<Guid>
 {
+    public string? Title { get; set; }
+    public string? Description { get; set; }
     public int Year { get; set; }
     public string? LicensePlate { get; set; }
     public decimal PricePerDay { get; set; }

@@ -272,6 +272,9 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<DateTime?>("DeletedOn")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
                     b.Property<int>("Doors")
                         .HasColumnType("int");
 
@@ -343,6 +346,9 @@ namespace CarRentalZaimi.Migrations.Migrations
 
                     b.Property<bool?>("ThirdRowSeats")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("longtext");
 
                     b.Property<bool?>("ToyotaSafetySense")
                         .HasColumnType("tinyint(1)");
