@@ -342,7 +342,7 @@ public class CarService(
             .Include(c => c.InteriorColorType)
             .Include(c => c.TransmissionType)
             .Include(c => c.FuelType)
-            .Include(c => c.CarImages)
+            .Include(c => c.CarImages!.Where(c => !c.IsDeleted))
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id && !c.IsDeleted, cancellationToken);
 
         if (car is null)
@@ -363,9 +363,10 @@ public class CarService(
             .Include(c => c.InteriorColorType)
             .Include(c => c.TransmissionType)
             .Include(c => c.FuelType)
-            .Include(c => c.CarImages)
+            .Include(c => c.CarImages!.Where(c => !c.IsDeleted))
             .Where(c => !c.IsDeleted);
 
+        // Search
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.ToLower();
@@ -378,10 +379,40 @@ public class CarService(
                 (c.Category != null && c.Category.Name.ToLower().Contains(search)));
         }
 
+      
+        if (!string.IsNullOrWhiteSpace(request.CategoryId))
+            query = query.Where(c => c.Category!.Id.ToString() == request.CategoryId);
+
+        if (!string.IsNullOrWhiteSpace(request.TransmissionId))
+            query = query.Where(c => c.TransmissionType!.Id.ToString() == request.TransmissionId);
+
+        if (!string.IsNullOrWhiteSpace(request.FuelTypeId))
+            query = query.Where(c => c.FuelType!.Id.ToString() == request.FuelTypeId);
+
+
+        if (request.Seats.HasValue)
+            query = request.Seats.Value == 7
+                ? query.Where(c => c.Seats >= 7)
+                : query.Where(c => c.Seats == request.Seats.Value);
+
+        if (request.PriceMin.HasValue)
+            query = query.Where(c => c.PricePerDay >= request.PriceMin.Value);
+
+        if (request.PriceMax.HasValue)
+            query = query.Where(c => c.PricePerDay <= request.PriceMax.Value);
+
+
+        query = request.SortBy switch
+        {
+            "priceAsc" => query.OrderBy(c => c.PricePerDay),
+            "priceDesc" => query.OrderByDescending(c => c.PricePerDay),
+            "newest" => query.OrderByDescending(c => c.Year),
+            _ => query.OrderBy(c => c.PricePerDay), // recommended / default
+        };
+
         var totalCount = await query.CountAsync(cancellationToken);
 
         var cars = await query
-            .OrderByDescending(c => c.CreatedOn)
             .Skip((request.PageNr - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync(cancellationToken);

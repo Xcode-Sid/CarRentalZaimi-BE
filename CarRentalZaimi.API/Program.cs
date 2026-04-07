@@ -6,12 +6,15 @@ using CarRentalZaimi.Application.Common.Yahoo;
 using CarRentalZaimi.Application.Extensions;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Services;
+using CarRentalZaimi.Domain.Common.Constants;
 using CarRentalZaimi.Infrastructure;
 using CarRentalZaimi.Infrastructure.Seed;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
+using System.Text;
+using System.Text.Json.Serialization;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -30,26 +33,44 @@ try
             "AppLogs"));
 
 
-    builder.Services
-        .AddAuthentication(options =>
-        {
-            options.DefaultScheme = "GoogleAuth";
-            options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-        })
-        .AddCookie("GoogleAuth", options =>
-        {
-            options.Cookie.SameSite = SameSiteMode.Lax;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        })
-        .AddGoogle(options =>
-        {
-            options.SignInScheme = "GoogleAuth";
-            options.ClientId = builder.Configuration.GetValue<string>("Authentication:Google:ClientId")!;
-            options.ClientSecret = builder.Configuration.GetValue<string>("Authentication:Google:ClientSecret")!;
-            options.CallbackPath = "/api/v1/Auth/google-response";
-            options.SaveTokens = true;
-        });
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+   .AddJwtBearer(options =>
+   {
+       options.TokenValidationParameters = new TokenValidationParameters
+       {
+           ValidateIssuerSigningKey = true,
+           IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!)),
+           ValidateIssuer = true,
+           ValidIssuer = "CarRentalZaimi",
+           ValidateAudience = true,
+           ValidAudience = "CarRentalZaimiUsers",
+           ValidateLifetime = true,
+       };
+   })
+   .AddCookie("GoogleAuth", options =>
+   {
+       options.Cookie.SameSite = SameSiteMode.Lax;
+       options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+   })
+   .AddGoogle(options =>
+   {
+       options.SignInScheme = "GoogleAuth";
+       options.ClientId = builder.Configuration.GetValue<string>("Authentication:Google:ClientId")!;
+       options.ClientSecret = builder.Configuration.GetValue<string>("Authentication:Google:ClientSecret")!;
+       options.CallbackPath = "/api/v1/Auth/google-response";
+       options.SaveTokens = true;
+   });
 
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy(SystemPolicies.Admin, policy =>
+            policy.RequireRole(SystemPolicies.Admin));
+    });
 
     builder.Services.AddSingleton(new GoogleOAuthSettings
     {
@@ -102,7 +123,11 @@ try
     });
 
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+     .AddJsonOptions(options =>
+     {
+         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+     });
     builder.Services.AddOpenApi();
     builder.Services.AddProblemDetails();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -128,6 +153,7 @@ try
     app.UseExceptionHandler();
     app.UseCors("AllowAll");
     app.UseHttpsRedirection();
+    app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
     app.Run();

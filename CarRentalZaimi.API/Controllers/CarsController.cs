@@ -14,9 +14,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentalZaimi.API.Controllers;
 
+
 public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
 {
-    [HttpPost]
+    [HttpPost("create")]
     [Authorize(SystemPolicies.Admin)]
     [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
@@ -37,10 +38,11 @@ public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
     [ProducesResponseType(typeof(Result<PagedResponse<CarDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllCars([FromQuery] GetAllCarsQuery query)
     {
-        return await SendCommand(query);
+        var res =  await SendCommand(query);
+        return res;
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("update/{id}")]
     [Authorize(SystemPolicies.Admin)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
