@@ -10,6 +10,8 @@ using CarRentalZaimi.Infrastructure.Identity;
 using CarRentalZaimi.Infrastructure.Persistence;
 using CarRentalZaimi.Infrastructure.Persistence.UnitOfWork;
 using CarRentalZaimi.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -32,13 +34,19 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+        services.Configure<AuthenticationOptions>(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        });
+
         services.AddHttpContextAccessor();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICarRepository, CarRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped<ICarService, CarService>();
         services.Configure<EmailSettings>(configuration.GetSection(ConfigurationKeys.Sections.Email));
         services.Configure<PhoneSettings>(configuration.GetSection(ConfigurationKeys.Sections.Sms));
         services.AddScoped<IEmailService, EmailService>();

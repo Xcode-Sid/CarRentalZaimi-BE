@@ -37,5 +37,12 @@ public class MappingProfile : Profile
         CreateMap<UserDevice, UserDeviceDto>().ReverseMap();
         CreateMap<StatePrefix, StatePrefixDto>().ReverseMap();
         CreateMap<Result<List<StatePrefix>>, Result<List<StatePrefixDto>>>();
+        CreateMap<Result<List<CarFuel>>, Result<List<CarFuelDto>>>();
+        CreateMap<Result<List<CarTransmission>>, Result<List<CarTransmissionDto>>>();
+        CreateMap<Result<List<CarInteriorColor>>, Result<List<CarInteriorColorDto>>>();
+        CreateMap<Result<List<CarExteriorColor>>, Result<List<CarExteriorColorDto>>>();
+        CreateMap<Result<List<CarCategory>>, Result<List<CarCategoryDto>>>();
+        CreateMap<Result<List<CarCompanyName>>, Result<List<CarCompanyNameDto>>>();
+        CreateMap<Result<List<CarCompanyModel>>, Result<List<CarCompanyModelDto>>>();
     }
 }
