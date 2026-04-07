@@ -1,10 +1,11 @@
-﻿using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Command;
 using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Application.Features.Authentication.Command.Microsoft;
 
@@ -15,41 +16,40 @@ public class AuthenticateWithMicrosoftCommandHandler(
     IMicrosoftOAuthService _microsoftOAuthService,
     IHttpContextAccessor _httpContextAccessor) : ICommandHandler<AuthenticateWithMicrosoftCommand, AuthenticationResponseDto>
 {
-    public async Task<Result<AuthenticationResponseDto>> Handle(AuthenticateWithMicrosoftCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<AuthenticationResponseDto>> Handle(AuthenticateWithMicrosoftCommand request, CancellationToken cancellationToken)
     {
         try
         {
             var microsoftResult = await _microsoftOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.CodeVerifier, request.RedirectUri);
 
-            if (!microsoftResult.IsSuccessful || microsoftResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(microsoftResult.ErrorMessage ?? "Failed to verify Microsoft authentication");
+            if (!microsoftResult.Success || microsoftResult.Data == null)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(microsoftResult.Errors.FirstOrDefault() ?? "Failed to verify Microsoft authentication");
 
-            var googleUser = microsoftResult.Data;
+            var microsoftUser = microsoftResult.Data;
 
-            string firstName = googleUser.GivenName!;
-            string lastName = googleUser.Surname!;
+            string firstName = microsoftUser.GivenName!;
+            string lastName = microsoftUser.Surname!;
 
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
             {
-                var nameParts = googleUser.UserPrincipalName!.Split(' ', 2);
-                firstName = nameParts.Length > 0 ? nameParts[0] : googleUser.GivenName!;
-                lastName = nameParts.Length > 1 ? nameParts[1] : googleUser.Surname!;
+                var nameParts = microsoftUser.UserPrincipalName!.Split(' ', 2);
+                firstName = nameParts.Length > 0 ? nameParts[0] : microsoftUser.GivenName!;
+                lastName = nameParts.Length > 1 ? nameParts[1] : microsoftUser.Surname!;
             }
 
-            // Get device info from HTTP context
             var userAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString();
 
             var result = await _authenticationService.AuthenticateWithMicrosoftAsync(
-                googleUser.Mail,
+                microsoftUser.Mail,
                 firstName,
                 lastName,
-                googleUser.Id,
+                microsoftUser.Id,
                 userAgent);
 
-            if (result.IsSuccessful)
-                _logger.LogInformation("Authentication successful for email {Email}", googleUser.Mail);
+            if (result.Success)
+                _logger.Info("Authentication successful for email {Email}", microsoftUser.Mail);
             else
-                _logger.LogWarning("Authentication failed for email {Email}: {Error}", googleUser.Mail, result.ErrorMessage);
+                _logger.Warn("Authentication failed for email {Email}: {Error}", microsoftUser.Mail, result.Errors.FirstOrDefault());
 
             return result;
         }

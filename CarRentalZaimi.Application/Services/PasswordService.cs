@@ -1,5 +1,6 @@
-﻿using CarRentalZaimi.Application.Interfaces.Services;
+using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -33,7 +34,7 @@ public class PasswordService(ILogger<PasswordService> _logger) : IPasswordServic
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to hash password");
+            _logger.Error(ex, "Failed to hash password");
             throw;
         }
     }
@@ -62,7 +63,7 @@ public class PasswordService(ILogger<PasswordService> _logger) : IPasswordServic
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to verify password");
+            _logger.Error(ex, "Failed to verify password");
             return false;
         }
     }

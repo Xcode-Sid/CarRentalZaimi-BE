@@ -1,6 +1,7 @@
-﻿using CarRentalZaimi.API.Controllers.Base;
-using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.API.Controllers.Base;
 using CarRentalZaimi.Application.Common.Messages;
+using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.StatePrefixes.Commands.CreateStatePrefix;
 using CarRentalZaimi.Application.Features.StatePrefixes.Commands.DeleteStatePrefix;
 using CarRentalZaimi.Application.Features.StatePrefixes.Commands.UpdateStatePrefix;
@@ -11,31 +12,29 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace CarRentalZaimi.API.Controllers;
 
-public class StatePrefixController(IMediator _mediator) : ApiControllerBase(_mediator)
+public class StatePrefixController(IMediator mediator) : ApiControllerBase(mediator)
 {
     [HttpPost(Name = nameof(CreateStatePrefix))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<StatePrefixDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateStatePrefix([FromBody] CreateStatePrefixCommand command)
-    {
-        return await SendCommand(command, SuccessMessages.StatePrefix.StatePrefixCreated);
-    }
+        => await SendCommand(command, SuccessMessages.StatePrefix.StatePrefixCreated);
 
     [HttpPut("{id}", Name = nameof(UpdateStatePrefix))]
     [EnableRateLimiting("strict")]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<StatePrefixDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateStatePrefix(
-       [FromRoute] string id,
-       [FromBody] UpdateStatePrefixCommand command)
+        [FromRoute] string id,
+        [FromBody] UpdateStatePrefixCommand command)
     {
         var updatedCommand = command with { Id = id };
         return await SendCommand(updatedCommand, SuccessMessages.StatePrefix.StatePrefixUpdated);
     }
 
     [HttpDelete("{id}", Name = nameof(DeleteStatePrefix))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteStatePrefix([FromRoute] string id)
     {
         var command = new DeleteStatePrefixCommand { Id = id };
@@ -43,10 +42,8 @@ public class StatePrefixController(IMediator _mediator) : ApiControllerBase(_med
     }
 
     [HttpGet("getAll", Name = nameof(GetAllStatePrefixes))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<StatePrefixDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllStatePrefixes()
-    {
-        return await SendQuery(new GetAllStatePrefixesQuery(), null, StatusCodes.Status404NotFound);
-    }
+        => await SendQuery(new GetAllStatePrefixesQuery(), null, StatusCodes.Status404NotFound);
 }

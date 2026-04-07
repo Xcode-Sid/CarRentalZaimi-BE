@@ -1,9 +1,10 @@
-﻿using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Command;
 using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Application.Features.Authentication.Command.Google;
 
@@ -14,14 +15,14 @@ public class AuthenticateWithGoogleCommandHandler(
     IGoogleOAuthService _googleOAuthService,
     IHttpContextAccessor _httpContextAccessor) : ICommandHandler<AuthenticateWithGoogleCommand, AuthenticationResponseDto>
 {
-    public async Task<Result<AuthenticationResponseDto>> Handle(AuthenticateWithGoogleCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<AuthenticationResponseDto>> Handle(AuthenticateWithGoogleCommand request, CancellationToken cancellationToken)
     {
         try
         {
             var googleResult = await _googleOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.RedirectUri);
 
-            if (!googleResult.IsSuccessful || googleResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(googleResult.ErrorMessage ?? "Failed to verify Google authentication");
+            if (!googleResult.Success || googleResult.Data == null)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(googleResult.Errors.FirstOrDefault() ?? "Failed to verify Google authentication");
 
             var googleUser = googleResult.Data;
 
@@ -35,7 +36,6 @@ public class AuthenticateWithGoogleCommandHandler(
                 lastName = nameParts.Length > 1 ? nameParts[1] : googleUser.Name;
             }
 
-            // Get device info from HTTP context
             var userAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString();
 
             var result = await _authenticationService.AuthenticateWithGoogleAsync(
@@ -46,10 +46,10 @@ public class AuthenticateWithGoogleCommandHandler(
                 googleUser.Id,
                 userAgent);
 
-            if (result.IsSuccessful)
-                _logger.LogInformation("Authentication successful for email {Email}", googleUser.Email);
+            if (result.Success)
+                _logger.Info("Authentication successful for email {Email}", googleUser.Email);
             else
-                _logger.LogWarning("Authentication failed for email {Email}: {Error}", googleUser.Email, result.ErrorMessage);
+                _logger.Warn("Authentication failed for email {Email}: {Error}", googleUser.Email, result.Errors.FirstOrDefault());
 
             return result;
         }

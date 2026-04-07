@@ -1,5 +1,5 @@
-﻿using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Command;
 using CarRentalZaimi.Application.Interfaces.Services;
 
@@ -7,7 +7,6 @@ namespace CarRentalZaimi.Application.Features.StatePrefixes.Commands.CreateState
 
 public class CreateStatePrefixCommandHandler(IStatePrefixService _statePrefixService) : ICommandHandler<CreateStatePrefixCommand, StatePrefixDto>
 {
-    public async Task<Result<StatePrefixDto>> Handle(CreateStatePrefixCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<StatePrefixDto>> Handle(CreateStatePrefixCommand request, CancellationToken cancellationToken)
         => await _statePrefixService.CreateAsync(request, cancellationToken);
 }
-

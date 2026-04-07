@@ -1,47 +1,44 @@
-﻿using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Errors;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Application.Services;
 
 public class ErrorService(IHttpContextAccessor _httpContextAccessor, ILogger<ErrorService> _logger) : IErrorService
 {
-    public Result<T> CreateFailure<T>(string errorCode, string? language = null, params object[] parameters)
-    {
-        return CreateFailure<T>(errorCode, exception: null, language, parameters);
-    }
+    public ApiResponse<T> CreateFailure<T>(string errorCode, string? language = null, params object[] parameters)
+        => CreateFailure<T>(errorCode, exception: null, language, parameters);
 
-    public Result<T> CreateFailure<T>(string errorCode, Exception? exception, string? language = null, params object[] parameters)
+    public ApiResponse<T> CreateFailure<T>(string errorCode, Exception? exception, string? language = null, params object[] parameters)
     {
         var userLanguage = language ?? GetCurrentUserLanguage();
         var message = GetErrorMessage(errorCode, userLanguage, parameters);
 
         if (exception != null)
-            _logger.LogError(exception, "Error occurred: {ErrorCode} - {Message}", errorCode, message);
+            _logger.Error(exception, "Error occurred: {ErrorCode} - {Message}", errorCode, message);
         else
-            _logger.LogError("Error occurred: {ErrorCode} - {Message}", errorCode, message);
+            _logger.Error("Error occurred: {ErrorCode} - {Message}", errorCode, message);
 
-        return Result<T>.Error(message);
+        return ApiResponse<T>.FailureResponse(message);
     }
 
-    public Result CreateFailure(string errorCode, string? language = null, params object[] parameters)
-    {
-        return CreateFailure(errorCode, exception: null, language, parameters);
-    }
+    public ApiResponse CreateFailure(string errorCode, string? language = null, params object[] parameters)
+        => CreateFailure(errorCode, exception: null, language, parameters);
 
-    public Result CreateFailure(string errorCode, Exception? exception, string? language = null, params object[] parameters)
+    public ApiResponse CreateFailure(string errorCode, Exception? exception, string? language = null, params object[] parameters)
     {
         var userLanguage = language ?? GetCurrentUserLanguage();
         var message = GetErrorMessage(errorCode, userLanguage, parameters);
 
         if (exception != null)
-            _logger.LogError(exception, "Error occurred: {ErrorCode} - {Message}", errorCode, message);
+            _logger.Error(exception, "Error occurred: {ErrorCode} - {Message}", errorCode, message);
         else
-            _logger.LogError("Error occurred: {ErrorCode} - {Message}", errorCode, message);
+            _logger.Error("Error occurred: {ErrorCode} - {Message}", errorCode, message);
 
-        return Result.Error(message);
+        return ApiResponse.FailureResponse(message);
     }
 
     public string GetErrorMessage(string errorCode, string? language = null, params object[] parameters)
@@ -57,7 +54,7 @@ public class ErrorService(IHttpContextAccessor _httpContextAccessor, ILogger<Err
             }
             catch (FormatException ex)
             {
-                _logger.LogError(ex, "Failed to format error message for code {ErrorCode}", errorCode);
+                _logger.Error(ex, "Failed to format error message for code {ErrorCode}", errorCode);
             }
         }
 
@@ -71,11 +68,6 @@ public class ErrorService(IHttpContextAccessor _httpContextAccessor, ILogger<Err
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext != null)
             {
-                // RouteValues not available in Application layer
-                // var routeLanguage = httpContext.Request.RouteValues["language"]?.ToString();
-                // if (!string.IsNullOrEmpty(routeLanguage))
-                //     return routeLanguage!;
-
                 var queryLanguage = httpContext.Request.Query["lang"].FirstOrDefault();
                 if (!string.IsNullOrEmpty(queryLanguage))
                     return queryLanguage;
@@ -106,7 +98,7 @@ public class ErrorService(IHttpContextAccessor _httpContextAccessor, ILogger<Err
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting current user language");
+            _logger.Error(ex, "Error getting current user language");
         }
 
         return "en";

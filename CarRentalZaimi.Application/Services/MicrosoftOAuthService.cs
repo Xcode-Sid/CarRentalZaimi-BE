@@ -1,12 +1,11 @@
-﻿using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.Common.Microsoft;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.DTOs.Microsoft;
 using CarRentalZaimi.Application.Interfaces.Services;
 using System.Text.Json;
 
 namespace CarRentalZaimi.Application.Services;
-
 
 public class MicrosoftOAuthService(
     HttpClient httpClient,
@@ -17,7 +16,7 @@ public class MicrosoftOAuthService(
     private readonly MicrosoftOAuthSettings _settings = settings;
     private readonly IErrorService _errorService = errorService;
 
-    public async Task<Result<MicrosoftUserProfileResponse>> VerifyAuthorizationCodeAsync(string code, string codeVerifier, string redirectUri)
+    public async Task<ApiResponse<MicrosoftUserProfileResponse>> VerifyAuthorizationCodeAsync(string code, string codeVerifier, string redirectUri)
     {
         try
         {
@@ -65,7 +64,7 @@ public class MicrosoftOAuthService(
             if (userData == null)
                 return _errorService.CreateFailure<MicrosoftUserProfileResponse>(ErrorCodes.MICROSOFT_INVALID_USER_DATA);
 
-            return Result<MicrosoftUserProfileResponse>.Success(userData);
+            return ApiResponse<MicrosoftUserProfileResponse>.SuccessResponse(userData);
         }
         catch (Exception)
         {
@@ -73,5 +72,3 @@ public class MicrosoftOAuthService(
         }
     }
 }
-
-

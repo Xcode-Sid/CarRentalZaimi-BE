@@ -1,17 +1,19 @@
-﻿using AutoMapper;
-using CarRentalZaimi.Application.Common;
+using AutoMapper;
 using CarRentalZaimi.Application.Common.Constants;
 using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Repositories;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Common.Constants;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
+using CarRentalZaimi.Domain.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 using System.Security.Claims;
 
 namespace CarRentalZaimi.Application.Services;
@@ -22,16 +24,16 @@ public class AuthenticationService : IAuthenticationService
     private readonly IErrorService _errorService;
     private readonly IPasswordService _passwordService;
     private readonly ILogger<AuthenticationService> _logger;
-    private readonly IJwtTokenService _jwtTokenService; 
+    private readonly IJwtTokenService _jwtTokenService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
-    private readonly UserManager<User> _userManager; 
+    private readonly UserManager<User> _userManager;
     private readonly RoleManager<Role> _roleManager;
     private readonly IMapper _mapper;
 
     public AuthenticationService(
-        IUserRepository userRepository, 
-        IErrorService errorService, 
+        IUserRepository userRepository,
+        IErrorService errorService,
         IPasswordService passwordService,
         ILogger<AuthenticationService> logger,
         IUnitOfWork unitOfWork,
@@ -41,7 +43,7 @@ public class AuthenticationService : IAuthenticationService
         RoleManager<Role> roleManager,
         IMapper mapper)
     {
-        _userRepository = userRepository;   
+        _userRepository = userRepository;
         _errorService = errorService;
         _passwordService = passwordService;
         _logger = logger;
@@ -53,50 +55,41 @@ public class AuthenticationService : IAuthenticationService
         _mapper = mapper;
     }
 
-    public async Task<Result<UserDto>> RegisterAsync(string firstname, string lastname, DateTime? dateOfBirth, string username, string email, 
+    public async Task<ApiResponse<UserDto>> RegisterAsync(string firstname, string lastname, DateTime? dateOfBirth, string username, string email,
         string phone, string password, string? name, string? data, string? role, string? deviceInfo = null)
     {
         await _unitOfWork.BeginTransactionAsync();
 
         try
         {
-            // Check if user already exists (GetByEmailAsync already filters out deleted users)
             var existingUser = await _userRepository.GetByEmailAsync(email);
             if (existingUser != null)
                 return _errorService.CreateFailure<UserDto>(ErrorCodes.USER_EMAIL_ALREADY_EXISTS);
 
-            // Validate password strength
             if (!_passwordService.IsPasswordStrong(password))
                 return _errorService.CreateFailure<UserDto>(ErrorCodes.VALIDATION_FAILED);
 
-
-            // Create new user with PendingVerification status (will be activated after email confirmation)
             var user = new User
             {
-                Id = Guid.NewGuid().ToString(),
                 FirstName = firstname,
                 LastName = lastname,
-                DateOfBirth =  dateOfBirth,
+                DateOfBirth = dateOfBirth,
                 Email = email,
                 UserName = username,
                 PhoneNumber = phone,
                 PasswordHash = _passwordService.HashPassword(password),
-                Status = UserStatus.PendingVerification, // New users start as PendingVerification
+                Status = UserStatus.PendingVerification,
                 EmailConfirmed = false
             };
 
             await _userRepository.AddAsync(user);
-
             await _unitOfWork.SaveChangesAsync();
 
-
-            // Save profile image if provided
             if (!string.IsNullOrEmpty(data) && !string.IsNullOrEmpty(name))
                 await SaveProfileImageAsync(user, name, data);
 
             await _unitOfWork.SaveChangesAsync();
 
-            // Generate JWT token
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -106,16 +99,15 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
-            var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
-            var accessTokenExpiryMinutes = int.Parse(jwtSettings[ConfigurationKeys.JwtSettingKeys.ExpiryMinutes] ?? "60");
-            var refreshTokenExpiryDays = int.Parse(jwtSettings[ConfigurationKeys.JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
+            var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+            var accessTokenExpiryMinutes = int.Parse(jwtSettings[JwtSettingKeys.ExpiryMinutes] ?? "60");
+            var refreshTokenExpiryDays = int.Parse(jwtSettings[JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
 
             var accessToken = _jwtTokenService.GenerateAccessToken(claims);
             var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
             var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes);
             var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
 
-            // Save refresh token to database
             var refreshToken = new RefreshToken
             {
                 User = user,
@@ -128,41 +120,31 @@ public class AuthenticationService : IAuthenticationService
             await _userRepository.AddRefreshTokenAsync(refreshToken);
             if (role != null)
             {
-
                 var roleResult = await _userManager.AddToRoleAsync(user, role);
                 if (!roleResult.Succeeded)
                 {
-                    _logger.LogError("Failed to assign role {Role} to user {UserId}", role, user.Id);
+                    _logger.Error("Failed to assign role {Role} to user {UserId}", role, user.Id);
                     return _errorService.CreateFailure<UserDto>(ErrorCodes.VALIDATION_FAILED);
                 }
             }
 
-            _logger.LogInformation("User {UserId} registered successfully", user.Id);
+            _logger.Info("User {UserId} registered successfully", user.Id);
             await _unitOfWork.CommitTransactionAsync();
 
-            var response = new UserDto
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                DateOfBirth = user.DateOfBirth,
-                Email = user.Email,
-                Username = user.UserName,
-                PhoneNumber = user.PhoneNumber,
-                Role = role,
-            };
+            var response = _mapper.Map<UserDto>(user);
+            response.Role = role;
 
-            return Result<UserDto>.Success(response);
+            return ApiResponse<UserDto>.SuccessResponse(response);
         }
         catch (Exception ex)
         {
             await _unitOfWork.RollbackTransactionAsync();
-            _logger.LogError(ex, "Registration failed for email {Email}", email); 
+            _logger.Error(ex, "Registration failed for email {Email}", email);
             return _errorService.CreateFailure<UserDto>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
 
-    public async Task<Result<AuthenticationResponseDto>> AuthenticateWithGoogleAsync(string? email, string? firstName, string? lastName, string? picture, 
+    public async Task<ApiResponse<AuthenticationResponseDto>> AuthenticateWithGoogleAsync(string? email, string? firstName, string? lastName, string? picture,
         string? externalProviderId, string? deviceInfo = null, CancellationToken cancellationToken = default)
     {
         await _unitOfWork.BeginTransactionAsync();
@@ -175,22 +157,19 @@ public class AuthenticationService : IAuthenticationService
 
             if (user == null)
             {
-
                 user = new User
                 {
-                    Id = Guid.NewGuid().ToString(),
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
                     UserName = email.Split('@')[0],
-                    PasswordHash = null, // External auth users have no password
-                    Status = UserStatus.Active, // Google-verified users are active immediately
-                    ExternalProvider = "Google",
+                    PasswordHash = null,
+                    Status = UserStatus.Active,
+                    ExternalProvider = ExternalProvider.Google.GetDescription(),
                     ExternalProviderId = externalProviderId,
-                    EmailConfirmed = true, // Google already confirmed the email
+                    EmailConfirmed = true,
                 };
 
-                // Download profile picture and convert to base64
                 if (!string.IsNullOrEmpty(picture))
                 {
                     try
@@ -198,25 +177,22 @@ public class AuthenticationService : IAuthenticationService
                         using var httpClient = new HttpClient();
                         var imageBytes = await httpClient.GetByteArrayAsync(picture);
                         string? base64Image = Convert.ToBase64String(imageBytes);
-                        // Save profile image if provided
                         var name = $"profile_{user.Id}.jpg";
                         if (!string.IsNullOrEmpty(picture) && !string.IsNullOrEmpty(name))
                             await SaveProfileImageAsync(user, name, base64Image);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Failed to download Facebook profile picture for {Email}", email);
+                        _logger.Warn(ex, "Failed to download Google profile picture for {Email}", email);
                     }
                 }
 
-
                 await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
-                _logger.LogInformation("New Google user {UserId} created successfully", user.Id);
+                _logger.Info("New Google user {UserId} created successfully", user.Id);
             }
             else
             {
-                // Existing user - check if they can log in
                 if (user.Status == UserStatus.Banned)
                     return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_BANNED);
 
@@ -227,27 +203,24 @@ public class AuthenticationService : IAuthenticationService
                     return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INACTIVE);
             }
 
-            
-            // Generate tokens
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Email, user.Email),
+                new(ClaimTypes.Email, user.Email!),
                 new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
                 new(ClaimTypes.Role, SystemPolicies.User.ToString()),
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var accessTokenExpiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
-            var refreshTokenExpiryDays = int.Parse(jwtSettings["RefreshTokenExpiryDays"] ?? "7");
+            var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+            var accessTokenExpiryMinutes = int.Parse(jwtSettings[JwtSettingKeys.ExpiryMinutes] ?? "60");
+            var refreshTokenExpiryDays = int.Parse(jwtSettings[JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
 
             var accessToken = _jwtTokenService.GenerateAccessToken(claims);
             var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
             var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes);
             var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
 
-            // Save refresh token
             var refreshToken = new RefreshToken
             {
                 User = user,
@@ -260,9 +233,9 @@ public class AuthenticationService : IAuthenticationService
             await _userRepository.UpdateAsync(user);
             await _userRepository.AddRefreshTokenAsync(refreshToken);
             await _unitOfWork.CommitTransactionAsync();
-            _logger.LogInformation("Google user {UserId} authenticated successfully", user.Id);
+            _logger.Info("Google user {UserId} authenticated successfully", user.Id);
 
-            return Result<AuthenticationResponseDto>.Success(new AuthenticationResponseDto
+            return ApiResponse<AuthenticationResponseDto>.SuccessResponse(new AuthenticationResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshTokenValue,
@@ -275,13 +248,12 @@ public class AuthenticationService : IAuthenticationService
         catch (Exception ex)
         {
             await _unitOfWork.RollbackTransactionAsync();
-            _logger.LogError(ex, "Google authentication failed for email {Email}", email);
+            _logger.Error(ex, "Google authentication failed for email {Email}", email);
             return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
 
-
-    public async Task<Result<AuthenticationResponseDto>> AuthenticateWithFacebookAsync(string? email, string? firstName, string? lastName, string? picture, 
+    public async Task<ApiResponse<AuthenticationResponseDto>> AuthenticateWithFacebookAsync(string? email, string? firstName, string? lastName, string? picture,
         string? externalProviderId, string? deviceInfo = null, CancellationToken cancellationToken = default)
     {
         await _unitOfWork.BeginTransactionAsync();
@@ -296,19 +268,17 @@ public class AuthenticationService : IAuthenticationService
             {
                 user = new User
                 {
-                    Id = Guid.NewGuid().ToString(),
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
                     UserName = email.Split('@')[0],
-                    PasswordHash = null, // External users have no pass
-                    Status = UserStatus.Active, // Facebook-verified users are active immediately
-                    ExternalProvider = "Facebook",
+                    PasswordHash = null,
+                    Status = UserStatus.Active,
+                    ExternalProvider = ExternalProvider.Facebook.GetDescription(),
                     ExternalProviderId = externalProviderId,
-                    EmailConfirmed = true, 
+                    EmailConfirmed = true,
                 };
 
-                // Download profile picture and convert to base64
                 if (!string.IsNullOrEmpty(picture))
                 {
                     try
@@ -316,25 +286,22 @@ public class AuthenticationService : IAuthenticationService
                         using var httpClient = new HttpClient();
                         var imageBytes = await httpClient.GetByteArrayAsync(picture);
                         string? base64Image = Convert.ToBase64String(imageBytes);
-                        // Save profile image if provided
                         var name = $"profile_{user.Id}.jpg";
                         if (!string.IsNullOrEmpty(picture) && !string.IsNullOrEmpty(name))
                             await SaveProfileImageAsync(user, name, base64Image);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Failed to download Facebook profile picture for {Email}", email);
+                        _logger.Warn(ex, "Failed to download Facebook profile picture for {Email}", email);
                     }
                 }
 
-
                 await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
-                _logger.LogInformation("New Facebook user {UserId} created successfully", user.Id);
+                _logger.Info("New Facebook user {UserId} created successfully", user.Id);
             }
             else
             {
-                // Existing user - check if they can log in
                 if (user.Status == UserStatus.Banned)
                     return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_BANNED);
 
@@ -345,8 +312,6 @@ public class AuthenticationService : IAuthenticationService
                     return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INACTIVE);
             }
 
-          
-            // Generate tokens
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -356,16 +321,15 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var accessTokenExpiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
-            var refreshTokenExpiryDays = int.Parse(jwtSettings["RefreshTokenExpiryDays"] ?? "7");
+            var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+            var accessTokenExpiryMinutes = int.Parse(jwtSettings[JwtSettingKeys.ExpiryMinutes] ?? "60");
+            var refreshTokenExpiryDays = int.Parse(jwtSettings[JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
 
             var accessToken = _jwtTokenService.GenerateAccessToken(claims);
             var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
             var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes);
             var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
 
-            // Save refresh token
             var refreshToken = new RefreshToken
             {
                 User = user,
@@ -377,12 +341,11 @@ public class AuthenticationService : IAuthenticationService
             };
 
             await _userRepository.AddRefreshTokenAsync(refreshToken);
-
             await _userRepository.UpdateAsync(user);
             await _unitOfWork.CommitTransactionAsync();
-            _logger.LogInformation("Facebook user {UserId} authenticated successfully", user.Id);
+            _logger.Info("Facebook user {UserId} authenticated successfully", user.Id);
 
-            return Result<AuthenticationResponseDto>.Success(new AuthenticationResponseDto
+            return ApiResponse<AuthenticationResponseDto>.SuccessResponse(new AuthenticationResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshTokenValue,
@@ -395,109 +358,12 @@ public class AuthenticationService : IAuthenticationService
         catch (Exception ex)
         {
             await _unitOfWork.RollbackTransactionAsync();
-            _logger.LogError(ex, "Facebook authentication failed for email {Email}", email);
+            _logger.Error(ex, "Facebook authentication failed for email {Email}", email);
             return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
 
-    public async Task<Result<AuthenticationResponseDto>> AuthenticateWithMicrosoftAsync(string? email, string? firstName, string? lastName, string? externalProviderId, 
-        string? deviceInfo = null, CancellationToken cancellationToken = default)
-    {
-        await _unitOfWork.BeginTransactionAsync();
-        try
-        {
-            if (string.IsNullOrEmpty(email))
-                return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
-
-            var user = await _userRepository.GetByEmailAsync(email);
-
-            if (user == null)
-            {
-                user = new User
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    FirstName = firstName,
-                    LastName = lastName,
-                    Email = email,
-                    UserName = email.Split('@')[0],
-                    PasswordHash = null, // External auth users have no password
-                    Status = UserStatus.Active, // Facebook-verified users are active immediately
-                    ExternalProvider = "Microsoft",
-                    ExternalProviderId = externalProviderId,
-                    EmailConfirmed = true, 
-                };
-
-                await _userRepository.AddAsync(user);
-                await _unitOfWork.SaveChangesAsync();
-                _logger.LogInformation("New Microsoft user {UserId} created successfully", user.Id);
-            }
-            else
-            {
-                // Existing user - check if they can log in
-                if (user.Status == UserStatus.Banned)
-                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_BANNED);
-
-                if (user.Status == UserStatus.Suspended)
-                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_SUSPENDED);
-
-                if (user.Status != UserStatus.Active)
-                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INACTIVE);
-            }
-
-
-            // Generate tokens
-            var claims = new List<Claim>
-            {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Email, user.Email!),
-                new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new(ClaimTypes.Role, SystemPolicies.User.ToString()),
-                new(ClaimNames.UserStatus, user.Status.ToString())
-            };
-
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var accessTokenExpiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
-            var refreshTokenExpiryDays = int.Parse(jwtSettings["RefreshTokenExpiryDays"] ?? "7");
-
-            var accessToken = _jwtTokenService.GenerateAccessToken(claims);
-            var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
-            var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes);
-            var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
-
-            // Save refresh token
-            var refreshToken = new RefreshToken
-            {
-                User = user,
-                Token = refreshTokenValue,
-                ExpiresAt = refreshTokenExpiresAt,
-                IsRevoked = false,
-                DeviceInfo = deviceInfo,
-            };
-
-            await _userRepository.AddRefreshTokenAsync(refreshToken);
-            await _userRepository.UpdateAsync(user);
-            await _unitOfWork.CommitTransactionAsync();
-            _logger.LogInformation("Microsoft user {UserId} authenticated successfully", user.Id);
-
-            return Result<AuthenticationResponseDto>.Success(new AuthenticationResponseDto
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshTokenValue,
-                AccessTokenExpiresAt = accessTokenExpiresAt,
-                RefreshTokenExpiresAt = refreshTokenExpiresAt,
-                User = MapToUserDto(user),
-                Role = await GetRoleDtoAsync(user)
-            });
-        }
-        catch (Exception ex)
-        {
-            await _unitOfWork.RollbackTransactionAsync();
-            _logger.LogError(ex, "Microsoft authentication failed for email {Email}", email);
-            return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
-        }
-    }
-
-    public async Task<Result<AuthenticationResponseDto>> AuthenticateWithYahooAsync(string? email, string? firstName, string? lastName, string? picture, 
+    public async Task<ApiResponse<AuthenticationResponseDto>> AuthenticateWithMicrosoftAsync(string? email, string? firstName, string? lastName,
         string? externalProviderId, string? deviceInfo = null, CancellationToken cancellationToken = default)
     {
         await _unitOfWork.BeginTransactionAsync();
@@ -510,28 +376,25 @@ public class AuthenticationService : IAuthenticationService
 
             if (user == null)
             {
-
                 user = new User
                 {
-                    Id = Guid.NewGuid().ToString(),
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
                     UserName = email.Split('@')[0],
-                    PasswordHash = null, // External users have no pass
-                    Status = UserStatus.Active, // verified users are active immediately
-                    ExternalProvider = "Yahoo",
+                    PasswordHash = null,
+                    Status = UserStatus.Active,
+                    ExternalProvider = ExternalProvider.Microsoft.GetDescription(),
                     ExternalProviderId = externalProviderId,
                     EmailConfirmed = true,
                 };
 
                 await _userRepository.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
-                _logger.LogInformation("New Yahoo user {UserId} created successfully", user.Id);
+                _logger.Info("New Microsoft user {UserId} created successfully", user.Id);
             }
             else
             {
-                // Existing user - check if they can log in
                 if (user.Status == UserStatus.Banned)
                     return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_BANNED);
 
@@ -542,8 +405,6 @@ public class AuthenticationService : IAuthenticationService
                     return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INACTIVE);
             }
 
-
-            // Generate tokens
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -553,16 +414,15 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var accessTokenExpiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
-            var refreshTokenExpiryDays = int.Parse(jwtSettings["RefreshTokenExpiryDays"] ?? "7");
+            var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+            var accessTokenExpiryMinutes = int.Parse(jwtSettings[JwtSettingKeys.ExpiryMinutes] ?? "60");
+            var refreshTokenExpiryDays = int.Parse(jwtSettings[JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
 
             var accessToken = _jwtTokenService.GenerateAccessToken(claims);
             var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
             var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes);
             var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
 
-            // Save refresh token
             var refreshToken = new RefreshToken
             {
                 User = user,
@@ -575,9 +435,9 @@ public class AuthenticationService : IAuthenticationService
             await _userRepository.AddRefreshTokenAsync(refreshToken);
             await _userRepository.UpdateAsync(user);
             await _unitOfWork.CommitTransactionAsync();
-            _logger.LogInformation("Yahoo user {UserId} authenticated successfully", user.Id);
+            _logger.Info("Microsoft user {UserId} authenticated successfully", user.Id);
 
-            return Result<AuthenticationResponseDto>.Success(new AuthenticationResponseDto
+            return ApiResponse<AuthenticationResponseDto>.SuccessResponse(new AuthenticationResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshTokenValue,
@@ -590,13 +450,104 @@ public class AuthenticationService : IAuthenticationService
         catch (Exception ex)
         {
             await _unitOfWork.RollbackTransactionAsync();
-            _logger.LogError(ex, "Yahoo authentication failed for email {Email}", email);
+            _logger.Error(ex, "Microsoft authentication failed for email {Email}", email);
             return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
 
+    public async Task<ApiResponse<AuthenticationResponseDto>> AuthenticateWithYahooAsync(string? email, string? firstName, string? lastName, string? picture,
+        string? externalProviderId, string? deviceInfo = null, CancellationToken cancellationToken = default)
+    {
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            if (string.IsNullOrEmpty(email))
+                return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.VALIDATION_FAILED);
 
-    public async Task<Result<AuthenticationResponseDto>> LoginAsync(string login, string password, string? ipAddress = null, string? deviceInfo = null)
+            var user = await _userRepository.GetByEmailAsync(email);
+
+            if (user == null)
+            {
+                user = new User
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    UserName = email.Split('@')[0],
+                    PasswordHash = null,
+                    Status = UserStatus.Active,
+                    ExternalProvider = ExternalProvider.Yahoo.GetDescription(),
+                    ExternalProviderId = externalProviderId,
+                    EmailConfirmed = true,
+                };
+
+                await _userRepository.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+                _logger.Info("New Yahoo user {UserId} created successfully", user.Id);
+            }
+            else
+            {
+                if (user.Status == UserStatus.Banned)
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_BANNED);
+
+                if (user.Status == UserStatus.Suspended)
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_SUSPENDED);
+
+                if (user.Status != UserStatus.Active)
+                    return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INACTIVE);
+            }
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Email, user.Email!),
+                new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+                new(ClaimTypes.Role, SystemPolicies.User.ToString()),
+                new(ClaimNames.UserStatus, user.Status.ToString())
+            };
+
+            var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+            var accessTokenExpiryMinutes = int.Parse(jwtSettings[JwtSettingKeys.ExpiryMinutes] ?? "60");
+            var refreshTokenExpiryDays = int.Parse(jwtSettings[JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
+
+            var accessToken = _jwtTokenService.GenerateAccessToken(claims);
+            var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
+            var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes);
+            var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
+
+            var refreshToken = new RefreshToken
+            {
+                User = user,
+                Token = refreshTokenValue,
+                ExpiresAt = refreshTokenExpiresAt,
+                IsRevoked = false,
+                DeviceInfo = deviceInfo,
+            };
+
+            await _userRepository.AddRefreshTokenAsync(refreshToken);
+            await _userRepository.UpdateAsync(user);
+            await _unitOfWork.CommitTransactionAsync();
+            _logger.Info("Yahoo user {UserId} authenticated successfully", user.Id);
+
+            return ApiResponse<AuthenticationResponseDto>.SuccessResponse(new AuthenticationResponseDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshTokenValue,
+                AccessTokenExpiresAt = accessTokenExpiresAt,
+                RefreshTokenExpiresAt = refreshTokenExpiresAt,
+                User = MapToUserDto(user),
+                Role = await GetRoleDtoAsync(user)
+            });
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            _logger.Error(ex, "Yahoo authentication failed for email {Email}", email);
+            return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+    }
+
+    public async Task<ApiResponse<AuthenticationResponseDto>> LoginAsync(string login, string password, string? ipAddress = null, string? deviceInfo = null)
     {
         try
         {
@@ -608,7 +559,6 @@ public class AuthenticationService : IAuthenticationService
             if (!_passwordService.VerifyPassword(password, user.PasswordHash!))
                 return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_INVALID_CREDENTIALS);
 
-            // Check user status - banned and suspended users cannot login
             if (user.Status == UserStatus.Banned)
                 return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.USER_BANNED);
 
@@ -630,16 +580,15 @@ public class AuthenticationService : IAuthenticationService
                 new(ClaimNames.UserStatus, user.Status.ToString())
             };
 
-            var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
-            var accessTokenExpiryMinutes = int.Parse(jwtSettings[ConfigurationKeys.JwtSettingKeys.ExpiryMinutes] ?? "60");
-            var refreshTokenExpiryDays = int.Parse(jwtSettings[ConfigurationKeys.JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
+            var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+            var accessTokenExpiryMinutes = int.Parse(jwtSettings[JwtSettingKeys.ExpiryMinutes] ?? "60");
+            var refreshTokenExpiryDays = int.Parse(jwtSettings[JwtSettingKeys.RefreshTokenExpiryDays] ?? "7");
 
             var accessToken = _jwtTokenService.GenerateAccessToken(claims);
             var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
             var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes);
             var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
 
-            // Save refresh token to database
             var refreshToken = new RefreshToken
             {
                 User = user,
@@ -652,13 +601,12 @@ public class AuthenticationService : IAuthenticationService
             };
 
             await _userRepository.AddRefreshTokenAsync(refreshToken);
-
             await _userRepository.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("User {UserId} logged in successfully", user.Id);
+            _logger.Info("User {UserId} logged in successfully", user.Id);
 
-            var response = new AuthenticationResponseDto
+            return ApiResponse<AuthenticationResponseDto>.SuccessResponse(new AuthenticationResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshTokenValue,
@@ -666,17 +614,14 @@ public class AuthenticationService : IAuthenticationService
                 RefreshTokenExpiresAt = refreshTokenExpiresAt,
                 User = MapToUserDto(user),
                 Role = await GetRoleDtoAsync(user),
-            };
-
-            return Result<AuthenticationResponseDto>.Success(response);
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Login failed for {Login}", login);
+            _logger.Error(ex, "Login failed for {Login}", login);
             return _errorService.CreateFailure<AuthenticationResponseDto>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
-
 
     private async Task SaveProfileImageAsync(User user, string name, string data)
     {
@@ -703,13 +648,7 @@ public class AuthenticationService : IAuthenticationService
     }
 
     private UserDto MapToUserDto(User user)
-       => _mapper.Map<UserDto>(user);
-
-    private async Task<RoleDto?> GetRoleDtoByNameAsync(string roleName)
-    {
-        var role = await _roleManager.FindByNameAsync(roleName);
-        return role != null ? _mapper.Map<RoleDto>(role) : null;
-    }
+        => _mapper.Map<UserDto>(user);
 
     private async Task<RoleDto?> GetRoleDtoAsync(User user)
     {

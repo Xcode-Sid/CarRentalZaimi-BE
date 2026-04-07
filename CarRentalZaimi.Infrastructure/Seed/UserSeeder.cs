@@ -45,10 +45,8 @@ public static class UserSeeder
             logger.LogInformation("Seeded admin user: {Email}", adminEmail);
         }
         else
-        {
             logger.LogWarning("Failed to seed admin user: {Errors}",
                 string.Join(", ", result.Errors.Select(e => e.Description)));
-        }
     }
 
     private static async Task SeedCustomerAsync(UserManager<User> userManager, ILogger logger)
@@ -78,9 +76,7 @@ public static class UserSeeder
             logger.LogInformation("Seeded customer user: {Email}", customerEmail);
         }
         else
-        {
             logger.LogWarning("Failed to seed customer user: {Errors}",
                 string.Join(", ", result.Errors.Select(e => e.Description)));
-        }
     }
 }

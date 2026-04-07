@@ -3,6 +3,7 @@ using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Infrastructure.Persistence.UnitOfWork;
 
@@ -43,9 +44,9 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Saving changes to database");
+        _logger.Debug("Saving changes to database");
         var count = await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogDebug("Saved {Count} change(s) to database", count);
+        _logger.Debug("Saved {Count} change(s) to database", count);
         return count;
     }
 

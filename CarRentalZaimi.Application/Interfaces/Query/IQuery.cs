@@ -1,9 +1,8 @@
-﻿using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using MediatR;
 
 namespace CarRentalZaimi.Application.Interfaces.Query;
 
-public interface IQuery<TResponse> : IRequest<Result<TResponse>>
+public interface IQuery<TResponse> : IRequest<ApiResponse<TResponse>>
 {
 }
-

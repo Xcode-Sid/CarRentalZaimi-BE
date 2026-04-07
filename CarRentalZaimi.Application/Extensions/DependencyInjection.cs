@@ -2,7 +2,6 @@
 using CarRentalZaimi.Application.Behaviors;
 using CarRentalZaimi.Application.Dependency;
 using CarRentalZaimi.Application.Mappings;
-using CarRentalZaimi.Application.Services;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

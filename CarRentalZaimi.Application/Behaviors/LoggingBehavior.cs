@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Application.Behaviors;
 
@@ -16,7 +17,7 @@ public class LoggingBehavior<TRequest, TResponse>(
     {
         var requestName = typeof(TRequest).Name;
 
-        _logger.LogInformation("Handling {RequestName} — {@Request}", requestName, request);
+        _logger.Info("Handling {RequestName} — {@Request}", requestName, request);
 
         var sw = Stopwatch.StartNew();
 
@@ -25,7 +26,7 @@ public class LoggingBehavior<TRequest, TResponse>(
             var response = await next(cancellationToken);
             sw.Stop();
 
-            _logger.LogInformation("Handled {RequestName} in {ElapsedMs}ms",
+            _logger.Info("Handled {RequestName} in {ElapsedMs}ms",
                 requestName, sw.ElapsedMilliseconds);
 
             return response;
@@ -34,7 +35,7 @@ public class LoggingBehavior<TRequest, TResponse>(
         {
             sw.Stop();
 
-            _logger.LogError(ex,
+            _logger.Error(ex,
                 "Error handling {RequestName} after {ElapsedMs}ms — {ErrorMessage}",
                 requestName, sw.ElapsedMilliseconds, ex.Message);
 

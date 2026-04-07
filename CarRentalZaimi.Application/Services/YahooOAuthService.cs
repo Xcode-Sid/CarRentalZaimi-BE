@@ -1,12 +1,11 @@
-﻿using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.Common.Yahoo;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.DTOs.Yahoo;
 using CarRentalZaimi.Application.Interfaces.Services;
 using System.Text.Json;
 
 namespace CarRentalZaimi.Application.Services;
-
 
 public class YahooOAuthService(
     HttpClient httpClient,
@@ -17,7 +16,7 @@ public class YahooOAuthService(
     private readonly YahooOAuthSettings _settings = settings;
     private readonly IErrorService _errorService = errorService;
 
-    public async Task<Result<YahooUserProfileResponse>> VerifyAuthorizationCodeAsync(string code, string codeVerifier, string redirectUri)
+    public async Task<ApiResponse<YahooUserProfileResponse>> VerifyAuthorizationCodeAsync(string code, string codeVerifier, string redirectUri)
     {
         try
         {
@@ -25,13 +24,11 @@ public class YahooOAuthService(
                 return _errorService.CreateFailure<YahooUserProfileResponse>(ErrorCodes.YAHOO_AUTHORIZATION_CODE_REQUIRES);
 
             if (string.IsNullOrEmpty(codeVerifier))
-
                 return _errorService.CreateFailure<YahooUserProfileResponse>(ErrorCodes.YAHOO_CODE_VERIFIER_REQUIRED);
 
             if (string.IsNullOrEmpty(redirectUri))
                 return _errorService.CreateFailure<YahooUserProfileResponse>(ErrorCodes.YAHOO_REDIRECT_URI_REQUIRED);
 
-            // Exchange authorization code for access token (PKCE flow)
             var tokenRequestContent = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("client_id", _settings.ClientId!),
@@ -55,7 +52,6 @@ public class YahooOAuthService(
             if (tokenData == null || string.IsNullOrEmpty(tokenData.AccessToken))
                 return _errorService.CreateFailure<YahooUserProfileResponse>(ErrorCodes.YAHOO_INVALID_TOKEN);
 
-            // Get user profile from Yahoo OpenID
             var userRequest = new HttpRequestMessage(HttpMethod.Get, _settings.UserInfoUrl);
             userRequest.Headers.Add("Authorization", $"Bearer {tokenData.AccessToken}");
 
@@ -70,7 +66,7 @@ public class YahooOAuthService(
             if (userData == null)
                 return _errorService.CreateFailure<YahooUserProfileResponse>(ErrorCodes.YAHOO_INVALID_USER_DATA);
 
-            return Result<YahooUserProfileResponse>.Success(userData);
+            return ApiResponse<YahooUserProfileResponse>.SuccessResponse(userData);
         }
         catch (Exception)
         {
@@ -78,4 +74,3 @@ public class YahooOAuthService(
         }
     }
 }
-

@@ -1,6 +1,5 @@
-using CarRentalZaimi.API.Exctention;
-using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Messages;
+using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.DTOs.ApiResponse;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -22,86 +21,84 @@ public abstract class ApiControllerBase(IMediator mediator) : ControllerBase
         return (userId, null);
     }
 
-    protected async Task<IActionResult> SendQuery<TResponse>(IRequest<Result<TResponse>> query)
+    protected async Task<IActionResult> SendQuery<TResponse>(IRequest<ApiResponse<TResponse>> query)
     {
-        var result = await _mediator.Send(query);
-        return result.ToActionResult();
+        var response = await _mediator.Send(query);
+        if (!response.Success)
+            return BadRequest(response);
+        return Ok(response);
     }
 
     protected async Task<IActionResult> SendQuery<TResponse>(
-        IRequest<Result<TResponse>> query,
+        IRequest<ApiResponse<TResponse>> query,
         string? successMessage = null,
         int failureStatusCode = StatusCodes.Status400BadRequest)
     {
-        var result = await _mediator.Send(query);
-        if (!result.IsSuccessful)
-            return StatusCode(
-                failureStatusCode,
-                ApiResponse<TResponse>.FailureResponse(result.ErrorMessage ?? ApiResponseMessages.InvalidRequest));
-
-        return Ok(ApiResponse<TResponse>.SuccessResponse(result.Data!, successMessage));
+        var response = await _mediator.Send(query);
+        if (!response.Success)
+            return StatusCode(failureStatusCode, response);
+        if (successMessage != null)
+            response.Message = successMessage;
+        return Ok(response);
     }
 
-    protected async Task<IActionResult> SendCommand<TResponse>(IRequest<Result<TResponse>> command)
+    protected async Task<IActionResult> SendCommand<TResponse>(IRequest<ApiResponse<TResponse>> command)
     {
-        var result = await _mediator.Send(command);
-        return result.ToActionResult();
+        var response = await _mediator.Send(command);
+        if (!response.Success)
+            return BadRequest(response);
+        return Ok(response);
     }
 
     protected async Task<IActionResult> SendCommand<TResponse>(
-        IRequest<Result<TResponse>> command,
+        IRequest<ApiResponse<TResponse>> command,
         string? successMessage,
         int failureStatusCode = StatusCodes.Status400BadRequest)
     {
-        var result = await _mediator.Send(command);
-        if (!result.IsSuccessful)
-            return StatusCode(
-                failureStatusCode,
-                ApiResponse<TResponse>.FailureResponse(result.ErrorMessage ?? ApiResponseMessages.InvalidRequest));
-
-        return Ok(ApiResponse<TResponse>.SuccessResponse(result.Data!, successMessage ?? SuccessMessages.General.OperationCompleted));
-    }
-
-    protected async Task<IActionResult> SendCommand(
-        IRequest<Result> command,
-        string? successMessage = null,
-        int failureStatusCode = StatusCodes.Status400BadRequest)
-    {
-        var result = await _mediator.Send(command);
-        if (!result.IsSuccessful)
-            return StatusCode(
-                failureStatusCode,
-                ApiResponse.FailureResponse(result.ErrorMessage ?? ApiResponseMessages.InvalidRequest));
-
-        return Ok(ApiResponse.SuccessResponse(successMessage ?? SuccessMessages.General.OperationCompleted));
+        var response = await _mediator.Send(command);
+        if (!response.Success)
+            return StatusCode(failureStatusCode, response);
+        response.Message ??= successMessage ?? SuccessMessages.General.OperationCompleted;
+        return Ok(response);
     }
 
     protected async Task<IActionResult> SendCommandCreated<TResponse>(
-        IRequest<Result<TResponse>> command,
+        IRequest<ApiResponse<TResponse>> command,
         string routeName,
         object routeValues,
         string? successMessage = null)
     {
-        var result = await _mediator.Send(command);
-        return result.ToCreatedResult(routeName, routeValues, successMessage);
+        var response = await _mediator.Send(command);
+        if (!response.Success)
+            return BadRequest(response);
+        response.Message ??= successMessage ?? SuccessMessages.General.ResourceCreated;
+        return CreatedAtRoute(routeName, routeValues, response);
     }
 
-    protected async Task<IActionResult> SendCommandNoContent(IRequest<Result> command)
+    protected async Task<IActionResult> SendCommandNoContent(IRequest<ApiResponse> command)
     {
-        var result = await _mediator.Send(command);
-        return result.ToNoContentResult();
+        var response = await _mediator.Send(command);
+        if (!response.Success)
+            return BadRequest(response);
+        return NoContent();
     }
 
     protected async Task<IActionResult> SendPaginatedQuery<TDto>(
-        IRequest<Result<List<TDto>>> query,
+        IRequest<ApiResponse<List<TDto>>> query,
         int totalCount,
         int pageNumber,
         int pageSize)
     {
-        var result = await _mediator.Send(query);
-        if (!result.IsSuccessful)
-            return result.ToActionResult();
+        var response = await _mediator.Send(query);
+        if (!response.Success)
+            return BadRequest(response);
 
-        return result.Data!.ToPaginatedResult(totalCount, pageNumber, pageSize);
+        var pagedResponse = new PagedResponse<TDto>(
+            response.Data!,
+            totalCount,
+            pageNumber,
+            pageSize);
+
+        return Ok(ApiResponse<PagedResponse<TDto>>.SuccessResponse(pagedResponse));
     }
 }

@@ -1,12 +1,11 @@
-﻿using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.Common.Facebook;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.DTOs.Facebook;
 using CarRentalZaimi.Application.Interfaces.Services;
 using System.Text.Json;
 
 namespace CarRentalZaimi.Application.Services;
-
 
 public class FacebookOAuthService(
     HttpClient httpClient,
@@ -17,7 +16,7 @@ public class FacebookOAuthService(
     private readonly FacebookOAuthSettings _settings = settings;
     private readonly IErrorService _errorService = errorService;
 
-    public async Task<Result<FacebookUserProfileResponse>> VerifyAuthorizationCodeAsync(string code, string redirectUri)
+    public async Task<ApiResponse<FacebookUserProfileResponse>> VerifyAuthorizationCodeAsync(string code, string redirectUri)
     {
         try
         {
@@ -27,7 +26,6 @@ public class FacebookOAuthService(
             if (string.IsNullOrEmpty(redirectUri))
                 return _errorService.CreateFailure<FacebookUserProfileResponse>(ErrorCodes.FACEBOOK_REDIRECT_URI_REQUIRED);
 
-            // Exchange authorization code for access token
             var tokenUrl = $"{_settings.TokenUrl}?" +
                 $"client_id={_settings.AppId}&" +
                 $"redirect_uri={Uri.EscapeDataString(redirectUri)}&" +
@@ -45,7 +43,6 @@ public class FacebookOAuthService(
             if (tokenData == null || string.IsNullOrEmpty(tokenData.AccessToken))
                 return _errorService.CreateFailure<FacebookUserProfileResponse>(ErrorCodes.FACEBOOK_INVALID_TOKEN);
 
-            // Get user profile from Facebook
             var userInfoUrl = $"{_settings.UserInfoUrl}?fields=id,email,first_name,last_name,name,picture&access_token={tokenData.AccessToken}";
             var userResponse = await _httpClient.GetAsync(userInfoUrl);
 
@@ -58,7 +55,7 @@ public class FacebookOAuthService(
             if (userData == null)
                 return _errorService.CreateFailure<FacebookUserProfileResponse>(ErrorCodes.FACEBOOK_INVALID_USER_DATA);
 
-            return Result<FacebookUserProfileResponse>.Success(userData);
+            return ApiResponse<FacebookUserProfileResponse>.SuccessResponse(userData);
         }
         catch (Exception)
         {

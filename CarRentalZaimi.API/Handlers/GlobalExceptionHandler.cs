@@ -1,6 +1,8 @@
-using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Domain.Exceptions;
+using CarRentalZaimi.Logging;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace CarRentalZaimi.API.Handlers;
 
@@ -12,7 +14,7 @@ public sealed class GlobalExceptionHandler(
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(exception,
+        _logger.Error(exception,
             "Unhandled {ExceptionType} on {Method} {Path} — TraceId: {TraceId}",
             exception.GetType().Name,
             httpContext.Request.Method,
@@ -23,11 +25,10 @@ public sealed class GlobalExceptionHandler(
         httpContext.Response.StatusCode = statusCode;
         httpContext.Response.ContentType = "application/json";
 
-        var result = Result.Error(
-            exception,
-            GetSafeMessage(exception, httpContext));
+        var message = GetSafeMessage(exception, httpContext);
+        var response = ApiResponse.FailureResponse(message);
 
-        await httpContext.Response.WriteAsJsonAsync(result, cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
         return true;
     }
 
@@ -50,6 +51,6 @@ public sealed class GlobalExceptionHandler(
         if (exception is AppException)
             return exception.Message;
 
-        return ResultMessages.UnexpectedError;
+        return "An unexpected error occurred.";
     }
 }
