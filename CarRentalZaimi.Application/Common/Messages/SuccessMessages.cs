@@ -21,6 +21,7 @@ public static class SuccessMessages
         public const string CarCreated = "Car created successfully";
         public const string CarUpdated = "Car updated successfully";
         public const string CarDeleted = "Car deleted successfully";
+        public const string CarFeaturedUpdated = "Car featured updated successfully";
     }
     public static class StatePrefix
     {

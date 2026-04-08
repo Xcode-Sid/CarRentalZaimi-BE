@@ -42,4 +42,5 @@ public class CarDto : BaseDto<Guid>
     public CarTransmissionDto? TransmissionType { get; set; }
     public CarFuelDto? FuelType { get; set; }
     public ICollection<CarImagesDto>? CarImages { get; set; }
+    public ICollection<CarReviewDto>? CarReviews { get; set; }
 }
