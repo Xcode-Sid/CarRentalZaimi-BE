@@ -11,6 +11,7 @@ using CarRentalZaimi.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CarRentalZaimi.API.Controllers;
 
@@ -38,6 +39,9 @@ public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
     [ProducesResponseType(typeof(Result<PagedResponse<CarDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllCars([FromQuery] GetAllCarsQuery query)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        query = query with { UserId = userIdClaim };
         var res =  await SendCommand(query);
         return res;
     }

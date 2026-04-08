@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CarRentalZaimi.API.Controllers;
 
 
+
 [Authorize(SystemPolicies.User)]
 public class SavedCarController(IMediator _mediator) : ApiControllerBase(_mediator)
 {
@@ -23,7 +24,7 @@ public class SavedCarController(IMediator _mediator) : ApiControllerBase(_mediat
         return await SendCommand(command, SuccessMessages.SavedCar.CarSaved);
     }
 
-    [HttpPost("getAll-savedCars")]
+    [HttpGet("getAll-savedCars")]
     [ProducesResponseType(typeof(Result<PagedResponse<SavedCarDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllSavedCar([FromQuery] GetAllSavedCarsQuery query)
     {

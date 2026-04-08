@@ -58,13 +58,16 @@ public class SavedCarService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISavedC
             return Result<bool>.Error("Car not found");
 
         var user = await _unitOfWork.Repository<User>()
-           .FirstOrDefaultAsync(p => p.Id.ToString() == request.UserId, cancellationToken);
+           .FirstOrDefaultAsync(p => p.Id == request.UserId, cancellationToken);
 
         if (user is null)
             return Result<bool>.Error("User not found");
 
         var savedCar = await _unitOfWork.Repository<SavedCar>()
-           .FirstOrDefaultAsync(p => p.Id == car.Id && p.User!.Id == user.Id, cancellationToken);
+            .AsQueryable()
+            .Include(c => c.Car)
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(p => p.Car!.Id == car.Id && p.User!.Id == user.Id, cancellationToken);
 
         if (savedCar is null)
         {
@@ -79,7 +82,7 @@ public class SavedCarService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISavedC
         {
             //unsave
             savedCar.IsDeleted = true;
-            await _unitOfWork.Repository<SavedCar>().AddAsync(savedCar, cancellationToken);
+            await _unitOfWork.Repository<SavedCar>().UpdateAsync(savedCar, cancellationToken);
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
