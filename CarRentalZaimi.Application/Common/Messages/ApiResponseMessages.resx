@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="InvalidRequest" xml:space="preserve">
+    <value>Kërkesë e pavlefshme</value>
+  </data>
+  <data name="Unauthorized" xml:space="preserve">
+    <value>I paautorizuar</value>
+  </data>
+  <data name="UnauthorizedDetail" xml:space="preserve">
+    <value>Nuk jeni të autorizuar për të kryer këtë veprim</value>
+  </data>
+  <data name="UnauthorizedAccessResource" xml:space="preserve">
+    <value>Nuk jeni të autorizuar të aksesoni këtë burim</value>
+  </data>
+  <data name="UserNotAuthenticated" xml:space="preserve">
+    <value>Përdoruesi nuk është autentikuar</value>
+  </data>
+  <data name="ResourceNotFound" xml:space="preserve">
+    <value>Burimi nuk u gjet</value>
+  </data>
+  <data name="RequestTimeout" xml:space="preserve">
+    <value>Kërkesa përfundoi me kohë</value>
+  </data>
+  <data name="RequestTimeoutDetail" xml:space="preserve">
+    <value>Kërkesa zgjati shumë për t'u përpunuar</value>
+  </data>
+  <data name="InternalServerError" xml:space="preserve">
+    <value>Gabim i brendshëm i serverit</value>
+  </data>
+  <data name="InternalServerErrorDetail" xml:space="preserve">
+    <value>Ndodhi një gabim i papritur</value>
+  </data>
+</root>

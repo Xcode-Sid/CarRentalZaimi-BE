@@ -1,5 +1,6 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Infrastructure.Seed;
 
@@ -10,12 +11,13 @@ public class DatabaseSeeder
         var logger = services.GetRequiredService<ILoggerFactory>()
             .CreateLogger(nameof(DatabaseSeeder));
 
-        logger.LogInformation("Starting database seeding");
+        logger.Info("Starting database seeding");
 
         await RoleSeeder.SeedAsync(services);
         await UserSeeder.SeedAsync(services);
         await CarCategorySeeder.SeedAsync(services);
 
-        logger.LogInformation("Database seeding completed");
+        logger.Info("Database seeding completed");
     }
 }
+

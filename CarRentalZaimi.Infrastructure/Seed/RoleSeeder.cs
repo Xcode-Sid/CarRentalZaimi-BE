@@ -1,8 +1,9 @@
-using CarRentalZaimi.Domain.Entities;
+﻿using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Infrastructure.Seed;
 
@@ -29,8 +30,9 @@ public static class RoleSeeder
                         _ => roleName
                     }
                 });
-                logger.LogInformation("Seeded role: {RoleName}", roleName);
+                logger.Info("Seeded role: {RoleName}", roleName);
             }
         }
     }
 }
+

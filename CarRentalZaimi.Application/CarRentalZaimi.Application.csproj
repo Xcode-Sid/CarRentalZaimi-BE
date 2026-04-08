@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Cars\Queries\" />
-    <Folder Include="Features\Users\Commands\" />
-    <Folder Include="Features\Users\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +17,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
+    <PackageReference Include="Twilio" Version="7.14.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,4 +25,7 @@
     <ProjectReference Include="..\CarRentalZaimi.Logging\CarRentalZaimi.Logging.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<EmbeddedResource Include="Files\CarRentalZaimiForgotPasswordEmailTemplate_en.html" />
+	</ItemGroup>
 </Project>

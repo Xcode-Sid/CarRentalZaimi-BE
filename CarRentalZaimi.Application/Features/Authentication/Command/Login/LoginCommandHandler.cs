@@ -26,10 +26,10 @@ public class LoginCommandHandler(
 
             var result = await _authenticationService.LoginAsync(request.Login, request.Password, ipAddress, userAgent);
 
-            if (result.Success)
+            if (result.IsSuccess)
                 _logger.Info("Login successful for {Login}", request.Login);
             else
-                _logger.Warn("Login failed for {Login}: {Error}", request.Login, result.Errors.FirstOrDefault());
+                _logger.Warn("Login failed for {Login}: {Error}", request.Login, result.ErrorResult);
 
             return result;
         }

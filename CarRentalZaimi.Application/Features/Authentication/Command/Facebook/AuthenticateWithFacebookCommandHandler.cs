@@ -1,4 +1,4 @@
-using CarRentalZaimi.Application.DTOs;
+﻿using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Command;
 using CarRentalZaimi.Application.Interfaces.Services;
@@ -21,8 +21,11 @@ public class AuthenticateWithFacebookCommandHandler(
         {
             var facebookResult = await _facebookOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.RedirectUri);
 
-            if (!facebookResult.Success || facebookResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(facebookResult.Errors.FirstOrDefault() ?? "Failed to verify Facebook authentication");
+            if (!facebookResult.IsSuccess || facebookResult.Data == null)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(
+                    string.IsNullOrWhiteSpace(facebookResult.ErrorResult)
+                        ? "Failed to verify Facebook authentication"
+                        : facebookResult.ErrorResult);
 
             var facebookUser = facebookResult.Data;
 
@@ -46,10 +49,10 @@ public class AuthenticateWithFacebookCommandHandler(
                 facebookUser.Id,
                 userAgent);
 
-            if (result.Success)
+            if (result.IsSuccess)
                 _logger.Info("Authentication successful for email {Email}", facebookUser.Email);
             else
-                _logger.Warn("Authentication failed for email {Email}: {Error}", facebookUser.Email, result.Errors.FirstOrDefault());
+                _logger.Warn("Authentication failed for email {Email}: {Error}", facebookUser.Email, result.ErrorResult);
 
             return result;
         }
@@ -59,3 +62,4 @@ public class AuthenticateWithFacebookCommandHandler(
         }
     }
 }
+

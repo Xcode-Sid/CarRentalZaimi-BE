@@ -1,4 +1,5 @@
 using AutoMapper;
+using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.StatePrefixes.Commands.CreateStatePrefix;
@@ -20,7 +21,7 @@ public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISta
             .FirstOrDefaultAsync(p => p.PhonePrefix == request.PhonePrefix, cancellationToken);
 
         if (prefix is not null)
-            return ApiResponse<StatePrefixDto>.FailureResponse("This prefix already exists");
+            return ApiResponse<StatePrefixDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.ALREADY_EXISTS));
 
         var newPrefix = new StatePrefix
         {
@@ -43,13 +44,13 @@ public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISta
             .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingPrefixId is null)
-            return ApiResponse<StatePrefixDto>.FailureResponse("This prefix id does not exist");
+            return ApiResponse<StatePrefixDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
         var prefix = await _unitOfWork.Repository<StatePrefix>()
             .FirstOrDefaultAsync(p => p.PhonePrefix == request.PhonePrefix && p.Id.ToString() != request.Id, cancellationToken);
 
         if (prefix is not null)
-            return ApiResponse<StatePrefixDto>.FailureResponse("This prefix already exists");
+            return ApiResponse<StatePrefixDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.ALREADY_EXISTS));
 
         existingPrefixId.PhoneRegex = request.PhoneRegex;
         existingPrefixId.CountryName = request.CountryName;
@@ -68,7 +69,7 @@ public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISta
             .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingPrefix is null)
-            return ApiResponse<bool>.FailureResponse("This prefix id does not exist");
+            return ApiResponse<bool>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
         existingPrefix.IsDeleted = true;
 

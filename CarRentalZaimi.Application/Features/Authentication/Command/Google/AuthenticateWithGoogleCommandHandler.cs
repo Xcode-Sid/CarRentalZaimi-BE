@@ -21,12 +21,15 @@ public class AuthenticateWithGoogleCommandHandler(
         {
             var googleResult = await _googleOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.RedirectUri);
 
-            if (!googleResult.Success || googleResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(googleResult.Errors.FirstOrDefault() ?? "Failed to verify Google authentication");
+            if (!googleResult.IsSuccess || googleResult.Data == null)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(
+                    string.IsNullOrWhiteSpace(googleResult.ErrorResult)
+                        ? "Failed to verify Google authentication"
+                        : googleResult.ErrorResult);
 
             var googleUser = googleResult.Data;
 
-            string firstName = googleUser.FamilyName!;
+            string firstName = googleUser!.FamilyName!;
             string lastName = googleUser.GivenName!;
 
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
@@ -46,10 +49,10 @@ public class AuthenticateWithGoogleCommandHandler(
                 googleUser.Id,
                 userAgent);
 
-            if (result.Success)
+            if (result.IsSuccess)
                 _logger.Info("Authentication successful for email {Email}", googleUser.Email);
             else
-                _logger.Warn("Authentication failed for email {Email}: {Error}", googleUser.Email, result.Errors.FirstOrDefault());
+                _logger.Warn("Authentication failed for email {Email}: {Error}", googleUser.Email, result.ErrorResult);
 
             return result;
         }

@@ -1,7 +1,6 @@
 using CarRentalZaimi.Logging;
 using CarRentalZaimi.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 
 namespace CarRentalZaimi.SignalR.Services;
 

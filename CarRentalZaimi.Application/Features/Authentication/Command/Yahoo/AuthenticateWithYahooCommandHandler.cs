@@ -21,12 +21,15 @@ internal class AuthenticateWithYahooCommandHandler(
         {
             var yahooResult = await _yahooOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.CodeVerifier, request.RedirectUri);
 
-            if (!yahooResult.Success || yahooResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(yahooResult.Errors.FirstOrDefault() ?? "Failed to verify Yahoo authentication");
+            if (!yahooResult.IsSuccess || yahooResult.Data == null)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(
+                    string.IsNullOrWhiteSpace(yahooResult.ErrorResult)
+                        ? "Failed to verify Yahoo authentication"
+                        : yahooResult.ErrorResult);
 
             var yahooUser = yahooResult.Data;
 
-            string firstName = yahooUser.GivenName!;
+            string firstName = yahooUser!.GivenName!;
             string lastName = yahooUser.FamilyName!;
 
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
@@ -46,10 +49,10 @@ internal class AuthenticateWithYahooCommandHandler(
                 yahooUser.Sub,
                 userAgent);
 
-            if (result.Success)
+            if (result.IsSuccess)
                 _logger.Info("Authentication successful for {Email}", yahooUser.Email);
             else
-                _logger.Warn("Authentication failed for {Email}: {Error}", yahooUser.Email, result.Errors.FirstOrDefault());
+                _logger.Warn("Authentication failed for {Email}: {Error}", yahooUser.Email, result.ErrorResult);
 
             return result;
         }

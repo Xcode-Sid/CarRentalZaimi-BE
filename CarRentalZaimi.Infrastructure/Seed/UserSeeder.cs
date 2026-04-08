@@ -1,8 +1,9 @@
-using CarRentalZaimi.Domain.Entities;
+﻿using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Infrastructure.Seed;
 
@@ -42,10 +43,10 @@ public static class UserSeeder
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(admin, nameof(UserRole.Admin));
-            logger.LogInformation("Seeded admin user: {Email}", adminEmail);
+            logger.Info("Seeded admin user: {Email}", adminEmail);
         }
         else
-            logger.LogWarning("Failed to seed admin user: {Errors}",
+            logger.Warn("Failed to seed admin user: {Errors}",
                 string.Join(", ", result.Errors.Select(e => e.Description)));
     }
 
@@ -73,10 +74,11 @@ public static class UserSeeder
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(customer, nameof(UserRole.User));
-            logger.LogInformation("Seeded customer user: {Email}", customerEmail);
+            logger.Info("Seeded customer user: {Email}", customerEmail);
         }
         else
-            logger.LogWarning("Failed to seed customer user: {Errors}",
+            logger.Warn("Failed to seed customer user: {Errors}",
                 string.Join(", ", result.Errors.Select(e => e.Description)));
     }
 }
+

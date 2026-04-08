@@ -22,12 +22,15 @@ public class AuthenticateWithMicrosoftCommandHandler(
         {
             var microsoftResult = await _microsoftOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.CodeVerifier, request.RedirectUri);
 
-            if (!microsoftResult.Success || microsoftResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(microsoftResult.Errors.FirstOrDefault() ?? "Failed to verify Microsoft authentication");
+            if (!microsoftResult.IsSuccess || microsoftResult.Data == null)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(
+                    string.IsNullOrWhiteSpace(microsoftResult.ErrorResult)
+                        ? "Failed to verify Microsoft authentication"
+                        : microsoftResult.ErrorResult);
 
             var microsoftUser = microsoftResult.Data;
 
-            string firstName = microsoftUser.GivenName!;
+            string firstName = microsoftUser!.GivenName!;
             string lastName = microsoftUser.Surname!;
 
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
@@ -46,10 +49,10 @@ public class AuthenticateWithMicrosoftCommandHandler(
                 microsoftUser.Id,
                 userAgent);
 
-            if (result.Success)
+            if (result.IsSuccess)
                 _logger.Info("Authentication successful for email {Email}", microsoftUser.Mail);
             else
-                _logger.Warn("Authentication failed for email {Email}: {Error}", microsoftUser.Mail, result.Errors.FirstOrDefault());
+                _logger.Warn("Authentication failed for email {Email}: {Error}", microsoftUser.Mail, result.ErrorResult);
 
             return result;
         }

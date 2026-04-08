@@ -34,12 +34,13 @@ public class RegisterCommandHandler(
                 request.Name,
                 request.Data,
                 request.Role,
+                request.Location,
                 userAgent);
 
-            if (result.Success)
+            if (result.IsSuccess)
                 _logger.Info("Registration successful for email {Email}", request.Email);
             else
-                _logger.Warn("Registration failed for email {Email}: {Error}", request.Email, result.Errors.FirstOrDefault());
+                _logger.Warn("Registration failed for email {Email}: {Error}", request.Email, result.ErrorResult);
 
             return result;
         }

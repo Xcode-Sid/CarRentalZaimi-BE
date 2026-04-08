@@ -13,6 +13,4 @@ public interface IErrorService
     ApiResponse CreateFailure(string errorCode, Exception? exception, string? language = null, params object[] parameters);
 
     string GetErrorMessage(string errorCode, string? language = null, params object[] parameters);
-
-    string GetCurrentUserLanguage();
 }

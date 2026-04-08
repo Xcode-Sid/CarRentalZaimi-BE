@@ -55,8 +55,6 @@ public class MappingProfile : Profile
         CreateMap<List<UserImage>, List<UserImageDto>>();
         CreateMap<RefreshToken, RefreshTokenDto>().ReverseMap();
         CreateMap<List<RefreshToken>, List<RefreshTokenDto>>();
-        CreateMap<EmailConfirmationToken, EmailConfirmationTokenDto>().ReverseMap();
-        CreateMap<List<EmailConfirmationToken>, List<EmailConfirmationTokenDto>>();
         CreateMap<PhoneConfirmationToken, PhoneConfirmationTokenDto>().ReverseMap();
         CreateMap<List<PhoneConfirmationToken>, List<PhoneConfirmationTokenDto>>();
         CreateMap<AppLog, AppLogDto>().ReverseMap();
