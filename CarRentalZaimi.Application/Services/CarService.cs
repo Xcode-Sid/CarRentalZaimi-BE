@@ -435,7 +435,7 @@ public class CarService(
         if (existingCar is null)
             return Result<bool>.Error("Car not found.");
 
-        existingCar.IsRecommended = request.IsRecomanded;
+        existingCar.IsRecommended = request.IsRecommended;
 
         await _uow.Repository<Car>().UpdateAsync(existingCar, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
