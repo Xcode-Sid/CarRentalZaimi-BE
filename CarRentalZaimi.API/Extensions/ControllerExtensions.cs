@@ -6,7 +6,7 @@ namespace CarRentalZaimi.API.Exctention;
 
 public static class ControllerExtensions
 {
-    public static IActionResult ToPaginatedResult<T>(
+    public static IActionResult ToPaginatedApiResponse<T>(
         this IEnumerable<T> items,
         int totalCount,
         int pageNumber,

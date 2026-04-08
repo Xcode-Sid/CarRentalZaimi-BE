@@ -5,6 +5,8 @@ namespace CarRentalZaimi.Domain.Entities;
 
 public class Car : AuditedEntity<Guid>
 {
+    public string? Title { get; set; }
+    public string? Description { get; set; }
     public int Year { get; set; }
     public string? LicensePlate { get; set; } 
     public decimal PricePerDay { get; set; }
@@ -12,10 +14,24 @@ public class Car : AuditedEntity<Guid>
     public int Doors { get; set; }  
     public int? Mileage { get; set; }
     public int? HorsePower { get; set; }
-    public bool? AirConditioner { get; set; }
     public bool? ABS { get; set; }
-    public bool? ElectricWindows { get; set; }
+    public bool? Bluetooth { get; set; }
+    public bool? ParkingSensors { get; set; }
+    public bool? CruiseControl { get; set; }
+    public bool? ClimateControl { get; set; }
+    public bool? LEDHeadlights { get; set; }
+    public bool? AppleCarPlay { get; set; }
+    public bool? AndroidAuto { get; set; }
+    public bool? LaneDepartureAlert { get; set; }
+    public bool? AdaptiveCruiseControl { get; set; }
+    public bool? ToyotaSafetySense { get; set; }
     public bool? HeatedSeats { get; set; }
+    public bool? PanoramicRoof { get; set; }
+    public bool? ThirdRowSeats { get; set; }
+    public bool? WirelessCharging { get; set; }
+    public bool? Camera { get; set; }
+    public bool? AirConditioner { get; set; }
+    public bool? ElectricWindows { get; set; }
     public bool? GPS { get; set; }
     public CarStatus? Status { get; set; }
     public virtual CarCategory? Category { get; set; }

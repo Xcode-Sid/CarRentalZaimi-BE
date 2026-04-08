@@ -1,4 +1,5 @@
-﻿using CarRentalZaimi.Domain.Entities;
+﻿using CarRentalZaimi.Application.Interfaces.Services;
+using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +14,18 @@ public static class UserSeeder
     {
         var logger = services.GetRequiredService<ILoggerFactory>()
             .CreateLogger(nameof(UserSeeder));
-        var userManager = services.GetRequiredService<UserManager<User>>();
 
-        await SeedAdminAsync(userManager, logger);
-        await SeedCustomerAsync(userManager, logger);
+        var userManager = services.GetRequiredService<UserManager<User>>();
+        var passwordService = services.GetRequiredService<IPasswordService>();
+
+        await SeedAdminAsync(userManager, passwordService, logger);
+        await SeedCustomerAsync(userManager, passwordService, logger);
     }
 
-    private static async Task SeedAdminAsync(UserManager<User> userManager, ILogger logger)
+    private static async Task SeedAdminAsync(
+        UserManager<User> userManager,
+        IPasswordService passwordService,
+        ILogger logger)
     {
         var adminEmail = "admin@carrental.com";
 
@@ -36,9 +42,13 @@ public static class UserSeeder
             PhoneNumber = "+355691234567",
             DateOfBirth = new DateTime(1990, 1, 1),
             CreatedOn = DateTime.UtcNow,
+            Status = UserStatus.Active,
+
+            // 🔴 IMPORTANT: use YOUR hash
+            PasswordHash = passwordService.HashPassword("Admin@123!")
         };
 
-        var result = await userManager.CreateAsync(admin, "Admin@123!");
+        var result = await userManager.CreateAsync(admin); // no password here
 
         if (result.Succeeded)
         {
@@ -50,7 +60,10 @@ public static class UserSeeder
                 string.Join(", ", result.Errors.Select(e => e.Description)));
     }
 
-    private static async Task SeedCustomerAsync(UserManager<User> userManager, ILogger logger)
+    private static async Task SeedCustomerAsync(
+        UserManager<User> userManager,
+        IPasswordService passwordService,
+        ILogger logger)
     {
         var customerEmail = "customer01@carrental.com";
 
@@ -59,7 +72,7 @@ public static class UserSeeder
 
         var customer = new User
         {
-            FirstName = "customer",
+            FirstName = "Customer",
             LastName = "01",
             UserName = customerEmail,
             Email = customerEmail,
@@ -67,9 +80,12 @@ public static class UserSeeder
             PhoneNumber = "+355697654321",
             DateOfBirth = new DateTime(1995, 6, 15),
             CreatedOn = DateTime.UtcNow,
+            Status = UserStatus.Active,
+
+            PasswordHash = passwordService.HashPassword("Customer@123!")
         };
 
-        var result = await userManager.CreateAsync(customer, "Customer@123!");
+        var result = await userManager.CreateAsync(customer); 
 
         if (result.Succeeded)
         {

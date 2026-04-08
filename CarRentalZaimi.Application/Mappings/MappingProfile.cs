@@ -1,5 +1,6 @@
 using AutoMapper;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Domain.Entities;
 
 namespace CarRentalZaimi.Application.Mappings;
@@ -62,6 +63,13 @@ public class MappingProfile : Profile
         CreateMap<UserDevice, UserDeviceDto>().ReverseMap();
         CreateMap<List<UserDevice>, List<UserDeviceDto>>();
         CreateMap<StatePrefix, StatePrefixDto>().ReverseMap();
-        CreateMap<List<StatePrefix>, List<StatePrefixDto>>();
+        CreateMap<ApiResponse<List<StatePrefix>>, ApiResponse<List<StatePrefixDto>>>();
+        CreateMap<ApiResponse<List<CarFuel>>, ApiResponse<List<CarFuelDto>>>();
+        CreateMap<ApiResponse<List<CarTransmission>>, ApiResponse<List<CarTransmissionDto>>>();
+        CreateMap<ApiResponse<List<CarInteriorColor>>, ApiResponse<List<CarInteriorColorDto>>>();
+        CreateMap<ApiResponse<List<CarExteriorColor>>, ApiResponse<List<CarExteriorColorDto>>>();
+        CreateMap<ApiResponse<List<CarCategory>>, ApiResponse<List<CarCategoryDto>>>();
+        CreateMap<ApiResponse<List<CarCompanyName>>, ApiResponse<List<CarCompanyNameDto>>>();
+        CreateMap<ApiResponse<List<CarCompanyModel>>, ApiResponse<List<CarCompanyModelDto>>>();
     }
 }
