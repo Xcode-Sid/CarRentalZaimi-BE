@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ERR_1001" xml:space="preserve">
+    <value>La risorsa richiesta non è stata trovata</value>
+  </data>
+  <data name="ERR_1002" xml:space="preserve">
+    <value>La risorsa esiste già</value>
+  </data>
+  <data name="ERR_1003" xml:space="preserve">
+    <value>L'operazione non è valida</value>
+  </data>
+  <data name="ERR_1004" xml:space="preserve">
+    <value>Non sei autorizzato a eseguire questa azione</value>
+  </data>
+  <data name="ERR_1005" xml:space="preserve">
+    <value>L'accesso a questa risorsa è vietato</value>
+  </data>
+  <data name="ERR_1006" xml:space="preserve">
+    <value>La validazione non è riuscita</value>
+  </data>
+  <data name="ERR_1007" xml:space="preserve">
+    <value>La risorsa è stata modificata da un altro utente</value>
+  </data>
+  <data name="ERR_1008" xml:space="preserve">
+    <value>Si è verificato un errore del servizio esterno</value>
+  </data>
+  <data name="ERR_1009" xml:space="preserve">
+    <value>Argomento non valido</value>
+  </data>
+  <data name="ERR_1010" xml:space="preserve">
+    <value>Si è verificato un errore del database durante l'elaborazione della richiesta</value>
+  </data>
+  <data name="ERR_1011" xml:space="preserve">
+    <value>Invio SMS non riuscito. Riprova.</value>
+  </data>
+  <data name="ERR_3001" xml:space="preserve">
+    <value>Utente non trovato</value>
+  </data>
+  <data name="ERR_3002" xml:space="preserve">
+    <value>L'utente esiste già</value>
+  </data>
+  <data name="ERR_3003" xml:space="preserve">
+    <value>L'account utente è inattivo</value>
+  </data>
+  <data name="ERR_3004" xml:space="preserve">
+    <value>L'indirizzo email è già registrato</value>
+  </data>
+  <data name="ERR_3005" xml:space="preserve">
+    <value>Il numero di telefono è già registrato</value>
+  </data>
+  <data name="ERR_3006" xml:space="preserve">
+    <value>Email o password non validi</value>
+  </data>
+  <data name="ERR_3007" xml:space="preserve">
+    <value>Profilo utente non trovato</value>
+  </data>
+  <data name="ERR_3008" xml:space="preserve">
+    <value>L'account utente è bannato</value>
+  </data>
+  <data name="ERR_3009" xml:space="preserve">
+    <value>L'account utente è sospeso</value>
+  </data>
+  <data name="ERR_3010" xml:space="preserve">
+    <value>Lo stato dell'utente non è valido</value>
+  </data>
+  <data name="ERR_3011" xml:space="preserve">
+    <value>La modifica dello stato dell'utente non è consentita</value>
+  </data>
+  <data name="ERR_3012" xml:space="preserve">
+    <value>Sono richiesti i permessi di amministratore</value>
+  </data>
+  <data name="ERR_3013" xml:space="preserve">
+    <value>L'utente non ha un numero di telefono</value>
+  </data>
+  <data name="ERR_3101" xml:space="preserve">
+    <value>Token di autenticazione non valido</value>
+  </data>
+  <data name="ERR_3102" xml:space="preserve">
+    <value>Il token di autenticazione è scaduto</value>
+  </data>
+  <data name="ERR_3103" xml:space="preserve">
+    <value>Token di refresh non valido</value>
+  </data>
+  <data name="ERR_3104" xml:space="preserve">
+    <value>Il token di refresh è scaduto</value>
+  </data>
+  <data name="ERR_3105" xml:space="preserve">
+    <value>Token di reimpostazione password non valido</value>
+  </data>
+  <data name="ERR_3106" xml:space="preserve">
+    <value>Il token di reimpostazione password è scaduto</value>
+  </data>
+  <data name="ERR_3107" xml:space="preserve">
+    <value>Email non confermata</value>
+  </data>
+  <data name="ERR_3108" xml:space="preserve">
+    <value>Email già confermata</value>
+  </data>
+  <data name="ERR_3109" xml:space="preserve">
+    <value>Account bloccato</value>
+  </data>
+  <data name="ERR_3110" xml:space="preserve">
+    <value>Account sospeso</value>
+  </data>
+  <data name="ERR_3111" xml:space="preserve">
+    <value>Token di refresh non valido</value>
+  </data>
+  <data name="ERR_3112" xml:space="preserve">
+    <value>Il token è in blacklist</value>
+  </data>
+  <data name="ERR_9005" xml:space="preserve">
+    <value>Scambio del token Google non riuscito</value>
+  </data>
+  <data name="ERR_9006" xml:space="preserve">
+    <value>Token Google non valido</value>
+  </data>
+  <data name="ERR_9007" xml:space="preserve">
+    <value>Impossibile recuperare il profilo utente Google</value>
+  </data>
+  <data name="ERR_9008" xml:space="preserve">
+    <value>È richiesto il codice di autorizzazione Google</value>
+  </data>
+  <data name="ERR_9009" xml:space="preserve">
+    <value>È richiesto l'URI di reindirizzamento Google</value>
+  </data>
+  <data name="ERR_9010" xml:space="preserve">
+    <value>Dati utente Google non validi</value>
+  </data>
+  <data name="ERR_9011" xml:space="preserve">
+    <value>Scambio del token Facebook non riuscito</value>
+  </data>
+  <data name="ERR_9012" xml:space="preserve">
+    <value>Token Facebook non valido</value>
+  </data>
+  <data name="ERR_9013" xml:space="preserve">
+    <value>Impossibile recuperare il profilo utente Facebook</value>
+  </data>
+  <data name="ERR_9014" xml:space="preserve">
+    <value>È richiesto il codice di autorizzazione Facebook</value>
+  </data>
+  <data name="ERR_9015" xml:space="preserve">
+    <value>È richiesto l'URI di reindirizzamento Facebook</value>
+  </data>
+  <data name="ERR_9016" xml:space="preserve">
+    <value>Dati utente Facebook non validi</value>
+  </data>
+  <data name="ERR_9017" xml:space="preserve">
+    <value>Scambio del token Microsoft non riuscito</value>
+  </data>
+  <data name="ERR_9018" xml:space="preserve">
+    <value>Token Microsoft non valido</value>
+  </data>
+  <data name="ERR_9019" xml:space="preserve">
+    <value>Impossibile recuperare il profilo utente Microsoft</value>
+  </data>
+  <data name="ERR_9020" xml:space="preserve">
+    <value>È richiesto il codice di autorizzazione Microsoft</value>
+  </data>
+  <data name="ERR_9021" xml:space="preserve">
+    <value>È richiesto l'URI di reindirizzamento Microsoft</value>
+  </data>
+  <data name="ERR_9022" xml:space="preserve">
+    <value>Dati utente Microsoft non validi</value>
+  </data>
+  <data name="ERR_9023" xml:space="preserve">
+    <value>È richiesto il code verifier di Microsoft</value>
+  </data>
+  <data name="ERR_9024" xml:space="preserve">
+    <value>Scambio del token Yahoo non riuscito</value>
+  </data>
+  <data name="ERR_9025" xml:space="preserve">
+    <value>Token Yahoo non valido</value>
+  </data>
+  <data name="ERR_9026" xml:space="preserve">
+    <value>Impossibile recuperare il profilo utente Yahoo</value>
+  </data>
+  <data name="ERR_9027" xml:space="preserve">
+    <value>È richiesto il codice di autorizzazione Yahoo</value>
+  </data>
+  <data name="ERR_9028" xml:space="preserve">
+    <value>È richiesto l'URI di reindirizzamento Yahoo</value>
+  </data>
+  <data name="ERR_9029" xml:space="preserve">
+    <value>Dati utente Yahoo non validi</value>
+  </data>
+  <data name="ERR_9030" xml:space="preserve">
+    <value>È richiesto il code verifier di Yahoo</value>
+  </data>
+  <data name="ERR_1040" xml:space="preserve">
+    <value>Il token è scaduto</value>
+  </data>
+  <data name="ERR_1041" xml:space="preserve">
+    <value>Token non valido</value>
+  </data>
+</root>

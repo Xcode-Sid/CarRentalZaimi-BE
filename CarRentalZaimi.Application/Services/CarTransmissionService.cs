@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
-using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.CarTransmission.Commands.CreateCarTransmission;
 using CarRentalZaimi.Application.Features.CarTransmission.Commands.DeleteCarTransmission;
 using CarRentalZaimi.Application.Features.CarTransmission.Commands.UpdateCarTransmission;
@@ -14,77 +15,77 @@ namespace CarRentalZaimi.Application.Services;
 
 public class CarTransmissionService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarTransmissionService
 {
-    public async Task<Result<CarTransmissionDto>> CreateAsync(CreateCarTransmissionCommand request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<CarTransmissionDto>> CreateAsync(CreateCarTransmissionCommand request, CancellationToken cancellationToken = default)
     {
         var transmission = await _unitOfWork.Repository<CarTransmission>()
           .FirstOrDefaultAsync(p => p.Name == request.Name, cancellationToken);
 
         if (transmission is not null)
-            return Result<CarTransmissionDto>.Error("This car transmission type already exists");
+            return ApiResponse<CarTransmissionDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.ALREADY_EXISTS));
 
         var newFuel = new CarTransmission
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
+            Name = request.Name!,
         };
 
         await _unitOfWork.Repository<CarTransmission>().AddAsync(newFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<CarTransmissionDto>.Success(_mapper.Map<CarTransmissionDto>(newFuel));
+        return ApiResponse<CarTransmissionDto>.SuccessResponse(_mapper.Map<CarTransmissionDto>(newFuel));
     }
 
-    public async Task<Result<bool>> DeleteAsync(DeleteCarTransmissionCommand request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<bool>> DeleteAsync(DeleteCarTransmissionCommand request, CancellationToken cancellationToken = default)
     {
         var existingTransmission = await _unitOfWork.Repository<CarTransmission>()
             .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingTransmission is null)
-            return Result<bool>.Error("This transmission type id does not exist");
+            return ApiResponse<bool>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
         var isUsedByCar = await _unitOfWork.Repository<Car>()
             .AnyAsync(c => c.TransmissionType != null && c.TransmissionType.Id.ToString() == request.Id, cancellationToken);
 
         if (isUsedByCar)
-            return Result<bool>.Error("This transmission type cannot be deleted because it is assigned to one or more cars");
+            return ApiResponse<bool>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.INVALID_OPERATION));
 
         existingTransmission.IsDeleted = true;
 
         await _unitOfWork.Repository<CarTransmission>().UpdateAsync(existingTransmission, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<bool>.Success(true);
+        return ApiResponse<bool>.SuccessResponse(true);
     }
 
-    public async Task<Result<IEnumerable<CarTransmissionDto>>> GetAllAsync(GetAllCarTransmissionQuery request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<IEnumerable<CarTransmissionDto>>> GetAllAsync(GetAllCarTransmissionQuery request, CancellationToken cancellationToken = default)
     {
         var carFuels = await _unitOfWork.Repository<CarTransmission>()
             .AsQueryable()
             .ToListAsync(cancellationToken);
 
         var mapped = _mapper.Map<IEnumerable<CarTransmissionDto>>(carFuels);
-        return Result.Success(mapped);
+        return ApiResponse<IEnumerable<CarTransmissionDto>>.SuccessResponse(mapped);
     }
 
-    public async Task<Result<CarTransmissionDto>> UpdateAsync(UpdateCarTransmissionCommand request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<CarTransmissionDto>> UpdateAsync(UpdateCarTransmissionCommand request, CancellationToken cancellationToken = default)
     {
         var existingTransmission = await _unitOfWork.Repository<CarTransmission>()
            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingTransmission is null)
-            return Result<CarTransmissionDto>.Error("This transmission type id does not exists");
+            return ApiResponse<CarTransmissionDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
         var fuel = await _unitOfWork.Repository<CarTransmission>()
             .FirstOrDefaultAsync(p => p.Name == request.Name && p.Id.ToString() != request.Id, cancellationToken);
 
         if (fuel is not null)
-            return Result<CarTransmissionDto>.Error("This transmission type already exists");
+            return ApiResponse<CarTransmissionDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.ALREADY_EXISTS));
 
-        existingTransmission.Name = request.Name;
+        existingTransmission.Name = request.Name!;
 
         await _unitOfWork.Repository<CarTransmission>().UpdateAsync(existingTransmission, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<CarTransmissionDto>.Success(_mapper.Map<CarTransmissionDto>(existingTransmission));
+        return ApiResponse<CarTransmissionDto>.SuccessResponse(_mapper.Map<CarTransmissionDto>(existingTransmission));
     }
 }
+

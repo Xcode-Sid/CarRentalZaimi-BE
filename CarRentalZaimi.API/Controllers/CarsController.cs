@@ -1,7 +1,7 @@
 using CarRentalZaimi.API.Controllers.Base;
-using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.Cars.Commands.CreateCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.DeleteCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.UpdateCar;
@@ -19,23 +19,23 @@ public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
 {
     [HttpPost("create")]
     [Authorize(SystemPolicies.Admin)]
-    [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<Guid>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCar([FromBody] CreateCarCommand command)
     {
         return await SendCommand(command, SuccessMessages.Car.CarCreated);
     }
 
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(Result<CarDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<CarDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCarById([FromRoute] string id)
     {
         return await SendCommand(new GetCarByIdQuery(id));
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(Result<PagedResponse<CarDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResponse<CarDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllCars([FromQuery] GetAllCarsQuery query)
     {
         var res =  await SendCommand(query);
@@ -44,9 +44,9 @@ public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
 
     [HttpPut("update/{id}")]
     [Authorize(SystemPolicies.Admin)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCar([FromRoute] string id, [FromBody] UpdateCarCommand command)
     {
         var updatedCommand = command with { CarId = id };
@@ -55,8 +55,8 @@ public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
 
     [HttpDelete("{id}")]
     [Authorize(SystemPolicies.Admin)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCar([FromRoute] string id)
     {
         return await SendCommand(new DeleteCarCommand(id));

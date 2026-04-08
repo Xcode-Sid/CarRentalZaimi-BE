@@ -87,14 +87,14 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<string>("Message")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("MessageTemplate")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Properties")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("Template")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Timestamp")
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 

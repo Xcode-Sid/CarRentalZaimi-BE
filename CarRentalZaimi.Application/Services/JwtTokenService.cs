@@ -1,8 +1,9 @@
-﻿using CarRentalZaimi.Application.Common.Constants;
+using CarRentalZaimi.Application.Common.Constants;
 using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -17,11 +18,11 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
 {
     public string GenerateAccessToken(IEnumerable<Claim> claims)
     {
-        var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
-        var secretKey = jwtSettings[ConfigurationKeys.JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
-        var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "SquadBuddy";
-        var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "SquadBuddy";
-        var expiryMinutes = int.Parse(jwtSettings[ConfigurationKeys.JwtSettingKeys.ExpiryMinutes] ?? "60");
+        var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+        var secretKey = jwtSettings[JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
+        var issuer = jwtSettings[JwtSettingKeys.Issuer] ?? "SquadBuddy";
+        var audience = jwtSettings[JwtSettingKeys.Audience] ?? "SquadBuddy";
+        var expiryMinutes = int.Parse(jwtSettings[JwtSettingKeys.ExpiryMinutes] ?? "60");
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -47,10 +48,10 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
 
     public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
     {
-        var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
-        var secretKey = jwtSettings[ConfigurationKeys.JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
-        var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "SquadBuddy";
-        var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "SquadBuddy";
+        var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+        var secretKey = jwtSettings[JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
+        var issuer = jwtSettings[JwtSettingKeys.Issuer] ?? "SquadBuddy";
+        var audience = jwtSettings[JwtSettingKeys.Audience] ?? "SquadBuddy";
 
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -78,10 +79,10 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
     {
         try
         {
-            var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
-            var secretKey = jwtSettings[ConfigurationKeys.JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
-            var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "SquadBuddy";
-            var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "SquadBuddy";
+            var jwtSettings = _configuration.GetSection(SectionKeys.JwtSettings);
+            var secretKey = jwtSettings[JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
+            var issuer = jwtSettings[JwtSettingKeys.Issuer] ?? "SquadBuddy";
+            var audience = jwtSettings[JwtSettingKeys.Audience] ?? "SquadBuddy";
 
             var tokenValidationParameters = new TokenValidationParameters
             {
@@ -102,7 +103,7 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Token validation failed");
+            _logger.Warn(ex, "Token validation failed");
             return false;
         }
     }
@@ -117,7 +118,7 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to get token expiration");
+            _logger.Warn(ex, "Failed to get token expiration");
             return DateTime.MinValue;
         }
     }

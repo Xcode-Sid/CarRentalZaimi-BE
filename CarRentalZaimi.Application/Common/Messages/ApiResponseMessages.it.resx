@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="InvalidRequest" xml:space="preserve">
+    <value>Richiesta non valida</value>
+  </data>
+  <data name="Unauthorized" xml:space="preserve">
+    <value>Non autorizzato</value>
+  </data>
+  <data name="UnauthorizedDetail" xml:space="preserve">
+    <value>Non sei autorizzato a eseguire questa azione</value>
+  </data>
+  <data name="UnauthorizedAccessResource" xml:space="preserve">
+    <value>Non sei autorizzato ad accedere a questa risorsa</value>
+  </data>
+  <data name="UserNotAuthenticated" xml:space="preserve">
+    <value>Utente non autenticato</value>
+  </data>
+  <data name="ResourceNotFound" xml:space="preserve">
+    <value>Risorsa non trovata</value>
+  </data>
+  <data name="RequestTimeout" xml:space="preserve">
+    <value>Timeout della richiesta</value>
+  </data>
+  <data name="RequestTimeoutDetail" xml:space="preserve">
+    <value>La richiesta ha impiegato troppo tempo per essere elaborata</value>
+  </data>
+  <data name="InternalServerError" xml:space="preserve">
+    <value>Errore interno del server</value>
+  </data>
+  <data name="InternalServerErrorDetail" xml:space="preserve">
+    <value>Si è verificato un errore imprevisto</value>
+  </data>
+</root>

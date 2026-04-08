@@ -1,6 +1,6 @@
 ﻿using CarRentalZaimi.API.Controllers.Base;
-using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Messages;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.CarCompanyName.Commands.CreateCarCompanyName;
 using CarRentalZaimi.Application.Features.CarCompanyName.Commands.DeleteCarCompanyName;
 using CarRentalZaimi.Application.Features.CarCompanyName.Commands.UpdateCarCompanyName;
@@ -13,16 +13,16 @@ namespace CarRentalZaimi.API.Controllers;
 public class CarCompanyNameController(IMediator _mediator) : ApiControllerBase(_mediator)
 {
     [HttpPost(Name = nameof(CreateCarCompanyName))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCarCompanyName([FromBody] CreateCarCompanyNameCommand command)
     {
         return await SendCommand(command, SuccessMessages.CarCompanyName.CarCompanyNameCreated);
     }
 
     [HttpPut("{id}", Name = nameof(UpdateCarCompanyName))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateCarCompanyName(
        [FromRoute] string id,
        [FromBody] UpdateCarCompanyNameCommand command)
@@ -32,8 +32,8 @@ public class CarCompanyNameController(IMediator _mediator) : ApiControllerBase(_
     }
 
     [HttpDelete("{id}", Name = nameof(DeleteCarCompanyName))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteCarCompanyName([FromRoute] string id)
     {
         var command = new DeleteCarCompanyNameCommand { Id = id };
@@ -42,8 +42,8 @@ public class CarCompanyNameController(IMediator _mediator) : ApiControllerBase(_
     }
 
     [HttpGet("getAll", Name = nameof(GetAllCarCompanyName))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllCarCompanyName()
     {
         return await SendQuery(new GetAllCarCompanyNameQuery(), null, StatusCodes.Status404NotFound);

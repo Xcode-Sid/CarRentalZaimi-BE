@@ -1,15 +1,11 @@
-﻿using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.Common.Google;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.DTOs.Google;
 using CarRentalZaimi.Application.Interfaces.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 
 namespace CarRentalZaimi.Application.Services;
-
 
 public class GoogleOAuthService(
     HttpClient httpClient,
@@ -20,7 +16,7 @@ public class GoogleOAuthService(
     private readonly GoogleOAuthSettings _settings = settings;
     private readonly IErrorService _errorService = errorService;
 
-    public async Task<Result<GoogleUserProfileResponse>> VerifyAuthorizationCodeAsync(string code, string redirectUri)
+    public async Task<ApiResponse<GoogleUserProfileResponse>> VerifyAuthorizationCodeAsync(string code, string redirectUri)
     {
         try
         {
@@ -44,9 +40,7 @@ public class GoogleOAuthService(
             if (!tokenResponse.IsSuccessStatusCode)
                 return _errorService.CreateFailure<GoogleUserProfileResponse>(ErrorCodes.GOOGLE_TOKEN_EXCHANGE_FAILED);
 
-
             var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
-
             var tokenData = JsonSerializer.Deserialize<GoogleTokenResponse>(tokenContent);
 
             if (tokenData == null || string.IsNullOrEmpty(tokenData.AccessToken))
@@ -61,13 +55,12 @@ public class GoogleOAuthService(
                 return _errorService.CreateFailure<GoogleUserProfileResponse>(ErrorCodes.GOOGLE_USER_PROFILE_FAILED);
 
             var userContent = await userResponse.Content.ReadAsStringAsync();
-
             var userData = JsonSerializer.Deserialize<GoogleUserProfileResponse>(userContent);
 
             if (userData == null)
                 return _errorService.CreateFailure<GoogleUserProfileResponse>(ErrorCodes.GOOGLE_INVALID_USER_DATA);
 
-            return Result<GoogleUserProfileResponse>.Success(userData);
+            return ApiResponse<GoogleUserProfileResponse>.SuccessResponse(userData);
         }
         catch (Exception)
         {

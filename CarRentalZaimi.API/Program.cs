@@ -1,4 +1,5 @@
 using CarRentalZaimi.API.Handlers;
+using CarRentalZaimi.API.Middleware;
 using CarRentalZaimi.Application.Common.Facebook;
 using CarRentalZaimi.Application.Common.Google;
 using CarRentalZaimi.Application.Common.Microsoft;
@@ -11,10 +12,14 @@ using CarRentalZaimi.Infrastructure;
 using CarRentalZaimi.Infrastructure.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Globalization;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -123,6 +128,25 @@ try
     });
 
 
+    var supportedCultures = new[]
+    {
+        new CultureInfo("sq"),
+        new CultureInfo("en"),
+        new CultureInfo("it")
+    };
+
+    builder.Services.Configure<RequestLocalizationOptions>(options =>
+    {
+        options.DefaultRequestCulture = new RequestCulture("sq");
+        options.SupportedCultures = supportedCultures;
+        options.SupportedUICultures = supportedCultures;
+        options.RequestCultureProviders =
+        [
+            new QueryStringRequestCultureProvider { QueryStringKey = "lang", UIQueryStringKey = "lang" },
+            new AcceptLanguageHeaderRequestCultureProvider()
+        ];
+    });
+
     builder.Services.AddControllers()
      .AddJsonOptions(options =>
      {
@@ -147,6 +171,10 @@ try
         app.MapOpenApi();
         app.MapScalarApiReference();
     }
+
+    var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
+    app.UseRequestLocalization(localizationOptions);
+    app.UseMiddleware<RequestLanguageMiddleware>();
 
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();

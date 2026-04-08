@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.Users.Commands.AddPhoneNumber;
 using CarRentalZaimi.Application.Features.Users.Commands.UpdateUser;
 using CarRentalZaimi.Application.Features.Users.Queries.GetUserByEmail;
@@ -35,7 +35,7 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<Result<UserDto>> GetUserByIdAsync(GetUserByIdQuery request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<UserDto>> GetUserByIdAsync(GetUserByIdQuery request, CancellationToken cancellationToken = default)
     {
         var user = await _unitOfWork.Repository<User>()
             .FirstOrDefaultAsync(p => p.Id == request.UserId, cancellationToken);
@@ -63,10 +63,10 @@ public class UserService : IUserService
             Status = user.Status.ToString(),
         };
 
-        return Result<UserDto>.Success(response);
+        return ApiResponse<UserDto>.SuccessResponse(response);
     }
 
-    public async Task<Result<UserDto>> GetUserByEmailAsync(GetUserByEmailQuery request, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<UserDto>> GetUserByEmailAsync(GetUserByEmailQuery request, CancellationToken cancellationToken = default)
     {
         var user = await _unitOfWork.Repository<User>()
             .FirstOrDefaultAsync(p => p.Email == request.Email, cancellationToken);
@@ -81,7 +81,6 @@ public class UserService : IUserService
 
         var response = new UserDto
         {
-            Id = user.Id,
             FirstName = user.FirstName,
             LastName = user.LastName,
             DateOfBirth = user.DateOfBirth,
@@ -94,9 +93,9 @@ public class UserService : IUserService
             Status = user.Status.ToString(),
         };
 
-        return Result<UserDto>.Success(response);
+        return ApiResponse<UserDto>.SuccessResponse(response);
     }
-    public async Task<Result<UserDto>> UpdateUserProfileAsync(UpdateUserCommand command, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<UserDto>> UpdateUserProfileAsync(UpdateUserCommand command, CancellationToken cancellationToken = default)
     {
         var user = await _unitOfWork.Repository<User>()
             .FirstOrDefaultAsync(p => p.Id == command.UserId, cancellationToken);
@@ -124,7 +123,7 @@ public class UserService : IUserService
 
             if (existingImage is not null)
             {
-                var oldImageFullPath = Path.Combine("wwwroot", existingImage.ImagePath);
+                var oldImageFullPath = Path.Combine("wwwroot", existingImage.ImagePath!);
                 if (File.Exists(oldImageFullPath))
                     File.Delete(oldImageFullPath);
 
@@ -174,10 +173,10 @@ public class UserService : IUserService
             Status = user.Status.ToString(),
         };
 
-        return Result<UserDto>.Success(response);
+        return ApiResponse<UserDto>.SuccessResponse(response);
     }
 
-    public async Task<Result<UserDto>> AddPhoneNumberAsync(AddPhoneNumberCommand command, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<UserDto>> AddPhoneNumberAsync(AddPhoneNumberCommand command, CancellationToken cancellationToken = default)
     {
         var user = await _unitOfWork.Repository<User>()
             .FirstOrDefaultAsync(p => p.Id == command.UserId, cancellationToken);
@@ -210,7 +209,7 @@ public class UserService : IUserService
             Status = user.Status.ToString(),
         };
 
-        return Result<UserDto>.Success(response);
+        return ApiResponse<UserDto>.SuccessResponse(response);
     }
 
 

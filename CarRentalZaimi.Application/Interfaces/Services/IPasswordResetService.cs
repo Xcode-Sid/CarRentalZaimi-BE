@@ -1,9 +1,9 @@
-﻿using CarRentalZaimi.Application.Common;
+﻿using CarRentalZaimi.Application.DTOs.ApiResponse;
 
 namespace CarRentalZaimi.Application.Interfaces.Services;
 
 public interface IPasswordResetService
 {
-    Task<Result<string>> GeneratePasswordResetTokenAsync(string email);
-    Task<Result<bool>> ResetPasswordAsync(string token, string email, string newPassword);
+    Task<ApiResponse<string>> GeneratePasswordResetTokenAsync(string email);
+    Task<ApiResponse<bool>> ResetPasswordAsync(string token, string email, string newPassword);
 }

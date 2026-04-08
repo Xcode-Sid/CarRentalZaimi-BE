@@ -1,6 +1,5 @@
-﻿using CarRentalZaimi.API.Controllers.Base;
-using CarRentalZaimi.Application.Common;
-using CarRentalZaimi.Application.Common.Messages;
+using CarRentalZaimi.API.Controllers.Base;
+using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.Authentication.Command.ChangePassword;
 using CarRentalZaimi.Application.Features.Authentication.Command.Facebook;
@@ -15,28 +14,22 @@ using CarRentalZaimi.Application.Features.Authentication.Logout;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace CarRentalZaimi.API.Controllers;
 
-public class AuthenticationController(IMediator _mediator) : ApiControllerBase(_mediator)
+public class AuthenticationController(IMediator mediator) : ApiControllerBase(mediator)
 {
-
     [HttpPost("register")]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
-    {
-        return await SendCommand(command);
-    }
+        => await SendCommand(command);
 
     [HttpPost("login")]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<AuthenticationResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
-    {
-        return await SendCommand(command);
-    }
+        => await SendCommand(command);
 
     [HttpPost("logout")]
     [Authorize]
@@ -80,34 +73,26 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase(_
     }
 
     [HttpPost("google-verify")]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<AuthenticationResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyGoogleAuth([FromBody] AuthenticateWithGoogleCommand command)
-    {
-        return await SendCommand(command);
-    }
+        => await SendCommand(command);
 
     [HttpPost("facebook-verify")]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<AuthenticationResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyFacebookAuth([FromBody] AuthenticateWithFacebookCommand command)
-    {
-        return await SendCommand(command);
-    }
+        => await SendCommand(command);
 
     [HttpPost("microsoft-verify")]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<AuthenticationResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyMicrosoftAuth([FromBody] AuthenticateWithMicrosoftCommand command)
-    {
-        return await SendCommand(command);
-    }
+        => await SendCommand(command);
 
     [HttpPost("yahoo-verify")]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result<string>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<AuthenticationResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyYahooAuth([FromBody] AuthenticateWithYahooCommand command)
-    {
-        return await SendCommand(command);
-    }
+        => await SendCommand(command);
 }

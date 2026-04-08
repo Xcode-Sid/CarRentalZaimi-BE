@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ERR_1001" xml:space="preserve">
+    <value>Burimi i kërkuar nuk u gjet</value>
+  </data>
+  <data name="ERR_1002" xml:space="preserve">
+    <value>Burimi ekziston tashmë</value>
+  </data>
+  <data name="ERR_1003" xml:space="preserve">
+    <value>Operacioni nuk është i vlefshëm</value>
+  </data>
+  <data name="ERR_1004" xml:space="preserve">
+    <value>Nuk jeni të autorizuar për të kryer këtë veprim</value>
+  </data>
+  <data name="ERR_1005" xml:space="preserve">
+    <value>Qasja në këtë burim është e ndaluar</value>
+  </data>
+  <data name="ERR_1006" xml:space="preserve">
+    <value>Validimi dështoi</value>
+  </data>
+  <data name="ERR_1007" xml:space="preserve">
+    <value>Burimi u modifikua nga një përdorues tjetër</value>
+  </data>
+  <data name="ERR_1008" xml:space="preserve">
+    <value>Ndodhi një gabim në shërbimin e jashtëm</value>
+  </data>
+  <data name="ERR_1009" xml:space="preserve">
+    <value>Argument i pavlefshëm</value>
+  </data>
+  <data name="ERR_1010" xml:space="preserve">
+    <value>Ndodhi një gabim në bazën e të dhënave gjatë përpunimit të kërkesës suaj</value>
+  </data>
+  <data name="ERR_1011" xml:space="preserve">
+    <value>Dështoi dërgimi i SMS. Ju lutemi provoni përsëri.</value>
+  </data>
+  <data name="ERR_3001" xml:space="preserve">
+    <value>Përdoruesi nuk u gjet</value>
+  </data>
+  <data name="ERR_3002" xml:space="preserve">
+    <value>Përdoruesi ekziston tashmë</value>
+  </data>
+  <data name="ERR_3003" xml:space="preserve">
+    <value>Llogaria e përdoruesit është joaktive</value>
+  </data>
+  <data name="ERR_3004" xml:space="preserve">
+    <value>Adresa e email-it është regjistruar tashmë</value>
+  </data>
+  <data name="ERR_3005" xml:space="preserve">
+    <value>Numri i telefonit është regjistruar tashmë</value>
+  </data>
+  <data name="ERR_3006" xml:space="preserve">
+    <value>Email ose fjalëkalim i pavlefshëm</value>
+  </data>
+  <data name="ERR_3007" xml:space="preserve">
+    <value>Profili i përdoruesit nuk u gjet</value>
+  </data>
+  <data name="ERR_3008" xml:space="preserve">
+    <value>Llogaria e përdoruesit është e ndaluar</value>
+  </data>
+  <data name="ERR_3009" xml:space="preserve">
+    <value>Llogaria e përdoruesit është e pezulluar</value>
+  </data>
+  <data name="ERR_3010" xml:space="preserve">
+    <value>Statusi i përdoruesit është i pavlefshëm</value>
+  </data>
+  <data name="ERR_3011" xml:space="preserve">
+    <value>Ndryshimi i statusit të përdoruesit nuk lejohet</value>
+  </data>
+  <data name="ERR_3012" xml:space="preserve">
+    <value>Kërkohen leje administratori</value>
+  </data>
+  <data name="ERR_3013" xml:space="preserve">
+    <value>Përdoruesi nuk ka një numër telefoni</value>
+  </data>
+  <data name="ERR_3101" xml:space="preserve">
+    <value>Tokeni i autentikimit është i pavlefshëm</value>
+  </data>
+  <data name="ERR_3102" xml:space="preserve">
+    <value>Tokeni i autentikimit ka skaduar</value>
+  </data>
+  <data name="ERR_3103" xml:space="preserve">
+    <value>Tokeni i rifreskimit është i pavlefshëm</value>
+  </data>
+  <data name="ERR_3104" xml:space="preserve">
+    <value>Tokeni i rifreskimit ka skaduar</value>
+  </data>
+  <data name="ERR_3105" xml:space="preserve">
+    <value>Tokeni i rivendosjes së fjalëkalimit është i pavlefshëm</value>
+  </data>
+  <data name="ERR_3106" xml:space="preserve">
+    <value>Tokeni i rivendosjes së fjalëkalimit ka skaduar</value>
+  </data>
+  <data name="ERR_3107" xml:space="preserve">
+    <value>Email-i nuk është konfirmuar</value>
+  </data>
+  <data name="ERR_3108" xml:space="preserve">
+    <value>Email-i është konfirmuar tashmë</value>
+  </data>
+  <data name="ERR_3109" xml:space="preserve">
+    <value>Llogaria është e bllokuar</value>
+  </data>
+  <data name="ERR_3110" xml:space="preserve">
+    <value>Llogaria është e pezulluar</value>
+  </data>
+  <data name="ERR_3111" xml:space="preserve">
+    <value>Tokeni i rifreskimit është i pavlefshëm</value>
+  </data>
+  <data name="ERR_3112" xml:space="preserve">
+    <value>Tokeni është në listë të zezë</value>
+  </data>
+  <data name="ERR_9005" xml:space="preserve">
+    <value>Dështoi shkëmbimi i tokenit të Google</value>
+  </data>
+  <data name="ERR_9006" xml:space="preserve">
+    <value>Tokeni i Google është i pavlefshëm</value>
+  </data>
+  <data name="ERR_9007" xml:space="preserve">
+    <value>Dështoi marrja e profilit të përdoruesit nga Google</value>
+  </data>
+  <data name="ERR_9008" xml:space="preserve">
+    <value>Kërkohet kodi i autorizimit të Google</value>
+  </data>
+  <data name="ERR_9009" xml:space="preserve">
+    <value>Kërkohet URI e ridrejtimit të Google</value>
+  </data>
+  <data name="ERR_9010" xml:space="preserve">
+    <value>Të dhëna të pavlefshme të përdoruesit nga Google</value>
+  </data>
+  <data name="ERR_9011" xml:space="preserve">
+    <value>Dështoi shkëmbimi i tokenit të Facebook</value>
+  </data>
+  <data name="ERR_9012" xml:space="preserve">
+    <value>Tokeni i Facebook është i pavlefshëm</value>
+  </data>
+  <data name="ERR_9013" xml:space="preserve">
+    <value>Dështoi marrja e profilit të përdoruesit nga Facebook</value>
+  </data>
+  <data name="ERR_9014" xml:space="preserve">
+    <value>Kërkohet kodi i autorizimit të Facebook</value>
+  </data>
+  <data name="ERR_9015" xml:space="preserve">
+    <value>Kërkohet URI e ridrejtimit të Facebook</value>
+  </data>
+  <data name="ERR_9016" xml:space="preserve">
+    <value>Të dhëna të pavlefshme të përdoruesit nga Facebook</value>
+  </data>
+  <data name="ERR_9017" xml:space="preserve">
+    <value>Dështoi shkëmbimi i tokenit të Microsoft</value>
+  </data>
+  <data name="ERR_9018" xml:space="preserve">
+    <value>Tokeni i Microsoft është i pavlefshëm</value>
+  </data>
+  <data name="ERR_9019" xml:space="preserve">
+    <value>Dështoi marrja e profilit të përdoruesit nga Microsoft</value>
+  </data>
+  <data name="ERR_9020" xml:space="preserve">
+    <value>Kërkohet kodi i autorizimit të Microsoft</value>
+  </data>
+  <data name="ERR_9021" xml:space="preserve">
+    <value>Kërkohet URI e ridrejtimit të Microsoft</value>
+  </data>
+  <data name="ERR_9022" xml:space="preserve">
+    <value>Të dhëna të pavlefshme të përdoruesit nga Microsoft</value>
+  </data>
+  <data name="ERR_9023" xml:space="preserve">
+    <value>Kërkohet verifikuesi i kodit të Microsoft</value>
+  </data>
+  <data name="ERR_9024" xml:space="preserve">
+    <value>Dështoi shkëmbimi i tokenit të Yahoo</value>
+  </data>
+  <data name="ERR_9025" xml:space="preserve">
+    <value>Tokeni i Yahoo është i pavlefshëm</value>
+  </data>
+  <data name="ERR_9026" xml:space="preserve">
+    <value>Dështoi marrja e profilit të përdoruesit nga Yahoo</value>
+  </data>
+  <data name="ERR_9027" xml:space="preserve">
+    <value>Kërkohet kodi i autorizimit të Yahoo</value>
+  </data>
+  <data name="ERR_9028" xml:space="preserve">
+    <value>Kërkohet URI e ridrejtimit të Yahoo</value>
+  </data>
+  <data name="ERR_9029" xml:space="preserve">
+    <value>Të dhëna të pavlefshme të përdoruesit nga Yahoo</value>
+  </data>
+  <data name="ERR_9030" xml:space="preserve">
+    <value>Kërkohet verifikuesi i kodit të Yahoo</value>
+  </data>
+  <data name="ERR_1040" xml:space="preserve">
+    <value>Tokeni ka skaduar</value>
+  </data>
+  <data name="ERR_1041" xml:space="preserve">
+    <value>Tokeni është i pavlefshëm</value>
+  </data>
+</root>

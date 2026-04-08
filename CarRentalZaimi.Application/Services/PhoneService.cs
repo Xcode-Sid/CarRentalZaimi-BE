@@ -1,6 +1,6 @@
-﻿using CarRentalZaimi.Application.Common;
-using CarRentalZaimi.Application.Common.Errors;
+﻿using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.Common.Phone;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Application.Services;
 
@@ -23,7 +24,7 @@ public class PhoneService(
     IOptions<PhoneSettings> _phoneSettings) : IPhoneService
 {
     private readonly PhoneSettings _settings = _phoneSettings.Value;
-    public async Task<Result<bool>> SendVerificationCodeAsync(
+    public async Task<ApiResponse<bool>> SendVerificationCodeAsync(
         string userId,
         CancellationToken cancellationToken = default)
     {
@@ -31,10 +32,10 @@ public class PhoneService(
             .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
 
         if (user is null)
-            return Result<bool>.Error("User not found");
+            return _errorService.CreateFailure<bool>(ErrorCodes.USER_NOT_FOUND);
 
         if (string.IsNullOrWhiteSpace(user.PhoneNumber))
-            return Result<bool>.Error("User does not have a phone number");
+            return _errorService.CreateFailure<bool>(ErrorCodes.USER_PHONE_NUMBER_MISSING);
 
         var existingTokens = await _unitOfWork.Repository<PhoneConfirmationToken>()
             .AsQueryable()
@@ -53,7 +54,6 @@ public class PhoneService(
 
         var token = new PhoneConfirmationToken
         {
-            Id = Guid.NewGuid(),
             Code = code,
             ExpiresAt = DateTime.UtcNow.AddMinutes(_settings.CodeExpiryMinutes),
             IsUsed = false,
@@ -67,17 +67,15 @@ public class PhoneService(
               $"This code expires in {_settings.CodeExpiryMinutes} minutes.";
 
         var smsSent = await SendSmsAsync(user.PhoneNumber, code, cancellationToken);
-        if (!smsSent.IsSuccessful)
-        {
-            return Result<bool>.Error("Failed to send SMS. Please try again.");
-        }
+        if (!smsSent.IsSuccess)
+            return _errorService.CreateFailure<bool>(ErrorCodes.SMS_SEND_FAILED);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<bool>.Success(true);
+        return ApiResponse<bool>.SuccessResponse(true);
     }
 
-    public async Task<Result<bool>> ConfirmPhoneAsync(string userId, string code, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<bool>> ConfirmPhoneAsync(string userId, string code, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -88,7 +86,7 @@ public class PhoneService(
                 return _errorService.CreateFailure<bool>(ErrorCodes.NOT_FOUND);
 
             if (user.PhoneNumberConfirmed)
-                return Result<bool>.Success(true);
+                return ApiResponse<bool>.SuccessResponse(true);
 
             var confirmationToken = await _unitOfWork.Repository<PhoneConfirmationToken>()
                 .AsQueryable()
@@ -119,15 +117,15 @@ public class PhoneService(
             await _unitOfWork.Repository<User>().UpdateAsync(user, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
+            _logger.Info(
                 "Phone confirmed for user {UserId}, status set to {Status}",
                 userId, user.Status);
 
-            return Result<bool>.Success(true);
+            return ApiResponse<bool>.SuccessResponse(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to confirm phone for user {UserId}", userId);
+            _logger.Error(ex, "Failed to confirm phone for user {UserId}", userId);
             return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
@@ -140,19 +138,19 @@ public class PhoneService(
     }
 
 
-    public async Task<Result<bool>> SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<bool>> SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken = default)
     {
         try
         {
             if (!_settings.EnableSms)
             {
-                _logger.LogWarning("SMS sending is disabled");
-                return Result<bool>.Success(true);
+                _logger.Warn("SMS sending is disabled");
+                return ApiResponse<bool>.SuccessResponse(true);
             }
 
             if (string.IsNullOrEmpty(_settings.TwilioAccountSid) || string.IsNullOrEmpty(_settings.TwilioAuthToken))
             {
-                _logger.LogError("Invalid Twilio credentials");
+                _logger.Error("Invalid Twilio credentials");
                 return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
             }
 
@@ -160,7 +158,7 @@ public class PhoneService(
             var validatedPhoneNumber = await ValidateAndFormatPhoneNumberAsync(phoneNumber, cancellationToken);
             if (string.IsNullOrEmpty(validatedPhoneNumber))
             {
-                _logger.LogWarning("Invalid phone number format: {PhoneNumber}", phoneNumber);
+                _logger.Warn("Invalid phone number format: {PhoneNumber}", phoneNumber);
                 return _errorService.CreateFailure<bool>(ErrorCodes.VALIDATION_FAILED);
             }
 
@@ -171,7 +169,7 @@ public class PhoneService(
             // Validate Twilio phone number is configured
             if (string.IsNullOrEmpty(_settings.TwilioPhoneNumber))
             {
-                _logger.LogError("Twilio phone number not configured");
+                _logger.Error("Twilio phone number not configured");
                 return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
             }
 
@@ -187,19 +185,19 @@ public class PhoneService(
 
             if (messageResource.ErrorCode.HasValue)
             {
-                _logger.LogError("Twilio error {ErrorCode}: {ErrorMessage} when sending SMS to {PhoneNumber}",
+                _logger.Error("Twilio error {ErrorCode}: {ErrorMessage} when sending SMS to {PhoneNumber}",
                     messageResource.ErrorCode, messageResource.ErrorMessage, validatedPhoneNumber);
                 return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
             }
 
-            _logger.LogInformation("SMS sent successfully to {PhoneNumber}. Message SID: {MessageSid}, Status: {Status}",
+            _logger.Info("SMS sent successfully to {PhoneNumber}. Message SID: {MessageSid}, Status: {Status}",
                 validatedPhoneNumber, messageResource.Sid, messageResource.Status);
 
-            return Result<bool>.Success(true);
+            return ApiResponse<bool>.SuccessResponse(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send SMS to {PhoneNumber}", phoneNumber);
+            _logger.Error(ex, "Failed to send SMS to {PhoneNumber}", phoneNumber);
             return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
@@ -231,3 +229,4 @@ public class PhoneService(
 
     
 }
+

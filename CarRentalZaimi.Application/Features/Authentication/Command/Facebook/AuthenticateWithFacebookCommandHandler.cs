@@ -1,9 +1,10 @@
-﻿using CarRentalZaimi.Application.Common;
-using CarRentalZaimi.Application.DTOs;
+﻿using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Command;
 using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Application.Features.Authentication.Command.Facebook;
 
@@ -14,14 +15,17 @@ public class AuthenticateWithFacebookCommandHandler(
     IFacebookOAuthService _facebookOAuthService,
     IHttpContextAccessor _httpContextAccessor) : ICommandHandler<AuthenticateWithFacebookCommand, AuthenticationResponseDto>
 {
-    public async Task<Result<AuthenticationResponseDto>> Handle(AuthenticateWithFacebookCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<AuthenticationResponseDto>> Handle(AuthenticateWithFacebookCommand request, CancellationToken cancellationToken)
     {
         try
         {
             var facebookResult = await _facebookOAuthService.VerifyAuthorizationCodeAsync(request.Code, request.RedirectUri);
 
-            if (!facebookResult.IsSuccessful || facebookResult.Data == null)
-                return _errorService.CreateFailure<AuthenticationResponseDto>(facebookResult.ErrorResult ?? "Failed to verify Facebook authentication");
+            if (!facebookResult.IsSuccess || facebookResult.Data == null)
+                return _errorService.CreateFailure<AuthenticationResponseDto>(
+                    string.IsNullOrWhiteSpace(facebookResult.ErrorResult)
+                        ? "Failed to verify Facebook authentication"
+                        : facebookResult.ErrorResult);
 
             var facebookUser = facebookResult.Data;
 
@@ -35,7 +39,6 @@ public class AuthenticateWithFacebookCommandHandler(
                 lastName = nameParts.Length > 1 ? nameParts[1] : facebookUser.Name;
             }
 
-            // Get device info from HTTP context
             var userAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString();
 
             var result = await _authenticationService.AuthenticateWithFacebookAsync(
@@ -46,10 +49,10 @@ public class AuthenticateWithFacebookCommandHandler(
                 facebookUser.Id,
                 userAgent);
 
-            if (result.IsSuccessful)
-                _logger.LogInformation("Authentication successful for email {Email}", facebookUser.Email);
+            if (result.IsSuccess)
+                _logger.Info("Authentication successful for email {Email}", facebookUser.Email);
             else
-                _logger.LogWarning("Authentication failed for email {Email}: {Error}", facebookUser.Email, result.ErrorResult);
+                _logger.Warn("Authentication failed for email {Email}: {Error}", facebookUser.Email, result.ErrorResult);
 
             return result;
         }
@@ -59,3 +62,4 @@ public class AuthenticateWithFacebookCommandHandler(
         }
     }
 }
+

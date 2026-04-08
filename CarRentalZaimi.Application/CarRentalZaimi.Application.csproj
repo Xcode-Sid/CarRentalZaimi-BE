@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CarRentalZaimi.Domain\CarRentalZaimi.Domain.csproj" />
+    <ProjectReference Include="..\CarRentalZaimi.Logging\CarRentalZaimi.Logging.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

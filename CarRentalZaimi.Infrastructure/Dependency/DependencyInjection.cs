@@ -47,8 +47,9 @@ public static class DependencyInjection
         services.AddScoped<ICarRepository, CarRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.Configure<EmailSettings>(configuration.GetSection(ConfigurationKeys.Sections.Email));
-        services.Configure<PhoneSettings>(configuration.GetSection(ConfigurationKeys.Sections.Sms));
+        services.AddScoped<ICarService, CarService>();
+        services.Configure<EmailSettings>(configuration.GetSection(SectionKeys.Email));
+        services.Configure<PhoneSettings>(configuration.GetSection(SectionKeys.Sms));
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IPasswordResetService, PasswordResetService>();
 

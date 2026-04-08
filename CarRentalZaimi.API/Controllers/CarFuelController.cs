@@ -1,6 +1,6 @@
 ﻿using CarRentalZaimi.API.Controllers.Base;
-using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Messages;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.CarFuel.Commands.CreateCarFuel;
 using CarRentalZaimi.Application.Features.CarFuel.Commands.DeleteCarFuel;
 using CarRentalZaimi.Application.Features.CarFuel.Commands.UpdateCarFuel;
@@ -13,16 +13,16 @@ namespace CarRentalZaimi.API.Controllers;
 public class CarFuelController(IMediator _mediator) : ApiControllerBase(_mediator)
 {
     [HttpPost(Name = nameof(CreateCarFuel))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCarFuel([FromBody] CreateCarFuelCommand command)
     {
         return await SendCommand(command, SuccessMessages.CarFuel.CarFuelCreated);
     }
 
     [HttpPut("{id}", Name = nameof(UpdateCarFuel))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateCarFuel(
        [FromRoute] string id,
        [FromBody] UpdateCarFuelCommand command)
@@ -32,8 +32,8 @@ public class CarFuelController(IMediator _mediator) : ApiControllerBase(_mediato
     }
 
     [HttpDelete("{id}", Name = nameof(DeleteCarFuel))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteCarFuel([FromRoute] string id)
     {
         var command = new DeleteCarFuelCommand { Id = id };
@@ -41,8 +41,8 @@ public class CarFuelController(IMediator _mediator) : ApiControllerBase(_mediato
     }
 
     [HttpGet("getAll", Name = nameof(GetAllCarFuels))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllCarFuels()
     {
         return await SendQuery(new GetAllCarFuelsQuery(), null, StatusCodes.Status404NotFound);

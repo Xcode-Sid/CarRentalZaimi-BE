@@ -1,6 +1,6 @@
+using CarRentalZaimi.Logging;
 using CarRentalZaimi.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 
 namespace CarRentalZaimi.SignalR.Services;
 
@@ -10,7 +10,7 @@ public class NotificationService(
 {
     public Task SendNotificationAsync(string message)
     {
-        _logger.LogInformation("Sending notification: {Message}", message);
+        _logger.Info("Sending notification: {Message}", message);
         throw new NotImplementedException();
     }
 }

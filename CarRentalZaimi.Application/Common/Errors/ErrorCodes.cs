@@ -13,6 +13,7 @@ public static class ErrorCodes
     public const string EXTERNAL_SERVICE_ERROR = "ERR_1008";
     public const string INVALID_ARGUMENT = "ERR_1009";
     public const string DATABASE_ERROR = "ERR_1010";
+    public const string SMS_SEND_FAILED = "ERR_1011";
 
     // User Errors (3000-3999)
     public const string USER_NOT_FOUND = "ERR_3001";
@@ -27,6 +28,7 @@ public static class ErrorCodes
     public const string USER_STATUS_INVALID = "ERR_3010";
     public const string USER_STATUS_CHANGE_NOT_ALLOWED = "ERR_3011";
     public const string USER_ADMIN_PERMISSION_REQUIRED = "ERR_3012";
+    public const string USER_PHONE_NUMBER_MISSING = "ERR_3013";
 
     // Authentication Errors (3100-3199)
     public const string AUTH_INVALID_TOKEN = "ERR_3101";

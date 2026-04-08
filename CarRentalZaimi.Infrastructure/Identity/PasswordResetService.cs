@@ -1,6 +1,6 @@
-﻿using CarRentalZaimi.Application.Common;
-using CarRentalZaimi.Application.Common.Email;
+﻿using CarRentalZaimi.Application.Common.Email;
 using CarRentalZaimi.Application.Common.Errors;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Infrastructure.Persistence;
@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Infrastructure.Identity;
 
@@ -20,13 +21,13 @@ public class PasswordResetService(
     IOptions<EmailSettings> _emailSettings,
     IErrorService _errorService) : IPasswordResetService
 {
-    public async Task<Result<string>> GeneratePasswordResetTokenAsync(string email)
+    public async Task<ApiResponse<string>> GeneratePasswordResetTokenAsync(string email)
     {
         try
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
-                return Result<string>.Error("Email does not exists");
+                return _errorService.CreateFailure<string>(ErrorCodes.USER_NOT_FOUND);
 
             var token = GenerateSecureToken();
             var tokenHash = HashToken(token);
@@ -57,7 +58,7 @@ public class PasswordResetService(
             var baseUrl = _emailSettings.Value.BaseUrl;
             if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var parsedBaseUrl))
             {
-                _logger.LogError("Email BaseUrl is missing or invalid in configuration.");
+                _logger.Error("Email BaseUrl is missing or invalid in configuration.");
                 return _errorService.CreateFailure<string>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
             }
 
@@ -65,30 +66,30 @@ public class PasswordResetService(
 
             var emailData = new Dictionary<string, object>
             {
-                { "FirstName", user.FirstName },
+                { "FirstName", user.FirstName! },
                 { "ResetLink", resetLink },
                 { "ExpirationHours", 1 }
             };
 
-            var emailResult = await _emailService.SendForgotPasswordEmailAsync(email, user.FirstName, resetLink);
+            var emailResult = await _emailService.SendForgotPasswordEmailAsync(email, user!.FirstName!, resetLink);
 
-            if (!emailResult.IsSuccessful)
+            if (!emailResult.IsSuccess)
             {
-                _logger.LogError("Failed to send password reset email to {Email}", email);
+                _logger.Error("Failed to send password reset email to {Email}", email);
                 return _errorService.CreateFailure<string>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
             }
 
-            _logger.LogInformation("Password reset token generated and email sent to {Email}", email);
-            return Result<string>.Success("Password reset email sent if account exists");
+            _logger.Info("Password reset token generated and email sent to {Email}", email);
+            return ApiResponse<string>.SuccessResponse("Password reset email sent if account exists");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to generate password reset token for {Email}", email);
+            _logger.Error(ex, "Failed to generate password reset token for {Email}", email);
             return _errorService.CreateFailure<string>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
 
-    public async Task<Result<bool>> ResetPasswordAsync(string token, string email, string newPassword)
+    public async Task<ApiResponse<bool>> ResetPasswordAsync(string token, string email, string newPassword)
     {
         try
         {
@@ -127,12 +128,12 @@ public class PasswordResetService(
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Password reset completed for user {UserId}", user.Id);
-            return Result<bool>.Success(true);
+            _logger.Info("Password reset completed for user {UserId}", user.Id);
+            return ApiResponse<bool>.SuccessResponse(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to reset password for email {Email}", email);
+            _logger.Error(ex, "Failed to reset password for email {Email}", email);
             return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
     }
@@ -152,3 +153,4 @@ public class PasswordResetService(
         return Convert.ToBase64String(hashBytes);
     }
 }
+

@@ -57,32 +57,32 @@ public class ApplicationDbContext(
 
 
     //Entities
-    public DbSet<AdditionalService> AdditionalServices { get; set; }
-    public DbSet<Booking> Bookings { get; set; }
-    public DbSet<BookingService> BookingServices { get; set; }
-    public DbSet<Car> Cars { get; set; }
-    public DbSet<CarCategory> CarCategories { get; set; }
-    public DbSet<CarCompanyModel> CarCompanyModels { get; set; }
-    public DbSet<CarCompanyName> CarCompanyNames { get; set; }
-    public DbSet<CarExteriorColor> CarExteriorColors { get; set; }
-    public DbSet<CarFuel> CarFuels { get; set; }
-    public DbSet<CarImages> CarImages { get; set; }
-    public DbSet<CarInteriorColor> CarInteriorColors { get; set; }
-    public DbSet<CarReview> CarReviews { get; set; }
-    public DbSet<CarTransmission> CarTransmissions { get; set; }
-    public DbSet<CompanyProfile> CompanyProfiles { get; set; }
-    public DbSet<ContactMessage> ContactMessages { get; set; }
-    public DbSet<Language> Languages { get; set; }
-    public DbSet<PhoneConfirmationToken> PhoneConfirmationTokens { get; set; }
-    public DbSet<Promotion> Promotions { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
-    public DbSet<SavedCar> SavedCars { get; set; }
-    public DbSet<UserImage> UserImages { get; set; }
-    public DbSet<UserNotification> UserNotifications { get; set; }
-    public DbSet<AppLog> AppLogs { get; set; }
-    public DbSet<UserDevice> UserDevices { get; set; }
-    public DbSet<StatePrefix> StatePrefixes { get; set; }
-    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public required DbSet<AdditionalService> AdditionalServices { get; set; }
+    public required DbSet<Booking> Bookings { get; set; }
+    public required DbSet<BookingService> BookingServices { get; set; }
+    public required DbSet<Car> Cars { get; set; }
+    public required DbSet<CarCategory> CarCategories { get; set; }
+    public required DbSet<CarCompanyModel> CarCompanyModels { get; set; }
+    public required DbSet<CarCompanyName> CarCompanyNames { get; set; }
+    public required DbSet<CarExteriorColor> CarExteriorColors { get; set; }
+    public required DbSet<CarFuel> CarFuels { get; set; }
+    public required DbSet<CarImages> CarImages { get; set; }
+    public required DbSet<CarInteriorColor> CarInteriorColors { get; set; }
+    public required DbSet<CarReview> CarReviews { get; set; }
+    public required DbSet<CarTransmission> CarTransmissions { get; set; }
+    public required DbSet<CompanyProfile> CompanyProfiles { get; set; }
+    public required DbSet<ContactMessage> ContactMessages { get; set; }
+    public required DbSet<Language> Languages { get; set; }
+    public required DbSet<PhoneConfirmationToken> PhoneConfirmationTokens { get; set; }
+    public required DbSet<Promotion> Promotions { get; set; }
+    public required DbSet<RefreshToken> RefreshTokens { get; set; }
+    public required DbSet<SavedCar> SavedCars { get; set; }
+    public required DbSet<UserImage> UserImages { get; set; }
+    public required DbSet<UserNotification> UserNotifications { get; set; }
+    public required DbSet<AppLog> AppLogs { get; set; }
+    public required DbSet<UserDevice> UserDevices { get; set; }
+    public required DbSet<StatePrefix> StatePrefixes { get; set; }
+    public required DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
 
 

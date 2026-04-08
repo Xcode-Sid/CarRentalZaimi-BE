@@ -53,7 +53,7 @@ public class UserRepository(ApplicationDbContext context) : Repository<User>(con
             .Where(u => !u.IsDeleted && (u.UserName!.ToLower().Contains(term) ||
                        u.Email!.ToLower().Contains(term)))
             .OrderBy(u => u.UserName)
-            .Take(50) // Limit results
+            .Take(50)
             .ToListAsync(cancellationToken);
     }
 
@@ -85,10 +85,9 @@ public class UserRepository(ApplicationDbContext context) : Repository<User>(con
     public override async Task<User?> GetByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
     {
         if (id is string stringId)
-        {
             return await _dbSet
                 .FirstOrDefaultAsync(u => u.Id == stringId && !u.IsDeleted, cancellationToken);
-        }
+        
         return await base.GetByIdAsync(id, cancellationToken);
     }
 
@@ -105,6 +104,7 @@ public class UserRepository(ApplicationDbContext context) : Repository<User>(con
         {
             context.RefreshTokens.Update(token);
         }
+
         await context.SaveChangesAsync();
     }
 

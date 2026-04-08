@@ -1,5 +1,5 @@
-using AutoMapper;
-using CarRentalZaimi.Application.Common;
+﻿using AutoMapper;
+using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.Common.Model;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Cars.Commands.CreateCar;
@@ -12,6 +12,7 @@ using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 
 namespace CarRentalZaimi.Application.Services;
 
@@ -21,7 +22,7 @@ public class CarService(
     ILogger<CarService> _logger) : ICarService
 {
 
-    public async Task<Result<CarDto>> CreateCarAsync(CreateCarCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<CarDto>> CreateCarAsync(CreateCarCommand request, CancellationToken cancellationToken)
     {
         // Check if a car with the same license plate already exists
         if (request.LicensePlate is not null)
@@ -30,12 +31,11 @@ public class CarService(
                 .FirstOrDefaultAsync(c => c.LicensePlate == request.LicensePlate, cancellationToken);
 
             if (existingCar is not null)
-                return Result<CarDto>.Error("A car with this license plate already exists.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.ALREADY_EXISTS));
         }
 
         var newCar = new Car
         {
-            Id = Guid.NewGuid(),
             Title = request.Title,
             Description = request.Description,
             Year = request.Year,
@@ -75,7 +75,7 @@ public class CarService(
                 .FirstOrDefaultAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
 
             if (category is null)
-                return Result<CarDto>.Error("Category not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             newCar.Category = category;
         }
@@ -86,7 +86,7 @@ public class CarService(
                 .FirstOrDefaultAsync(n => n.Id == request.NameId.Value, cancellationToken);
 
             if (name is null)
-                return Result<CarDto>.Error("Car company name not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             newCar.Name = name;
         }
@@ -97,7 +97,7 @@ public class CarService(
                 .FirstOrDefaultAsync(m => m.Id == request.ModelId.Value, cancellationToken);
 
             if (model is null)
-                return Result<CarDto>.Error("Car model not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             newCar.Model = model;
         }
@@ -108,7 +108,7 @@ public class CarService(
                 .FirstOrDefaultAsync(e => e.Id == request.ExteriorColorTypeId.Value, cancellationToken);
 
             if (exteriorColor is null)
-                return Result<CarDto>.Error("Exterior color type not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             newCar.ExteriorColorType = exteriorColor;
         }
@@ -119,7 +119,7 @@ public class CarService(
                 .FirstOrDefaultAsync(i => i.Id == request.InteriorColorTypeId.Value, cancellationToken);
 
             if (interiorColor is null)
-                return Result<CarDto>.Error("Interior color type not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             newCar.InteriorColorType = interiorColor;
         }
@@ -130,7 +130,7 @@ public class CarService(
                 .FirstOrDefaultAsync(t => t.Id == request.TransmissionTypeId.Value, cancellationToken);
 
             if (transmission is null)
-                return Result<CarDto>.Error("Transmission type not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             newCar.TransmissionType = transmission;
         }
@@ -141,7 +141,7 @@ public class CarService(
                 .FirstOrDefaultAsync(f => f.Id == request.FuelTypeId.Value, cancellationToken);
 
             if (fuel is null)
-                return Result<CarDto>.Error("Fuel type not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             newCar.FuelType = fuel;
         }
@@ -155,17 +155,17 @@ public class CarService(
 
 
         await _uow.SaveChangesAsync(cancellationToken);
-        return Result<CarDto>.Success(_mapper.Map<CarDto>(newCar));
+        return ApiResponse<CarDto>.SuccessResponse(_mapper.Map<CarDto>(newCar));
     }
 
 
-    public async Task<Result<CarDto>> UpdateCarAsync(UpdateCarCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<CarDto>> UpdateCarAsync(UpdateCarCommand request, CancellationToken cancellationToken)
     {
         var existingCar = await _uow.Repository<Car>()
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.CarId, cancellationToken);
 
         if (existingCar is null)
-            return Result<CarDto>.Error("Car not found.");
+            return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
         // Check license plate uniqueness against other cars
         if (request.LicensePlate is not null)
@@ -174,7 +174,7 @@ public class CarService(
                 .FirstOrDefaultAsync(c => c.LicensePlate == request.LicensePlate && c.Id.ToString() != request.CarId, cancellationToken);
 
             if (plateExists is not null)
-                return Result<CarDto>.Error("A car with this license plate already exists.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.ALREADY_EXISTS));
         }
 
         // Update scalar properties
@@ -216,7 +216,7 @@ public class CarService(
                 .FirstOrDefaultAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
 
             if (category is null)
-                return Result<CarDto>.Error("Category not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             existingCar.Category = category;
         }
@@ -227,7 +227,7 @@ public class CarService(
                 .FirstOrDefaultAsync(n => n.Id == request.NameId.Value, cancellationToken);
 
             if (name is null)
-                return Result<CarDto>.Error("Car company name not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             existingCar.Name = name;
         }
@@ -238,7 +238,7 @@ public class CarService(
                 .FirstOrDefaultAsync(m => m.Id == request.ModelId.Value, cancellationToken);
 
             if (model is null)
-                return Result<CarDto>.Error("Car model not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             existingCar.Model = model;
         }
@@ -249,7 +249,7 @@ public class CarService(
                 .FirstOrDefaultAsync(e => e.Id == request.ExteriorColorTypeId.Value, cancellationToken);
 
             if (exteriorColor is null)
-                return Result<CarDto>.Error("Exterior color type not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             existingCar.ExteriorColorType = exteriorColor;
         }
@@ -260,7 +260,7 @@ public class CarService(
                 .FirstOrDefaultAsync(i => i.Id == request.InteriorColorTypeId.Value, cancellationToken);
 
             if (interiorColor is null)
-                return Result<CarDto>.Error("Interior color type not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             existingCar.InteriorColorType = interiorColor;
         }
@@ -271,7 +271,7 @@ public class CarService(
                 .FirstOrDefaultAsync(t => t.Id == request.TransmissionTypeId.Value, cancellationToken);
 
             if (transmission is null)
-                return Result<CarDto>.Error("Transmission type not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             existingCar.TransmissionType = transmission;
         }
@@ -282,7 +282,7 @@ public class CarService(
                 .FirstOrDefaultAsync(f => f.Id == request.FuelTypeId.Value, cancellationToken);
 
             if (fuel is null)
-                return Result<CarDto>.Error("Fuel type not found.");
+                return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
             existingCar.FuelType = fuel;
         }
@@ -294,16 +294,16 @@ public class CarService(
         await _uow.Repository<Car>().UpdateAsync(existingCar, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return Result<CarDto>.Success(_mapper.Map<CarDto>(existingCar));
+        return ApiResponse<CarDto>.SuccessResponse(_mapper.Map<CarDto>(existingCar));
     }
 
-    public async Task<Result<bool>> DeleteCarAsync(DeleteCarCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<bool>> DeleteCarAsync(DeleteCarCommand request, CancellationToken cancellationToken)
     {
         var existingCar = await _uow.Repository<Car>()
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id, cancellationToken);
 
         if (existingCar is null)
-            return Result<bool>.Error("Car not found.");
+            return ApiResponse<bool>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
         // Soft-delete all associated images and remove files from disk
         var carImages = await _uow.Repository<CarImages>()
@@ -328,10 +328,10 @@ public class CarService(
         await _uow.Repository<Car>().UpdateAsync(existingCar, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return Result<bool>.Success(true);
+        return ApiResponse<bool>.SuccessResponse(true);
     }
 
-    public async Task<Result<CarDto>> GetCarByIdAsync(GetCarByIdQuery request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<CarDto>> GetCarByIdAsync(GetCarByIdQuery request, CancellationToken cancellationToken)
     {
         var car = await _uow.Repository<Car>()
             .AsQueryable()
@@ -346,13 +346,13 @@ public class CarService(
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id && !c.IsDeleted, cancellationToken);
 
         if (car is null)
-            return Result<CarDto>.Error("Car not found.");
+            return ApiResponse<CarDto>.FailureResponse(ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND));
 
-        return Result<CarDto>.Success(_mapper.Map<CarDto>(car));
+        return ApiResponse<CarDto>.SuccessResponse(_mapper.Map<CarDto>(car));
     }
 
 
-    public async Task<Result<PagedResponse<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<PagedResponse<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken)
     {
         var query = _uow.Repository<Car>()
             .AsQueryable()
@@ -420,7 +420,7 @@ public class CarService(
         var mapped = _mapper.Map<List<CarDto>>(cars);
         var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
 
-        return Result<PagedResponse<CarDto>>.Success(pagedResponse);
+        return ApiResponse<PagedResponse<CarDto>>.SuccessResponse(pagedResponse);
     }
 
 
@@ -518,7 +518,7 @@ public class CarService(
 
             var existingImage = existingImages.FirstOrDefault(x => x.ImageName == image.Name);
 
-            // No base64 data means image already exists — only update IsPrimary
+            // No base64 data means image already exists â€” only update IsPrimary
             if (string.IsNullOrEmpty(image.Data))
             {
                 if (existingImage is null)
@@ -577,7 +577,6 @@ public class CarService(
 
                 var newImage = new CarImages
                 {
-                    Id = Guid.NewGuid(),
                     Car = car,
                     ImageName = image.Name,
                     ImagePath = relativePath,

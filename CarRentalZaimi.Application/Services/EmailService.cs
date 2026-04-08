@@ -1,12 +1,13 @@
-﻿using CarRentalZaimi.Application.Common;
-using CarRentalZaimi.Application.Common.Email;
+﻿using CarRentalZaimi.Application.Common.Email;
 using CarRentalZaimi.Application.Common.Errors;
+using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
+using CarRentalZaimi.Logging;
 
 namespace CarRentalZaimi.Application.Services;
 
@@ -17,7 +18,7 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
     private readonly EmailSettings _emailSettings = emailSettingsOptions.Value;
     private readonly ILogger<EmailService> _logger = logger;
 
-    public async Task<Result<bool>> SendForgotPasswordEmailAsync(string email, string firstName, string resetLink, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<bool>> SendForgotPasswordEmailAsync(string email, string firstName, string resetLink, CancellationToken cancellationToken = default)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames()
@@ -25,7 +26,7 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
 
         if (resourceName == null)
         {
-            _logger.LogError("Forgot password email template not found in embedded resources.");
+            _logger.Error("Forgot password email template not found in embedded resources.");
             return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
         }
 
@@ -41,7 +42,7 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
         return await SendEmailAsync(email, "Reset Your Password", body, isHtml: true, cancellationToken);
     }
 
-    public async Task<Result<bool>> SendEmailAsync(string to, string subject, string body, bool isHtml = true, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<bool>> SendEmailAsync(string to, string subject, string body, bool isHtml = true, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -63,13 +64,14 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
             message.To.Add(to);
             await client.SendMailAsync(message, cancellationToken);
 
-            return Result<bool>.Success(true);
+            return ApiResponse<bool>.SuccessResponse(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send email to {Email}", to);
-            return Result<bool>.Error($"Failed to send email: {ex.Message}");
+            _logger.Error(ex, "Failed to send email to {Email}", to);
+            return ApiResponse<bool>.FailureResponse($"Failed to send email: {ex.Message}");
         }
     }
 
 }
+

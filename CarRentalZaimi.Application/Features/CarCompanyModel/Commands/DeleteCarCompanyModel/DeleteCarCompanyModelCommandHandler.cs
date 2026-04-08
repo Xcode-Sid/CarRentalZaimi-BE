@@ -1,4 +1,4 @@
-﻿using CarRentalZaimi.Application.Common;
+﻿using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Interfaces.Command;
 using CarRentalZaimi.Application.Interfaces.Services;
 
@@ -6,6 +6,6 @@ namespace CarRentalZaimi.Application.Features.CarCompanyModel.Commands.DeleteCar
 
 internal class DeleteCarCompanyModelCommandHandler(ICarCompanyModelService _carCompanyModelService) : ICommandHandler<DeleteCarCompanyModelCommand, bool>
 {
-    public async Task<Result<bool>> Handle(DeleteCarCompanyModelCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<bool>> Handle(DeleteCarCompanyModelCommand request, CancellationToken cancellationToken)
         => await _carCompanyModelService.DeleteAsync(request, cancellationToken);
 }

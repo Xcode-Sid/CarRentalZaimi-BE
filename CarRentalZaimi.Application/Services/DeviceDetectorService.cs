@@ -4,6 +4,7 @@ using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using CarRentalZaimi.Logging;
 using System.Text.RegularExpressions;
 
 namespace CarRentalZaimi.Application.Services;
@@ -15,7 +16,7 @@ public partial class DeviceDetectorService(
     public UserDevice ParseDevice(string? userAgent, string? ipAddress)
     {
         var resolvedIp = ipAddress ?? userContext.IpAddress;
-        _logger.LogDebug("Parsing device info from IP: {IpAddress}", resolvedIp);
+        _logger.Debug("Parsing device info from IP: {IpAddress}", resolvedIp);
         userAgent ??= "Unknown";
 
         var device = new UserDevice
@@ -31,7 +32,7 @@ public partial class DeviceDetectorService(
             IsActive = true
         };
 
-        _logger.LogInformation("Device parsed — {DeviceType} / {Browser} / {OS} from {IpAddress}",
+        _logger.Info("Device parsed — {DeviceType} / {Browser} / {OS} from {IpAddress}",
             device.DeviceType, device.Browser, device.OperatingSystem, device.IpAddress);
 
         return device;
