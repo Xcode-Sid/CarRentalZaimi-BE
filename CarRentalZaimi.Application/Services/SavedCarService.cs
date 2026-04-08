@@ -44,6 +44,10 @@ public class SavedCarService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISavedC
             .ToListAsync(cancellationToken);
 
         var mapped = _mapper.Map<List<SavedCarDto>>(cars);
+
+        // All cars here are saved by definition
+        foreach (var car in mapped)
+            car.Car!.IsSaved = true;
         var pagedResponse = new PagedResponse<SavedCarDto>(mapped, totalCount, request.PageNr, request.PageSize);
 
         return Result<PagedResponse<SavedCarDto>>.Success(pagedResponse);
