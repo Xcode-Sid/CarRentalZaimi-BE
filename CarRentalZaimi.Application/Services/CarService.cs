@@ -343,14 +343,17 @@ public class CarService(
             .Include(c => c.TransmissionType)
             .Include(c => c.FuelType)
             .Include(c => c.CarImages!.Where(c => !c.IsDeleted))
+            .Include(c => c.CarReviews!.Where(r => !r.IsDeleted)) 
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id && !c.IsDeleted, cancellationToken);
 
         if (car is null)
             return Result<CarDto>.Error("Car not found.");
 
-        return Result<CarDto>.Success(_mapper.Map<CarDto>(car));
-    }
+        var carDto = _mapper.Map<CarDto>(car);
+        carDto.TotalReviews = car.CarReviews?.Count; 
 
+        return Result<CarDto>.Success(carDto);
+    }
 
     public async Task<Result<PagedResponse<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken)
     {
