@@ -79,6 +79,13 @@ public static class SuccessMessages
         public const string CarCompanyModelDeleted = "Car company model deleted successfully";
     }
 
+    public static class AditionalServices
+    {
+        public const string AditionalServicesCreated = "Aditional services created successfully";
+        public const string AditionalServicesUpdated = "Aditional services updated successfully";
+        public const string AditionalServicesDeleted = "Aditional services deleted successfully";
+    }
+
     public static class CarReview
     {
         public const string CarReviewCreated = "Car review created successfully";
