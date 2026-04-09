@@ -10,5 +10,6 @@ public class Booking : AuditedEntity<Guid>
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public decimal TotalPrice { get; set; }
+    public string? PaymentMethod { get; set; }
     public BookingStatus? Status { get; set; } 
 }

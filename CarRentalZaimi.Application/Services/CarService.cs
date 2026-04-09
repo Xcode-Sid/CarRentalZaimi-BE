@@ -352,7 +352,7 @@ public class CarService(
     }
 
 
-    public async Task<Result<PagedResponse<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResponse<CarDto>>> GetAllPagedCarsAsync(GetAllPagedCarsQuery request, CancellationToken cancellationToken)
     {
         var query = _uow.Repository<Car>()
             .AsQueryable()
@@ -421,6 +421,17 @@ public class CarService(
         var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
 
         return Result<PagedResponse<CarDto>>.Success(pagedResponse);
+    }
+
+
+    public async Task<Result<IEnumerable<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken = default)
+    {
+        var carColors = await _uow.Repository<Car>()
+         .AsQueryable()
+         .ToListAsync(cancellationToken);
+
+        var mapped = _mapper.Map<IEnumerable<CarDto>>(carColors);
+        return Result.Success(mapped);
     }
 
 

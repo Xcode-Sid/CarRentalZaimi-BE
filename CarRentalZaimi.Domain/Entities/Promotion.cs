@@ -8,13 +8,11 @@ public class Promotion : AuditedEntity<Guid>
     public string? Description { get; set; } 
     public string? Code { get; set; }
     public decimal DiscountPercentage { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public int NumberOfDays { get; set; }
     public bool IsActive { get; set; }
 
     //promotion could be for each car or each category
     public Car? Car { get; set; }
     public CarCategory? CarCategory { get; set; }
-    public int? UsageLimit { get; set; }
     public int TimesUsed { get; set; }
 }

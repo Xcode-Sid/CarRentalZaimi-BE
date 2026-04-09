@@ -44,5 +44,7 @@ public class MappingProfile : Profile
         CreateMap<Result<List<CarCategory>>, Result<List<CarCategoryDto>>>();
         CreateMap<Result<List<CarCompanyName>>, Result<List<CarCompanyNameDto>>>();
         CreateMap<Result<List<CarCompanyModel>>, Result<List<CarCompanyModelDto>>>();
+        CreateMap<Result<List<Promotion>>, Result<List<PromotionDto>>>();
+        CreateMap<Result<List<Car>>, Result<List<CarDto>>>();
     }
 }
