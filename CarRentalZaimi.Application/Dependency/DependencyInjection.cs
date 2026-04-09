@@ -19,7 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ICarService, CarService>();
         services.AddScoped<IDeviceDetectorService, DeviceDetectorService>();
         services.AddScoped<IStatePrefixService, StatePrefixService>();
-        services.AddScoped<IUserService, UserService>(); 
+        services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICarFuelService, CarFuelService>();
         services.AddScoped<ICarTransmissionService, CarTransmissionService>();
         services.AddScoped<ICarInteriorColorService, CarInteriorColorService>();
@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<ICarCompanyModelService, CarCompanyModelService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IPhoneService, PhoneService>();
+        services.AddScoped<ICarReviewService, CarReviewService>();
         services.AddScoped<ISavedCarService, SavedCarService>();
         return services;
     }
