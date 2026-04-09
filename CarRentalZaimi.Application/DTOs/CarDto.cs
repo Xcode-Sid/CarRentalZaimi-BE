@@ -33,6 +33,9 @@ public class CarDto : BaseDto<Guid>
     public bool? AirConditioner { get; set; }
     public bool? ElectricWindows { get; set; }
     public bool? GPS { get; set; }
+    public bool IsRecommended { get; set; }
+    public int? TotalReviews { get; set; }
+    public bool IsSaved { get; set; }
     public CarStatus? Status { get; set; }
     public CarCategoryDto? Category { get; set; }
     public CarCompanyNameDto? Name { get; set; }
@@ -42,4 +45,5 @@ public class CarDto : BaseDto<Guid>
     public CarTransmissionDto? TransmissionType { get; set; }
     public CarFuelDto? FuelType { get; set; }
     public ICollection<CarImagesDto>? CarImages { get; set; }
+    public ICollection<CarReviewDto>? CarReviews { get; set; }
 }

@@ -305,6 +305,9 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("IsRecommended")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool?>("LEDHeadlights")
                         .HasColumnType("tinyint(1)");
 
@@ -1965,7 +1968,7 @@ namespace CarRentalZaimi.Migrations.Migrations
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.CarReview", b =>
                 {
                     b.HasOne("CarRentalZaimi.Domain.Entities.Car", "Post")
-                        .WithMany()
+                        .WithMany("CarReviews")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2122,6 +2125,8 @@ namespace CarRentalZaimi.Migrations.Migrations
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.Car", b =>
                 {
                     b.Navigation("CarImages");
+
+                    b.Navigation("CarReviews");
                 });
 
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.CarCompanyName", b =>

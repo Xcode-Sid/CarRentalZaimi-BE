@@ -1,12 +1,15 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Model;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.Features.Cars.Commands.AddFeaturedCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.CreateCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.DeleteCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.UpdateCar;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetAllCars;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetCarById;
+using CarRentalZaimi.Application.Features.Cars.Queries.GetFeaturedCars;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
@@ -45,7 +48,7 @@ public class CarService(
             Doors = request.Doors,
             Mileage = request.Mileage,
             HorsePower = request.HorsePower,
-           
+
             //bool properties
             ABS = request.ABS,
             Bluetooth = request.Bluetooth,
@@ -343,14 +346,17 @@ public class CarService(
             .Include(c => c.TransmissionType)
             .Include(c => c.FuelType)
             .Include(c => c.CarImages!.Where(c => !c.IsDeleted))
+            .Include(c => c.CarReviews!.Where(r => !r.IsDeleted))
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id && !c.IsDeleted, cancellationToken);
 
         if (car is null)
             return Result<CarDto>.Error("Car not found.");
 
-        return Result<CarDto>.Success(_mapper.Map<CarDto>(car));
-    }
+        var carDto = _mapper.Map<CarDto>(car);
+        carDto.TotalReviews = car.CarReviews?.Count;
 
+        return Result<CarDto>.Success(carDto);
+    }
 
     public async Task<Result<PagedResponse<CarDto>>> GetAllPagedCarsAsync(GetAllPagedCarsQuery request, CancellationToken cancellationToken)
     {
@@ -379,7 +385,7 @@ public class CarService(
                 (c.Category != null && c.Category.Name.ToLower().Contains(search)));
         }
 
-      
+
         if (!string.IsNullOrWhiteSpace(request.CategoryId))
             query = query.Where(c => c.Category!.Id.ToString() == request.CategoryId);
 
@@ -418,11 +424,22 @@ public class CarService(
             .ToListAsync(cancellationToken);
 
         var mapped = _mapper.Map<List<CarDto>>(cars);
-        var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
+        // ✅ Populate IsSaved after mapping
+        if (!string.IsNullOrWhiteSpace(request.UserId))
+        {
+            var savedCarIds = await _uow.Repository<SavedCar>()
+                .AsQueryable()
+                .Where(sc => sc.User!.Id == request.UserId && !sc.IsDeleted)
+                .Select(sc => sc.Car!.Id)
+                .ToHashSetAsync(cancellationToken);
 
+            foreach (var car in mapped)
+                car.IsSaved = savedCarIds.Contains(car.Id); // in-memory, no EF translation issue
+        }
+
+        var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
         return Result<PagedResponse<CarDto>>.Success(pagedResponse);
     }
-
 
     public async Task<Result<IEnumerable<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken = default)
     {
@@ -435,6 +452,51 @@ public class CarService(
     }
 
 
+    public async Task<Result<bool>> AddFeaturedCarAsync(AddFeaturedCarCommand request, CancellationToken cancellationToken = default)
+    {
+        var existingCar = await _uow.Repository<Car>()
+         .FirstOrDefaultAsync(c => c.Id.ToString() == request.CarId, cancellationToken);
+
+        if (existingCar is null)
+            return Result<bool>.Error("Car not found.");
+
+        existingCar.IsRecommended = request.IsRecommended;
+
+        await _uow.Repository<Car>().UpdateAsync(existingCar, cancellationToken);
+        await _uow.SaveChangesAsync(cancellationToken);
+
+        return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<IEnumerable<CarDto>>> GetFeaturedCarsAsync(GetFeaturedCarsQuery request, CancellationToken cancellationToken = default)
+    {
+        var cars = await GetBaseCarQuery()
+            .Where(c => c.CarReviews.Any(r => !r.IsDeleted))
+            .OrderByDescending(c => c.CarReviews.Count(r => !r.IsDeleted))
+            .ProjectTo<CarDto>(_mapper.ConfigurationProvider)
+            .Take(request.Limit)
+            .ToListAsync(cancellationToken);
+
+        if (cars.Count == 0)
+        {
+            cars = await GetBaseCarQuery()
+                .Where(c => c.IsRecommended)
+                .ProjectTo<CarDto>(_mapper.ConfigurationProvider)
+                .Take(request.Limit)
+                .ToListAsync(cancellationToken);
+        }
+
+        return Result<IEnumerable<CarDto>>.Success(cars);
+    }
+
+
+
+    private IQueryable<Car> GetBaseCarQuery()
+    {
+        return _uow.Repository<Car>()
+            .AsQueryable()
+            .Where(c => !c.IsDeleted);
+    }
 
     private async Task AddCarImagesAsync(Car car, List<CarImagesCommand> images, CancellationToken cancellationToken)
     {
