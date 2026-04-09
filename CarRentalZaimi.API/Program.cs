@@ -70,6 +70,9 @@ try
     {
         options.AddPolicy(SystemPolicies.Admin, policy =>
             policy.RequireRole(SystemPolicies.Admin));
+
+        options.AddPolicy(SystemPolicies.User, policy =>
+            policy.RequireRole(SystemPolicies.User));
     });
 
     builder.Services.AddSingleton(new GoogleOAuthSettings
