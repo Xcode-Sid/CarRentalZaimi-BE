@@ -2,11 +2,13 @@ using CarRentalZaimi.API.Controllers.Base;
 using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
+using CarRentalZaimi.Application.Features.Cars.Commands.AddFeaturedCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.CreateCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.DeleteCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.UpdateCar;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetAllCars;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetCarById;
+using CarRentalZaimi.Application.Features.Cars.Queries.GetFeaturedCars;
 using CarRentalZaimi.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -43,6 +45,24 @@ public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
 
         query = query with { UserId = userIdClaim };
         var res =  await SendCommand(query);
+        return res;
+    }
+
+
+    [HttpPost("add-featured-car")]
+    [Authorize(SystemPolicies.Admin)]
+    [ProducesResponseType(typeof(Result<Guid>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> AddFeaturedCar([FromBody] AddFeaturedCarCommand command)
+    {
+        return await SendCommand(command, SuccessMessages.Car.CarFeaturedUpdated);
+    }
+
+    [HttpGet("featured")]
+    [ProducesResponseType(typeof(Result<PagedResponse<CarDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetFeaturedCars([FromQuery] GetFeaturedCarsQuery query)
+    {
+        var res = await SendCommand(query);
         return res;
     }
 

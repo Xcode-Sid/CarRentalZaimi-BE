@@ -33,6 +33,7 @@ public class Car : AuditedEntity<Guid>
     public bool? AirConditioner { get; set; }
     public bool? ElectricWindows { get; set; }
     public bool? GPS { get; set; }
+    public bool IsRecommended { get; set; }
     public CarStatus? Status { get; set; }
     public virtual CarCategory? Category { get; set; }
     public virtual CarCompanyName? Name { get; set; }

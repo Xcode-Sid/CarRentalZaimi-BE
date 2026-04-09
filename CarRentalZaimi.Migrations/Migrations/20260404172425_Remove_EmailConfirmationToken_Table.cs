@@ -19,7 +19,7 @@ namespace CarRentalZaimi.Migrations.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PasswordResetTokens");
+                name: "EmailConfirmationTokens");
         }
     }
 }
