@@ -343,14 +343,17 @@ public class CarService(
             .Include(c => c.TransmissionType)
             .Include(c => c.FuelType)
             .Include(c => c.CarImages!.Where(c => !c.IsDeleted))
+            .Include(c => c.CarReviews!.Where(r => !r.IsDeleted)) 
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id && !c.IsDeleted, cancellationToken);
 
         if (car is null)
             return Result<CarDto>.Error("Car not found.");
 
-        return Result<CarDto>.Success(_mapper.Map<CarDto>(car));
-    }
+        var carDto = _mapper.Map<CarDto>(car);
+        carDto.TotalReviews = car.CarReviews?.Count; 
 
+        return Result<CarDto>.Success(carDto);
+    }
 
     public async Task<Result<PagedResponse<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken)
     {
@@ -418,8 +421,20 @@ public class CarService(
             .ToListAsync(cancellationToken);
 
         var mapped = _mapper.Map<List<CarDto>>(cars);
-        var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
+        // ✅ Populate IsSaved after mapping
+        if (!string.IsNullOrWhiteSpace(request.UserId))
+        {
+            var savedCarIds = await _uow.Repository<SavedCar>()
+                .AsQueryable()
+                .Where(sc => sc.User!.Id == request.UserId && !sc.IsDeleted)
+                .Select(sc => sc.Car!.Id)
+                .ToHashSetAsync(cancellationToken);
 
+            foreach (var car in mapped)
+                car.IsSaved = savedCarIds.Contains(car.Id); // in-memory, no EF translation issue
+        }
+
+        var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
         return Result<PagedResponse<CarDto>>.Success(pagedResponse);
     }
 

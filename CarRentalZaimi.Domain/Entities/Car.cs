@@ -42,4 +42,5 @@ public class Car : AuditedEntity<Guid>
     public  virtual CarTransmission? TransmissionType { get; set; }
     public virtual CarFuel? FuelType { get; set; }
     public ICollection<CarImages>? CarImages { get; set; }
+    public ICollection<CarReview>? CarReviews { get; set; }
 }
