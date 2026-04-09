@@ -5,7 +5,9 @@ using CarRentalZaimi.Application.Features.AdditionalService.Commands.CreateAddit
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.DeleteAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.UpdateAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllAdditionalServices;
+using CarRentalZaimi.Domain.Common.Constants;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentalZaimi.API.Controllers;
@@ -13,6 +15,7 @@ namespace CarRentalZaimi.API.Controllers;
 public class AdditionalServiceController(IMediator _mediator) : ApiControllerBase(_mediator)
 {
     [HttpPost(Name = nameof(CreateAdditionalService))]
+    [Authorize(SystemPolicies.Admin)]
     [ProducesResponseType(typeof(Result<object>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAdditionalService([FromBody] CreateAdditionalServiceCommand command)
@@ -21,6 +24,7 @@ public class AdditionalServiceController(IMediator _mediator) : ApiControllerBas
     }
 
     [HttpPut("{id}", Name = nameof(UpdateAdditionalSService))]
+    [Authorize(SystemPolicies.Admin)]
     [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateAdditionalSService(
@@ -31,10 +35,11 @@ public class AdditionalServiceController(IMediator _mediator) : ApiControllerBas
         return await SendCommand(updatedCommand, SuccessMessages.AditionalServices.AditionalServicesUpdated);
     }
 
-    [HttpDelete("{id}", Name = nameof(DeleteAdditionalSService))]
+    [HttpDelete("{id}", Name = nameof(DeleteAdditionalService))]
+    [Authorize(SystemPolicies.Admin)]
     [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteAdditionalSService([FromRoute] string id)
+    public async Task<IActionResult> DeleteAdditionalService([FromRoute] string id)
     {
         var command = new DeleteAdditionalServiceCommand { Id = id };
         return await SendCommand(command, SuccessMessages.AditionalServices.AditionalServicesDeleted);
