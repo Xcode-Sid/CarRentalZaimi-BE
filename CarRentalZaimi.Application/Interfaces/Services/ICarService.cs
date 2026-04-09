@@ -1,4 +1,4 @@
-﻿using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Cars.Commands.AddFeaturedCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.CreateCar;
@@ -16,6 +16,8 @@ public interface ICarService
     Task<Result<CarDto>> UpdateCarAsync(UpdateCarCommand request, CancellationToken cancellationToken = default);
     Task<Result<bool>> DeleteCarAsync(DeleteCarCommand request, CancellationToken cancellationToken = default);
     Task<Result<CarDto>> GetCarByIdAsync(GetCarByIdQuery request, CancellationToken cancellationToken = default);
+    Task<Result<PagedResponse<CarDto>>> GetAllPagedCarsAsync(GetAllPagedCarsQuery request, CancellationToken cancellationToken = default);
+    Task<Result<IEnumerable<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken = default);
     Task<Result<PagedResponse<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<CarDto>>> GetFeaturedCarsAsync(GetFeaturedCarsQuery request, CancellationToken cancellationToken = default);
     Task<Result<bool>> AddFeaturedCarAsync(AddFeaturedCarCommand request, CancellationToken cancellationToken = default);

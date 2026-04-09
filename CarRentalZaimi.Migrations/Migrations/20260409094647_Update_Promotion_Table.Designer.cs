@@ -3,6 +3,7 @@ using System;
 using CarRentalZaimi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalZaimi.Migrations.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260409094647_Update_Promotion_Table")]
+    partial class Update_Promotion_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -303,9 +306,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsRecommended")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool?>("LEDHeadlights")
@@ -1968,7 +1968,7 @@ namespace CarRentalZaimi.Migrations.Migrations
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.CarReview", b =>
                 {
                     b.HasOne("CarRentalZaimi.Domain.Entities.Car", "Post")
-                        .WithMany("CarReviews")
+                        .WithMany()
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2125,8 +2125,6 @@ namespace CarRentalZaimi.Migrations.Migrations
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.Car", b =>
                 {
                     b.Navigation("CarImages");
-
-                    b.Navigation("CarReviews");
                 });
 
             modelBuilder.Entity("CarRentalZaimi.Domain.Entities.CarCompanyName", b =>

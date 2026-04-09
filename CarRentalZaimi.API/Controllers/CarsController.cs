@@ -37,17 +37,24 @@ public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
         return await SendCommand(new GetCarByIdQuery(id));
     }
 
+
     [HttpGet]
     [ProducesResponseType(typeof(Result<PagedResponse<CarDto>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllCars([FromQuery] GetAllCarsQuery query)
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllPagedCars([FromQuery] GetAllPagedCarsQuery query)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        query = query with { UserId = userIdClaim };
-        var res =  await SendCommand(query);
+        var res = await SendCommand(query);
         return res;
     }
 
+    [HttpGet("getAll")]
+    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllCars([FromQuery] GetAllCarsQuery query)
+    {
+        var res = await SendCommand(query);
+        return res;
+    }
 
     [HttpPost("add-featured-car")]
     [Authorize(SystemPolicies.Admin)]

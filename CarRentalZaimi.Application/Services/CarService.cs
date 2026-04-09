@@ -48,7 +48,7 @@ public class CarService(
             Doors = request.Doors,
             Mileage = request.Mileage,
             HorsePower = request.HorsePower,
-           
+
             //bool properties
             ABS = request.ABS,
             Bluetooth = request.Bluetooth,
@@ -346,19 +346,19 @@ public class CarService(
             .Include(c => c.TransmissionType)
             .Include(c => c.FuelType)
             .Include(c => c.CarImages!.Where(c => !c.IsDeleted))
-            .Include(c => c.CarReviews!.Where(r => !r.IsDeleted)) 
+            .Include(c => c.CarReviews!.Where(r => !r.IsDeleted))
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id && !c.IsDeleted, cancellationToken);
 
         if (car is null)
             return Result<CarDto>.Error("Car not found.");
 
         var carDto = _mapper.Map<CarDto>(car);
-        carDto.TotalReviews = car.CarReviews?.Count; 
+        carDto.TotalReviews = car.CarReviews?.Count;
 
         return Result<CarDto>.Success(carDto);
     }
 
-    public async Task<Result<PagedResponse<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResponse<CarDto>>> GetAllPagedCarsAsync(GetAllPagedCarsQuery request, CancellationToken cancellationToken)
     {
         var query = _uow.Repository<Car>()
             .AsQueryable()
@@ -385,7 +385,7 @@ public class CarService(
                 (c.Category != null && c.Category.Name.ToLower().Contains(search)));
         }
 
-      
+
         if (!string.IsNullOrWhiteSpace(request.CategoryId))
             query = query.Where(c => c.Category!.Id.ToString() == request.CategoryId);
 
@@ -439,6 +439,16 @@ public class CarService(
 
         var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
         return Result<PagedResponse<CarDto>>.Success(pagedResponse);
+    }
+
+    public async Task<Result<IEnumerable<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken = default)
+    {
+        var carColors = await _uow.Repository<Car>()
+         .AsQueryable()
+         .ToListAsync(cancellationToken);
+
+        var mapped = _mapper.Map<IEnumerable<CarDto>>(carColors);
+        return Result.Success(mapped);
     }
 
 
