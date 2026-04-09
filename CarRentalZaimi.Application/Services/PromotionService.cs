@@ -5,6 +5,7 @@ using CarRentalZaimi.Application.Features.Promotion.Commands.CreatePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Commands.DeletePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Commands.UpdatePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Queries.GetAllPromotion;
+using CarRentalZaimi.Application.Features.Promotion.Queries.GetPromotionByCarId;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
@@ -91,6 +92,44 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPromo
 
         var mapped = _mapper.Map<IEnumerable<PromotionDto>>(carColors);
         return Result.Success(mapped);
+    }
+
+    public async Task<Result<decimal>> GetPromotionByCarIdAsync(GetPromotionByCarIdQuery request, CancellationToken cancellationToken = default)
+    {
+        var promotion = await _unitOfWork.Repository<Promotion>()
+            .AsQueryable()
+            .Include(c => c.Car)
+            .Include(c => c.CarCategory)
+            .FirstOrDefaultAsync(c => c.Car.Id.ToString() == request.CarId
+                                      && !c.IsDeleted
+                                      && c.IsActive,cancellationToken);
+
+        // 2️⃣ Fallback: look for an active promotion for the car's category
+        if (promotion is null)
+        {
+            var car = await _unitOfWork.Repository<Car>()
+                .AsQueryable()
+                .FirstOrDefaultAsync(c => c.Id.ToString() == request.CarId && !c.IsDeleted, cancellationToken);
+
+            if (car is null)
+                return Result<decimal>.Error("Car not found.");
+
+            promotion = await _unitOfWork.Repository<Promotion>()
+                .AsQueryable()
+                .Include(c => c.Car)
+                .Include(c => c.CarCategory)
+                .FirstOrDefaultAsync(c => c.CarCategory.Id == car.Category.Id
+                                          && c.Car.Id == null          // category-level promotion (not tied to a specific car)
+                                          && !c.IsDeleted
+                                          && c.IsActive, cancellationToken);
+        }
+
+        if (promotion is null)
+            return Result<decimal>.Error("No active promotion found for this car.");
+
+        var promotionDto = _mapper.Map<PromotionDto>(promotion);
+
+        return Result<decimal>.Success(promotion.DiscountPercentage);
     }
 
     public async Task<Result<PromotionDto>> UpdateAsync(UpdatePromotionCommand request, CancellationToken cancellationToken = default)

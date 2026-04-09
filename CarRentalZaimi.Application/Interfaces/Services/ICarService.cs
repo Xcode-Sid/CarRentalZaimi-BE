@@ -5,6 +5,7 @@ using CarRentalZaimi.Application.Features.Cars.Commands.CreateCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.DeleteCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.UpdateCar;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetAllCars;
+using CarRentalZaimi.Application.Features.Cars.Queries.GetBookedDatesForCar;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetCarById;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetFeaturedCars;
 
@@ -18,7 +19,7 @@ public interface ICarService
     Task<Result<CarDto>> GetCarByIdAsync(GetCarByIdQuery request, CancellationToken cancellationToken = default);
     Task<Result<PagedResponse<CarDto>>> GetAllPagedCarsAsync(GetAllPagedCarsQuery request, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken = default);
-    Task<Result<PagedResponse<CarDto>>> GetAllCarsAsync(GetAllCarsQuery request, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<CarDto>>> GetFeaturedCarsAsync(GetFeaturedCarsQuery request, CancellationToken cancellationToken = default);
     Task<Result<bool>> AddFeaturedCarAsync(AddFeaturedCarCommand request, CancellationToken cancellationToken = default);
+    Task<Result<IEnumerable<BookedDateRangeDto>>> GetBookedDatesForCarAsync(GetBookedDatesForCarQuery request, CancellationToken cancellationToken = default);
 }

@@ -6,5 +6,4 @@ public class BookingService : AuditedEntity<Guid>
 {
     public virtual Booking? Booking { get; set; }
     public virtual AdditionalService? AdditionalService { get; set; }
-    public decimal PricePerDay { get; set; }
 }

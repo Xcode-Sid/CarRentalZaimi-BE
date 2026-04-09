@@ -7,6 +7,7 @@ using CarRentalZaimi.Application.Features.Cars.Commands.CreateCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.DeleteCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.UpdateCar;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetAllCars;
+using CarRentalZaimi.Application.Features.Cars.Queries.GetBookedDatesForCar;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetCarById;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetFeaturedCars;
 using CarRentalZaimi.Domain.Common.Constants;
@@ -38,11 +39,22 @@ public class CarsController(IMediator _mediator) : ApiControllerBase(_mediator)
     }
 
 
+    [HttpGet("getBookedDates/{id}")]
+    [ProducesResponseType(typeof(Result<IEnumerable<object>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBookedDatesForCar([FromRoute] string id)
+    {
+        var query = new GetBookedDatesForCarQuery() { CarId = id };
+        return await SendCommand(query);
+    }
+
     [HttpGet]
     [ProducesResponseType(typeof(Result<PagedResponse<CarDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllPagedCars([FromQuery] GetAllPagedCarsQuery query)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        query.UserId = userId;
         var res = await SendCommand(query);
         return res;
     }

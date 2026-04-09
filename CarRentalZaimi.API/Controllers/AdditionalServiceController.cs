@@ -45,10 +45,10 @@ public class AdditionalServiceController(IMediator _mediator) : ApiControllerBas
         return await SendCommand(command, SuccessMessages.AditionalServices.AditionalServicesDeleted);
     }
 
-    [HttpGet("getAll", Name = nameof(GetAllAdditionalSServices))]
+    [HttpGet("getAll", Name = nameof(GetAllAdditionalServices))]
     [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetAllAdditionalSServices()
+    public async Task<IActionResult> GetAllAdditionalServices()
     {
         return await SendQuery(new GetAllAdditionalServicesQuery(), null, StatusCodes.Status404NotFound);
     }

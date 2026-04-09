@@ -8,6 +8,7 @@ using CarRentalZaimi.Application.Features.Cars.Commands.CreateCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.DeleteCar;
 using CarRentalZaimi.Application.Features.Cars.Commands.UpdateCar;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetAllCars;
+using CarRentalZaimi.Application.Features.Cars.Queries.GetBookedDatesForCar;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetCarById;
 using CarRentalZaimi.Application.Features.Cars.Queries.GetFeaturedCars;
 using CarRentalZaimi.Application.Interfaces.Services;
@@ -489,6 +490,32 @@ public class CarService(
         return Result<IEnumerable<CarDto>>.Success(cars);
     }
 
+    public async Task<Result<IEnumerable<BookedDateRangeDto>>> GetBookedDatesForCarAsync(
+        GetBookedDatesForCarQuery request,
+        CancellationToken cancellationToken = default)
+    {
+        var carExists = await _uow.Repository<Car>()
+            .AnyAsync(c => c.Id.ToString() == request.CarId, cancellationToken);
+
+        if (!carExists)
+            return Result<IEnumerable<BookedDateRangeDto>>.Error("Car not found.");
+
+        var today = DateTime.UtcNow.Date;
+
+        var bookedDates = await _uow.Repository<Booking>()
+            .AsQueryable()
+            .Where(b => b.Car!.Id.ToString() == request.CarId
+                     && b.EndDate >= today
+                     && b.Status == Domain.Enums.BookingStatus.Axcepted)
+            .Select(b => new BookedDateRangeDto
+            {
+                StartDate = b.StartDate,
+                EndDate = b.EndDate
+            })
+            .ToListAsync(cancellationToken);
+
+        return Result<IEnumerable<BookedDateRangeDto>>.Success(bookedDates);
+    }
 
 
     private IQueryable<Car> GetBaseCarQuery()

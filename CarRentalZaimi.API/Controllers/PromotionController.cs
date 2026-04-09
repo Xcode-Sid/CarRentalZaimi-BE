@@ -5,6 +5,7 @@ using CarRentalZaimi.Application.Features.Promotion.Commands.CreatePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Commands.DeletePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Commands.UpdatePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Queries.GetAllPromotion;
+using CarRentalZaimi.Application.Features.Promotion.Queries.GetPromotionByCarId;
 using CarRentalZaimi.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -51,5 +52,13 @@ public class PromotionController(IMediator _mediator) : ApiControllerBase(_media
     public async Task<IActionResult> GetAllPromotion()
     {
         return await SendQuery(new GetAllPromotionQuery(), null, StatusCodes.Status404NotFound);
+    }
+
+    [HttpGet("getPromotionForCar", Name = nameof(GetPromotion))]
+    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPromotion([FromQuery] GetPromotionByCarIdQuery query)
+    {
+        return await SendQuery(query, null, StatusCodes.Status404NotFound);
     }
 }

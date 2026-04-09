@@ -103,4 +103,10 @@ public static class SuccessMessages
     {
         public const string CarSaved = "Car saved successfully";
     }
+
+    public static class BookingRequest
+    {
+        public const string BookingRequestCreated = "Booking request created successfully";
+        public const string BookingRequestUpdated = "Booking request updated successfully";
+    }
 }
