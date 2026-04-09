@@ -1,4 +1,4 @@
-﻿namespace CarRentalZaimi.Application.Common.Messages;
+namespace CarRentalZaimi.Application.Common.Messages;
 
 public static class SuccessMessages
 {
@@ -83,5 +83,10 @@ public static class SuccessMessages
         public const string CarReviewCreated = "Car review created successfully";
         public const string CarReviewUpdated = "Car review updated successfully";
         public const string CarReviewDeleted = "Car review deleted successfully";
+
+    }
+    public static class SavedCar
+    {
+        public const string CarSaved = "Car saved successfully";
     }
 }

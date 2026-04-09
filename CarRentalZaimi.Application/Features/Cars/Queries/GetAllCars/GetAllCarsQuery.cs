@@ -3,7 +3,7 @@ using CarRentalZaimi.Application.Interfaces.Query;
 
 namespace CarRentalZaimi.Application.Features.Cars.Queries.GetAllCars;
 
-public class GetAllCarsQuery : IQuery<PagedResponse<CarDto>>
+public record GetAllCarsQuery : IQuery<PagedResponse<CarDto>>
 {
     public string? Search { get; set; }
     public int PageNr { get; set; } = 1;
@@ -18,4 +18,7 @@ public class GetAllCarsQuery : IQuery<PagedResponse<CarDto>>
 
     // Sort
     public string? SortBy { get; set; }
+
+    //to get if post is saved by loggedin user
+    public string? UserId { get; set; }
 }

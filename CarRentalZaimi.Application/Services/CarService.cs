@@ -421,8 +421,20 @@ public class CarService(
             .ToListAsync(cancellationToken);
 
         var mapped = _mapper.Map<List<CarDto>>(cars);
-        var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
+        // ✅ Populate IsSaved after mapping
+        if (!string.IsNullOrWhiteSpace(request.UserId))
+        {
+            var savedCarIds = await _uow.Repository<SavedCar>()
+                .AsQueryable()
+                .Where(sc => sc.User!.Id == request.UserId && !sc.IsDeleted)
+                .Select(sc => sc.Car!.Id)
+                .ToHashSetAsync(cancellationToken);
 
+            foreach (var car in mapped)
+                car.IsSaved = savedCarIds.Contains(car.Id); // in-memory, no EF translation issue
+        }
+
+        var pagedResponse = new PagedResponse<CarDto>(mapped, totalCount, request.PageNr, request.PageSize);
         return Result<PagedResponse<CarDto>>.Success(pagedResponse);
     }
 
