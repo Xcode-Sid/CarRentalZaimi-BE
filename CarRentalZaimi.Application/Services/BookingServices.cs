@@ -7,12 +7,14 @@ using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.Extensions.Logging;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper) : IBookingServices
+public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailService _emailService, 
+    ILogger<BookingServices> _logger, UserManager<User> _userManager) : IBookingServices
 {
     public async Task<Result<BookingDto>> CreateBookingRequestAsync(CreateBookingRequestCommand request, CancellationToken cancellationToken = default)
     {
@@ -28,38 +30,85 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper) : IBookin
         if (car is null)
             return Result<BookingDto>.Error("Car not found");
 
-        Enum.TryParse<PaymentMethod>(request.PaymentMethod, true, out var paymentMethod);
+        Enum.TryParse<PaymentMethod>(request.PaymentMethod, ignoreCase: true, out var paymentMethod);
 
-        var booking = new Booking
-        {
-            Id = Guid.NewGuid(),
-            Reference = GenerateBookingReference(),
-            PhoneNumber = request.PhoneNumber,
-            PaymentMethod = paymentMethod,
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
-            Status = BookingStatus.Axcepted,
-            TotalPrice = request.TotalPrice,
-            User = user,
-            Car = car,
-        };
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-        foreach (var serviceId in request.AditionalServiceIds)
+        try
         {
-            var service = await _unitOfWork.Repository<AdditionalService>()
-            .FirstOrDefaultAsync(p => p.Id.ToString() == serviceId, cancellationToken);
-            var bookingServices = new BookingService
+            var booking = new Booking
             {
-                Booking = booking,
-                AdditionalService = service
+                Id = Guid.NewGuid(),
+                Reference = GenerateBookingReference(),
+                PhoneNumber = request.PhoneNumber,
+                PaymentMethod = paymentMethod,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Status = BookingStatus.Axcepted,
+                TotalPrice = request.TotalPrice,
+                User = user,
+                Car = car,
             };
-            await _unitOfWork.Repository<BookingService>().AddAsync(bookingServices, cancellationToken);
+
+            foreach (var serviceId in request.AditionalServiceIds)
+            {
+                var service = await _unitOfWork.Repository<AdditionalService>()
+                    .FirstOrDefaultAsync(p => p.Id.ToString() == serviceId, cancellationToken);
+
+                var bookingServices = new BookingService
+                {
+                    Booking = booking,
+                    AdditionalService = service
+                };
+                await _unitOfWork.Repository<BookingService>().AddAsync(bookingServices, cancellationToken);
+            }
+
+            await _unitOfWork.Repository<Booking>().AddAsync(booking, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Notify admin
+            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+            var admin = adminUsers.FirstOrDefault();
+
+            if (admin is not null)
+            {
+                var notification = new UserNotification
+                {
+                    Id = Guid.NewGuid(),
+                    User = admin,
+                    Message = $"{user.FirstName} {user.LastName} has made a booking request for {car.Name} {car.Model}.",
+                    IsRead = false,
+                    UserNotificationType = UserNotificationType.NewBookingRequest
+                };
+
+                await _unitOfWork.Repository<UserNotification>().AddAsync(notification, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+            // Send email outside transaction — no need to roll back if email fails
+            if (admin is not null)
+            {
+                var emailResult = await _emailService.SendBookingRequestEmailToAdminAsync(
+                    admin.Email!,
+                    $"{user.FirstName} {user.LastName}",
+                    $"{car.Title}",
+                    booking.Reference,
+                    cancellationToken);
+
+                if (!emailResult.IsSuccessful)
+                    _logger.LogWarning("Failed to send admin booking notification for reference {Ref}", booking.Reference);
+            }
+
+            return Result<BookingDto>.Success(_mapper.Map<BookingDto>(booking));
         }
-
-        await _unitOfWork.Repository<Booking>().AddAsync(booking, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return Result<BookingDto>.Success(_mapper.Map<BookingDto>(booking));
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            _logger.LogError(ex, "Failed to create booking request for user {UserId}", request.UserId);
+            return Result<BookingDto>.Error("Failed to create booking request.");
+        }
     }
     private static string GenerateBookingReference()
     {

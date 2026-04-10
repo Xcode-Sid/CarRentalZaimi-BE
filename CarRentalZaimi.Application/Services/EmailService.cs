@@ -41,7 +41,33 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
         return await SendEmailAsync(email, "Reset Your Password", body, isHtml: true, cancellationToken);
     }
 
-    public async Task<Result<bool>> SendEmailAsync(string to, string subject, string body, bool isHtml = true, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> SendBookingRequestEmailToAdminAsync(string adminEmail, string userName, string carName, string bookingReference,
+    CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiNewBookingRequestEmailTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("Booking request email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        body = body
+            .Replace("{{UserName}}", userName)
+            .Replace("{{CarName}}", carName)
+            .Replace("{{BookingReference}}", bookingReference)
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(adminEmail, "New Booking Request", body, isHtml: true, cancellationToken);
+    }
+
+    private async Task<Result<bool>> SendEmailAsync(string to, string subject, string body, bool isHtml = true, CancellationToken cancellationToken = default)
     {
         try
         {

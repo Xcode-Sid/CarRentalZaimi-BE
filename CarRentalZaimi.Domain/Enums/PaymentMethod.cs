@@ -2,6 +2,6 @@
 
 public enum PaymentMethod
 {
-    CashAtPickup = 1, 
-    CardAtPickup = 2,
+    Cash = 1, 
+    Card = 2,
 }
