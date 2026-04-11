@@ -17,6 +17,7 @@ public class Booking : AuditedEntity<Guid>
     public BookingStatus? Status { get; set; }
     public string? RefuzedReason { get; set; }
     public RefuzedByType? RefuzedBy { get; set; }
+    public bool IsCanceled { get; set; }
     public ICollection<BookingService>? BookingServices { get; set; }
 
 }

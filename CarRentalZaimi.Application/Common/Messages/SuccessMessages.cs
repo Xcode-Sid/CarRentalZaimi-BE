@@ -107,6 +107,8 @@ public static class SuccessMessages
     public static class BookingRequest
     {
         public const string BookingRequestCreated = "Booking request created successfully";
-        public const string BookingRequestUpdated = "Booking request updated successfully";
+        public const string BookingRequestAccepted = "Booking request accepted successfully";
+        public const string BookingRequestRefused = "Booking request refused successfully";
+        public const string BookingRequestCanceled = "Booking request canceled successfully";
     }
 }

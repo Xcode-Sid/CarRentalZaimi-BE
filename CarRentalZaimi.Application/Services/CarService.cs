@@ -506,7 +506,7 @@ public class CarService(
             .AsQueryable()
             .Where(b => b.Car!.Id.ToString() == request.CarId
                      && b.EndDate >= today
-                     && b.Status == Domain.Enums.BookingStatus.Axcepted)
+                     && b.Status == Domain.Enums.BookingStatus.Accepted)
             .Select(b => new BookedDateRangeDto
             {
                 StartDate = b.StartDate,
