@@ -43,6 +43,10 @@ public class CompanyProfileService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
                 TwiterUrl = request.TwiterUrl,
                 YoutubeUrl = request.YoutubeUrl,
                 WhatsAppNumber = request.WhatsAppNumber,
+                Cars = request.Cars,
+                Years = request.Years,
+                Cities = request.Cities,
+                Clients = request.Clients
             };
 
             await _unitOfWork.Repository<CompanyProfile>().AddAsync(profile, cancellationToken);
@@ -72,6 +76,10 @@ public class CompanyProfileService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
             existingProfile.TwiterUrl = request.TwiterUrl;
             existingProfile.YoutubeUrl = request.YoutubeUrl;
             existingProfile.WhatsAppNumber = request.WhatsAppNumber;
+            existingProfile.Clients = request.Clients;
+            existingProfile.Cars = request.Cars;
+            existingProfile.Years = request.Years;
+            existingProfile.Cities = request.Cities;
 
             await _unitOfWork.Repository<CompanyProfile>().UpdateAsync(existingProfile);
         }
@@ -116,16 +124,22 @@ public class CompanyProfileService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
 
         byte[] imageData = Convert.FromBase64String(base64Data);
 
-        // Add a unique suffix to avoid overwriting previous logos
-        var uniqueName = $"{Guid.NewGuid()}_{"company_logo"}";
-        var imagePath = Path.Combine(folderPath, uniqueName);
-
-        await using (var fileStream = new FileStream(imagePath, FileMode.Create))
+        // Detect image type from magic bytes
+        string extension = "png"; // default
+        if (imageData.Length > 2)
         {
-            await fileStream.WriteAsync(imageData, 0, imageData.Length, cancellationToken);
+            if (imageData[0] == 0xFF && imageData[1] == 0xD8) extension = "jpg";
+            else if (imageData[0] == 0x89 && imageData[1] == 0x50) extension = "png";
+            else if (imageData[0] == 0x47 && imageData[1] == 0x49) extension = "gif";
+            else if (imageData[0] == 0x52 && imageData[1] == 0x49) extension = "webp";
         }
 
-        // Return the relative path to store in the database
+        var uniqueName = $"{Guid.NewGuid()}_company_logo.{extension}";
+        var imagePath = Path.Combine(folderPath, uniqueName);
+
+        await using var fileStream = new FileStream(imagePath, FileMode.Create);
+        await fileStream.WriteAsync(imageData, 0, imageData.Length, cancellationToken);
+
         return $"images/company/{uniqueName}";
     }
 }
