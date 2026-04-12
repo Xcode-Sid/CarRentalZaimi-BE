@@ -130,4 +130,11 @@ public static class SuccessMessages
         public const string TermUpdated = "Term updated successfully";
         public const string TermDeleted = "Term deleted successfully";
     }
+
+    public static class Privacy
+    {
+        public const string PrivacyCreated = "Privacy created successfully";
+        public const string PrivacyUpdated = "Privacy updated successfully";
+        public const string PrivacyDeleted = "Privacy deleted successfully";
+    }
 }

@@ -51,11 +51,11 @@ public class TermsService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITermsServ
 
     public async Task<Result<IEnumerable<TermsDto>>> GetAllAsync(GetAllTermsQuery request, CancellationToken cancellationToken = default)
     {
-        var carFuels = await _unitOfWork.Repository<Terms>()
+        var terms = await _unitOfWork.Repository<Terms>()
           .AsQueryable()
           .ToListAsync(cancellationToken);
 
-        var mapped = _mapper.Map<IEnumerable<TermsDto>>(carFuels);
+        var mapped = _mapper.Map<IEnumerable<TermsDto>>(terms);
         return Result.Success(mapped);
     }
 
