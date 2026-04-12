@@ -142,6 +142,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
             booking.IsCanceled = true;
             booking.Status = BookingStatus.Refused;
             booking.RefuzedBy = RefuzedByType.User;
+            booking.RefuzedReason = request.Reason;
 
             await _unitOfWork.Repository<Booking>().UpdateAsync(booking, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -176,7 +177,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
                     $"{booking.Car!.Title}",
                     $"{booking.Car.Name!.Name} {booking.Car.Model!.Name}",
                     DateTime.UtcNow.ToString("dd MMM yyyy"),
-                    "No reason provided", // TODO
+                    booking.RefuzedReason,
                     cancellationToken);
 
                 if (!emailResult.IsSuccessful)
@@ -293,6 +294,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         {
             booking.Status = BookingStatus.Refused;
             booking.RefuzedBy = RefuzedByType.Admin;
+            booking.RefuzedReason = request.RefusedReanson;
 
             await _unitOfWork.Repository<Booking>().UpdateAsync(booking, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -318,7 +320,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
                 $"{booking.User!.FirstName} {booking.User!.LastName}",
                 $"{booking.Car!.Title}",
                 $"{booking.Car.Name!.Name} {booking.Car.Model!.Name}",
-                request.RefusedReanson,
+                booking.RefuzedReason,
                 cancellationToken);
 
             if (!emailResult.IsSuccessful)
@@ -340,6 +342,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         var query = _unitOfWork.Repository<Booking>()
             .AsQueryable()
             .Include(b => b.Car)
+                .ThenInclude(c => c.CarImages)
             .Include(b => b.User)
             .Include(b => b.BookingServices)
             .ThenInclude(bs => bs.AdditionalService)
@@ -398,6 +401,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         var bookings = await _unitOfWork.Repository<Booking>()
            .AsQueryable()
             .Include(b => b.Car)
+                .ThenInclude(c => c.CarImages)
             .Include(b => b.User)
             .Include(b => b.BookingServices)
                 .ThenInclude(bs => bs.AdditionalService)

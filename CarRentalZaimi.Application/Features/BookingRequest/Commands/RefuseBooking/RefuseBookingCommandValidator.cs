@@ -8,8 +8,5 @@ internal class RefuseBookingCommandValidator : AbstractValidator<RefuseBookingCo
     {
         RuleFor(x => x.BookingId)
            .NotEmpty().WithMessage("Booking Id is required");
-
-        RuleFor(x => x.RefusedReanson)
-           .NotEmpty().WithMessage("Refused reanson Id is required");
     }
 }
