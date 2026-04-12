@@ -84,6 +84,8 @@ public class ApplicationDbContext(
     public DbSet<StatePrefix> StatePrefixes { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
     public DbSet<Partner> Partners { get; set; }
+    public DbSet<Privacy> Privacies { get; set; }
+    public DbSet<Terms> Terms { get; set; }
 
 
 

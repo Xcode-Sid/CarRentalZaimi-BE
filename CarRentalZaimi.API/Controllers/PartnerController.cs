@@ -26,7 +26,7 @@ public class PartnerController(IMediator _mediator) : ApiControllerBase(_mediato
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreatePartner([FromBody] CreatePartnerCommand command)
     {
-        return await SendCommand(command, SuccessMessages.Partner.PartnerrCreated);
+        return await SendCommand(command, SuccessMessages.Partner.PartnerCreated);
     }
 
     [HttpPut("{id}", Name = nameof(UpdatePartner))]

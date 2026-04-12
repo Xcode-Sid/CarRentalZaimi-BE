@@ -119,8 +119,15 @@ public static class SuccessMessages
 
     public static class Partner
     {
-        public const string PartnerrCreated = "Partner created successfully";
+        public const string PartnerCreated = "Partner created successfully";
         public const string PartnerUpdated = "Partner updated successfully";
         public const string PartnerDeleted = "Partner deleted successfully";
+    }
+
+    public static class Term
+    {
+        public const string TermCreated = "Term created successfully";
+        public const string TermUpdated = "Term updated successfully";
+        public const string TermDeleted = "Term deleted successfully";
     }
 }

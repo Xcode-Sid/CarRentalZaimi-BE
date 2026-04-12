@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IBookingServices, BookingServices>();
         services.AddScoped<ICompanyProfileService, CompanyProfileService>();
         services.AddScoped<IPartnerService, PartnerService>();
+        services.AddScoped<ITermsService, TermsService>();
         return services;
     }
 }
