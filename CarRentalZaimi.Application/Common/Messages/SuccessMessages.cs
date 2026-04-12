@@ -111,4 +111,16 @@ public static class SuccessMessages
         public const string BookingRequestRefused = "Booking request refused successfully";
         public const string BookingRequestCanceled = "Booking request canceled successfully";
     }
+
+    public static class CompanyProfile
+    {
+        public const string CompanyProfileAdded = "Company profile data added successfully";
+    }
+
+    public static class Partner
+    {
+        public const string PartnerrCreated = "Partner created successfully";
+        public const string PartnerUpdated = "Partner updated successfully";
+        public const string PartnerDeleted = "Partner deleted successfully";
+    }
 }

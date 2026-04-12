@@ -18,7 +18,7 @@ public class CompanyProfileController(IMediator _mediator) : ApiControllerBase(_
     [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddCompanyProfileData([FromBody] AddCompanyProfileDataCommand command)
     {
-        return await SendCommand(command, SuccessMessages.Car.CarCreated);
+        return await SendCommand(command, SuccessMessages.CompanyProfile.CompanyProfileAdded);
     }
 
     [HttpGet("get", Name = nameof(GetCompanyProfileData))]
