@@ -6,6 +6,7 @@ using CarRentalZaimi.Application.Features.BookingRequest.Commands.CancelBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.CreateBookingRequest;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.RefuseBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllBookings;
+using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllUserBookings;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
@@ -392,4 +393,18 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         return $"{prefix}-{year}-{suffix}";
     }
 
+    public async Task<Result<IEnumerable<BookingDto>>> GetAllUserBookingsAsync(GetAllUserBookingsQuery request, CancellationToken cancellationToken = default)
+    {
+        var bookings = await _unitOfWork.Repository<Booking>()
+           .AsQueryable()
+            .Include(b => b.Car)
+            .Include(b => b.User)
+            .Include(b => b.BookingServices)
+                .ThenInclude(bs => bs.AdditionalService)
+           .Where(b => b.User!.Id == request.UserId)
+           .ToListAsync(cancellationToken);
+
+        var mapped = _mapper.Map<IEnumerable<BookingDto>>(bookings);
+        return Result.Success(mapped);
+    }
 }
