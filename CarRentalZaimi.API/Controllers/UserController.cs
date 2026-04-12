@@ -1,8 +1,11 @@
 ﻿using CarRentalZaimi.API.Controllers.Base;
+using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Messages;
+using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.DTOs.ApiResponse;
 using CarRentalZaimi.Application.Features.Users.Commands.AddPhoneNumber;
 using CarRentalZaimi.Application.Features.Users.Commands.UpdateUser;
+using CarRentalZaimi.Application.Features.Users.Queries.GetAllUsers;
 using CarRentalZaimi.Application.Features.Users.Queries.GetUserByEmail;
 using CarRentalZaimi.Application.Features.Users.Queries.GetUserById;
 using MediatR;
@@ -18,6 +21,14 @@ public class UserController(IMediator _mediator) : ApiControllerBase(_mediator)
     public async Task<IActionResult> GetUserById(string userId)
     {
         return await SendQuery(new GetUserByIdQuery { UserId = userId }, null, StatusCodes.Status404NotFound);
+    }
+
+    [HttpGet("getAll", Name = nameof(GetAllUsers))]
+    [ProducesResponseType(typeof(Result<PagedResponse<UserDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllUsers([FromQuery] GetAllUsersQuery query)
+    {
+        return await SendQuery(query, null, StatusCodes.Status404NotFound);
     }
 
 

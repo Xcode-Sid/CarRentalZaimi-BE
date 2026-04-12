@@ -10,6 +10,7 @@ using CarRentalZaimi.Application.Features.BookingRequest.Commands.CancelBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.CreateBookingRequest;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.RefuseBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllBookings;
+using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllUserBookings;
 using CarRentalZaimi.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -63,6 +64,17 @@ public class BookingController(IMediator _mediator) : ApiControllerBase(_mediato
     [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllBookings([FromQuery] GetAllBookingsQuery query)
     {
+        var res = await SendCommand(query);
+        return res;
+    }
+
+
+    [HttpGet("user/{id}", Name = nameof(GetAllUserBookings))]
+    [ProducesResponseType(typeof(Result<PagedResponse<BookingDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAllUserBookings([FromRoute]  string id)
+    {
+        var query = new GetAllUserBookingsQuery() { UserId = id };
         var res = await SendCommand(query);
         return res;
     }

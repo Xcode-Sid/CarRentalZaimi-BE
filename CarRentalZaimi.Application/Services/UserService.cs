@@ -4,12 +4,15 @@ using CarRentalZaimi.Application.Common.Errors;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Users.Commands.AddPhoneNumber;
 using CarRentalZaimi.Application.Features.Users.Commands.UpdateUser;
+using CarRentalZaimi.Application.Features.Users.Queries.GetAllUsers;
 using CarRentalZaimi.Application.Features.Users.Queries.GetUserByEmail;
 using CarRentalZaimi.Application.Features.Users.Queries.GetUserById;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
@@ -64,6 +67,43 @@ public class UserService : IUserService
         };
 
         return Result<UserDto>.Success(response);
+    }
+
+
+    public async Task<Result<PagedResponse<UserDto>>> GetAllUsersAsync(GetAllUsersQuery request, CancellationToken cancellationToken = default)
+    {
+        var query = _unitOfWork.Repository<User>()
+            .AsQueryable()
+            .Where(c => !c.IsDeleted);
+
+        // Search
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToLower();
+            query = query.Where(c =>
+                (c.FirstName != null && c.FirstName.ToLower().Contains(search)) ||
+                (c.LastName != null && c.LastName.ToLower().Contains(search)) ||
+                (c.UserName != null && c.UserName.ToLower().Contains(search)) ||
+                (c.Email != null && c.Email.ToLower().Contains(search)));
+        }
+
+
+        if (Enum.TryParse<UserStatus>(request.Status, ignoreCase: true, out var status))
+        {
+            query = query.Where(c => c.Status == status);
+        }
+
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var cars = await query
+            .Skip((request.PageNr - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var mapped = _mapper.Map<List<UserDto>>(cars);
+        var pagedResponse = new PagedResponse<UserDto>(mapped, totalCount, request.PageNr, request.PageSize);
+        return Result<PagedResponse<UserDto>>.Success(pagedResponse);
     }
 
     public async Task<Result<UserDto>> GetUserByEmailAsync(GetUserByEmailQuery request, CancellationToken cancellationToken = default)
