@@ -19,8 +19,8 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
     {
         var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
         var secretKey = jwtSettings[ConfigurationKeys.JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
-        var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "SquadBuddy";
-        var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "SquadBuddy";
+        var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "CarRentalZaimi";
+        var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "CarRentalZaimi";
         var expiryMinutes = int.Parse(jwtSettings[ConfigurationKeys.JwtSettingKeys.ExpiryMinutes] ?? "60");
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -49,8 +49,8 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
     {
         var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
         var secretKey = jwtSettings[ConfigurationKeys.JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
-        var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "SquadBuddy";
-        var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "SquadBuddy";
+        var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "CarRentalZaimi";
+        var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "CarRentalZaimi";
 
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -80,8 +80,8 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
         {
             var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
             var secretKey = jwtSettings[ConfigurationKeys.JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
-            var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "SquadBuddy";
-            var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "SquadBuddy";
+            var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "CarRentalZaimi";
+            var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "CarRentalZaimi";
 
             var tokenValidationParameters = new TokenValidationParameters
             {
@@ -105,6 +105,33 @@ public class JwtTokenService(IConfiguration _configuration, ILogger<JwtTokenServ
             _logger.LogWarning(ex, "Token validation failed");
             return false;
         }
+    }
+
+    public string GenerateUnsubscribeToken(string email)
+    {
+        var jwtSettings = _configuration.GetSection(ConfigurationKeys.Sections.JwtSettings);
+        var secretKey = jwtSettings[ConfigurationKeys.JwtSettingKeys.SecretKey] ?? throw new InvalidOperationException(ExceptionMessages.JwtSecretKeyNotConfigured);
+        var issuer = jwtSettings[ConfigurationKeys.JwtSettingKeys.Issuer] ?? "CarRentalZaimi";
+        var audience = jwtSettings[ConfigurationKeys.JwtSettingKeys.Audience] ?? "CarRentalZaimi";
+
+        var claims = new[]
+        {
+        new Claim("email", email),
+        new Claim("purpose", "unsubscribe")
+    };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: issuer,
+            audience: audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(30),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     public DateTime GetTokenExpiration(string token)

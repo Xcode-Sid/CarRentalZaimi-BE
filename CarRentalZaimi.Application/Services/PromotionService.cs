@@ -79,18 +79,14 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
                 _ => "All Cars"
             };
 
-            var fleetUrl = "http://localhost:5173/fleet"; // TODO fix later
-
             var emailTasks = activeSubscribers.Select(subscriber =>
                 _emailService.SendNewPromotionNotificationEmailAsync(
                     subscriberEmail: subscriber.Email!,
                     title: newPromotion.Title,
-                    description: newPromotion.Description ?? string.Empty,
                     code: newPromotion.Code,
                     discountPercentage: newPromotion.DiscountPercentage.ToString("F0"),
                     numberOfDays: newPromotion.NumberOfDays.ToString(),
                     appliesTo: appliesTo,
-                    fleetUrl: fleetUrl,
                     cancellationToken: cancellationToken
                 )
             );

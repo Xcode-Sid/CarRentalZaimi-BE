@@ -11,10 +11,11 @@ using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserManager<User> _userManager, IEmailService _emailService) : ISubscribeService
+public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserManager<User> _userManager, IEmailService _emailService, IJwtTokenService _jwtTokenService) : ISubscribeService
 {
     public async Task<Result<PagedResponse<SubscribeDto>>> GetALlPagedSubscriptionsAsync(GetAllPagedSubscriptionsQuery request, CancellationToken cancellationToken = default)
     {
@@ -87,8 +88,16 @@ public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserMana
 
     public async Task<Result<bool>> UsubscribeAsync(RemoveSubscriptionCommand request, CancellationToken cancellationToken = default)
     {
+        var principal = _jwtTokenService.GetPrincipalFromExpiredToken(request.Token);
+        var email = principal?.Claims.FirstOrDefault(c =>
+            c.Type == "email" ||
+            c.Type == ClaimTypes.Email)?.Value;
+
+        if (string.IsNullOrEmpty(email))
+            return Result<bool>.Error("Invalid or expired unsubscribe token.");
+
         var subscription = await _unitOfWork.Repository<Subscribe>()
-            .FirstOrDefaultAsync(p => p.Email == request.Email, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Email == email, cancellationToken);
 
         if (subscription is null)
             return Result<bool>.Error("This email does not hava any subscriptions");
@@ -108,7 +117,7 @@ public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserMana
             {
                 Id = Guid.NewGuid(),
                 User = admin,
-                Message = $"{request.Email} has unsubscribed from car promotions and updates.",
+                Message = $"{email} has unsubscribed from car promotions and updates.",
                 IsRead = false,
                 UserNotificationType = UserNotificationType.Unsubscribe
             };
@@ -116,9 +125,9 @@ public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserMana
             await _unitOfWork.Repository<UserNotification>().AddAsync(notification, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await _emailService.SendUnsubscribeEmailToAdminAsync(admin.Email!, request.Email, cancellationToken);
+            await _emailService.SendUnsubscribeEmailToAdminAsync(admin.Email!, email, cancellationToken);
         }
 
-        return Result<bool>.Success(_mapper.Map<bool>(subscription));
+        return Result<bool>.Success(_mapper.Map<bool>(true));
     }
 }

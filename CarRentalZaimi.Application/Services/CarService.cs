@@ -168,7 +168,6 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
             {
                 var carModel = newCar.Model?.Name ?? "N/A";
                 var fuelType = newCar.FuelType?.Name ?? "N/A";
-                var carUrl = $"http://localhost:5173/fleet/{newCar.Id}"; // TODO fix later
 
                 var emailTasks = activeSubscribers.Select(subscriber =>
                     _emailService.SendNewCarNotificationEmailAsync(
@@ -179,7 +178,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
                         fuelType: fuelType,
                         seats: newCar.Seats.ToString() ?? "N/A",
                         pricePerDay: newCar.PricePerDay.ToString("F2"),
-                        carUrl: carUrl,
+                        carId: newCar.Id,
                         cancellationToken: cancellationToken
                     )
                 );

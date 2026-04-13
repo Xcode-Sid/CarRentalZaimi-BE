@@ -18,9 +18,9 @@ public interface IEmailService
     Task<Result<bool>> SendUnsubscribeEmailToAdminAsync(string adminEmail, string subscriberEmail,
         CancellationToken cancellationToken = default);
     Task<Result<bool>> SendNewCarNotificationEmailAsync(  string subscriberEmail, string carTitle, string carModel, string carYear, string fuelType, string seats,
-        string pricePerDay, string carUrl, CancellationToken cancellationToken = default);
-    Task<Result<bool>> SendNewPromotionNotificationEmailAsync(string subscriberEmail, string title, string description, string code, string discountPercentage,
-        string numberOfDays, string appliesTo, string fleetUrl, CancellationToken cancellationToken = default);
+        string pricePerDay, Guid carId, CancellationToken cancellationToken = default);
+    Task<Result<bool>> SendNewPromotionNotificationEmailAsync(string subscriberEmail, string title, string code, string discountPercentage,
+        string numberOfDays, string appliesTo, CancellationToken cancellationToken = default);
     Task<Result<bool>> SendContactMessageAdminNotificationAsync( string fullName, string email, string phone, string subject, string message, string adminEmail,
         CancellationToken cancellationToken = default);
 

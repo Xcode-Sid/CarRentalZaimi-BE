@@ -5,5 +5,5 @@ namespace CarRentalZaimi.Application.Features.Subscribe.Commands.RemoveSubscript
 
 public class RemoveSubscriptionCommand : ICommand<bool>
 {
-    public string? Email { get; set; }
+    public string? Token { get; set; }
 }

@@ -6,7 +6,7 @@ internal class RemoveSubscriptionCommandValidator : AbstractValidator<RemoveSubs
 {
     public RemoveSubscriptionCommandValidator()
     {
-        RuleFor(x => x.Email)
+        RuleFor(x => x.Token)
             .NotEmpty().WithMessage("Email is required")
             .EmailAddress().WithMessage("Email must be a valid email address");
     }

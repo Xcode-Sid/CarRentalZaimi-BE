@@ -7,11 +7,12 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
+using Twilio.Jwt.AccessToken;
 
 namespace CarRentalZaimi.Application.Services;
 
 public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
-    ILogger<EmailService> logger,IErrorService errorService) : IEmailService
+    ILogger<EmailService> logger,IErrorService errorService, IOptions<EmailSettings> _emailSettings, IErrorService _errorService, IJwtTokenService _jwtTokenService) : IEmailService
 {
 
     private readonly EmailSettings _emailSettings = emailSettingsOptions.Value;
@@ -201,7 +202,7 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
     }
 
     public async Task<Result<bool>> SendNewCarNotificationEmailAsync(string subscriberEmail, string carTitle, string carModel, string carYear, string fuelType,
-        string seats, string pricePerDay, string carUrl, CancellationToken cancellationToken = default)
+        string seats, string pricePerDay, Guid carId, CancellationToken cancellationToken = default)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames()
@@ -217,6 +218,19 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
         using var reader = new StreamReader(stream);
         var body = await reader.ReadToEndAsync(cancellationToken);
 
+        var rawBaseUrl = _emailSettings.BaseUrl;
+        if (!Uri.TryCreate(rawBaseUrl, UriKind.Absolute, out var parsedBaseUrl))
+        {
+            _logger.LogError("Email BaseUrl is missing or invalid in configuration.");
+            return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        var token = _jwtTokenService.GenerateUnsubscribeToken(subscriberEmail);
+        var baseUrl = parsedBaseUrl.ToString().TrimEnd('/');
+        var unsubscribeLink = $"{baseUrl}/unsubscribe?token={token}";
+
+        var carUrl = $"{baseUrl}/fleet/{carId}"; 
+
         body = body
             .Replace("{{CarTitle}}", carTitle)
             .Replace("{{CarModel}}", carModel)
@@ -225,13 +239,14 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
             .Replace("{{Seats}}", seats)
             .Replace("{{PricePerDay}}", pricePerDay)
             .Replace("{{CarUrl}}", carUrl)
+            .Replace("{{UnsubscribeUrl}}", unsubscribeLink)
             .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
 
         return await SendEmailAsync(subscriberEmail, "New Car Available at Car Rental Zaimi!", body, isHtml: true, cancellationToken);
     }
 
-    public async Task<Result<bool>> SendNewPromotionNotificationEmailAsync(string subscriberEmail, string title, string description, string code, string discountPercentage,
-        string numberOfDays, string appliesTo,  string fleetUrl, CancellationToken cancellationToken = default)
+    public async Task<Result<bool>> SendNewPromotionNotificationEmailAsync(string subscriberEmail, string title, string code, string discountPercentage,
+        string numberOfDays, string appliesTo, CancellationToken cancellationToken = default)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames()
@@ -247,14 +262,27 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
         using var reader = new StreamReader(stream);
         var body = await reader.ReadToEndAsync(cancellationToken);
 
+        var rawBaseUrl = _emailSettings.BaseUrl;
+        if (!Uri.TryCreate(rawBaseUrl, UriKind.Absolute, out var parsedBaseUrl))
+        {
+            _logger.LogError("Email BaseUrl is missing or invalid in configuration.");
+            return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        var token = _jwtTokenService.GenerateUnsubscribeToken(subscriberEmail);
+        var baseUrl = parsedBaseUrl.ToString().TrimEnd('/');
+        var unsubscribeLink = $"{baseUrl}/unsubscribe?token={token}";
+
+        var fleetUrl = $"{baseUrl}/fleet";
+
         body = body
             .Replace("{{Title}}", title)
-            .Replace("{{Description}}", description)
             .Replace("{{Code}}", code)
             .Replace("{{DiscountPercentage}}", discountPercentage)
             .Replace("{{NumberOfDays}}", numberOfDays)
             .Replace("{{AppliesTo}}", appliesTo)
             .Replace("{{FleetUrl}}", fleetUrl)
+            .Replace("{{UnsubscribeUrl}}", unsubscribeLink)
             .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
 
         return await SendEmailAsync(subscriberEmail, "New Promotion at Car Rental Zaimi!", body, isHtml: true, cancellationToken);
