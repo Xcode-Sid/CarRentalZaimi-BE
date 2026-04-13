@@ -86,7 +86,8 @@ public class ApplicationDbContext(
     public DbSet<Partner> Partners { get; set; }
     public DbSet<Privacy> Privacies { get; set; }
     public DbSet<Terms> Terms { get; set; }
-
+    public DbSet<Subscribe> Subscribes { get; set; }
+    
 
 
     protected override void OnModelCreating(ModelBuilder builder)

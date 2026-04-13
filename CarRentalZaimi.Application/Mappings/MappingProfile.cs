@@ -39,6 +39,7 @@ public class MappingProfile : Profile
         CreateMap<Partner, PartnerDto>().ReverseMap();
         CreateMap<Terms, TermsDto>().ReverseMap();
         CreateMap<Privacy, PrivacyDto>().ReverseMap();
+        CreateMap<Subscribe, SubscribeDto>().ReverseMap();
         CreateMap<Result<List<StatePrefix>>, Result<List<StatePrefixDto>>>();
         CreateMap<Result<List<CarFuel>>, Result<List<CarFuelDto>>>();
         CreateMap<Result<List<CarTransmission>>, Result<List<CarTransmissionDto>>>();
@@ -56,5 +57,6 @@ public class MappingProfile : Profile
         CreateMap<Result<List<Partner>>, Result<List<PartnerDto>>>();
         CreateMap<Result<List<Terms>>, Result<List<TermsDto>>>();
         CreateMap<Result<List<Privacy>>, Result<List<PrivacyDto>>>();
+        CreateMap<Result<List<Subscribe>>, Result<List<SubscribeDto>>>();
     }
 }

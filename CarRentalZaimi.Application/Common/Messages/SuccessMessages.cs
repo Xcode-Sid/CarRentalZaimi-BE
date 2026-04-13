@@ -137,4 +137,10 @@ public static class SuccessMessages
         public const string PrivacyUpdated = "Privacy updated successfully";
         public const string PrivacyDeleted = "Privacy deleted successfully";
     }
+
+    public static class Subscribe
+    {
+        public const string SubscriptionCreated = "Subscribe created successfully";
+        public const string SubscriptionRemoved = "Subscribe removed successfully";
+    }
 }
