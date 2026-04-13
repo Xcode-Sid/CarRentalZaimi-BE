@@ -6,12 +6,15 @@ using CarRentalZaimi.Application.Features.Subscribe.Commands.RemoveSubscription;
 using CarRentalZaimi.Application.Features.Subscribe.Queries.GetAllPagedSubscriptions;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
+using CarRentalZaimi.Domain.Common.Constants;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISubscribeService
+public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserManager<User> _userManager, IEmailService _emailService) : ISubscribeService
 {
     public async Task<Result<PagedResponse<SubscribeDto>>> GetALlPagedSubscriptionsAsync(GetAllPagedSubscriptionsQuery request, CancellationToken cancellationToken = default)
     {
@@ -58,6 +61,27 @@ public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISubsc
         await _unitOfWork.Repository<Subscribe>().AddAsync(newSubscription, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // Notify admin
+        var adminUsers = await _userManager.GetUsersInRoleAsync(SystemPolicies.Admin);
+        var admin = adminUsers.FirstOrDefault();
+
+        if (admin is not null)
+        {
+            var notification = new UserNotification
+            {
+                Id = Guid.NewGuid(),
+                User = admin,
+                Message = $"{request.Email} has subscribed to get new cars latest promotiotions informations.",
+                IsRead = false,
+                UserNotificationType = UserNotificationType.NewSubscribe
+            };
+
+            await _unitOfWork.Repository<UserNotification>().AddAsync(notification, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _emailService.SendNewSubscriptionEmailToAdminAsync(admin.Email!, request.Email, cancellationToken);
+        }
+
         return Result<SubscribeDto>.Success(_mapper.Map<SubscribeDto>(newSubscription));
     }
 
@@ -73,6 +97,27 @@ public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISubsc
 
         await _unitOfWork.Repository<Subscribe>().UpdateAsync(subscription, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Notify admin
+        var adminUsers = await _userManager.GetUsersInRoleAsync(SystemPolicies.Admin);
+        var admin = adminUsers.FirstOrDefault();
+
+        if (admin is not null)
+        {
+            var notification = new UserNotification
+            {
+                Id = Guid.NewGuid(),
+                User = admin,
+                Message = $"{request.Email} has unsubscribed from car promotions and updates.",
+                IsRead = false,
+                UserNotificationType = UserNotificationType.Unsubscribe
+            };
+
+            await _unitOfWork.Repository<UserNotification>().AddAsync(notification, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _emailService.SendUnsubscribeEmailToAdminAsync(admin.Email!, request.Email, cancellationToken);
+        }
 
         return Result<bool>.Success(_mapper.Map<bool>(subscription));
     }

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentalZaimi.Migrations.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260413085322_Add_Subscription_Table")]
-    partial class Add_Subscription_Table
+    [Migration("20260413113515_Delete_Contact_Table")]
+    partial class Delete_Contact_Table
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -973,9 +973,6 @@ namespace CarRentalZaimi.Migrations.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Message")
                         .HasColumnType("longtext");
 
@@ -990,9 +987,6 @@ namespace CarRentalZaimi.Migrations.Migrations
 
                     b.Property<string>("Phone")
                         .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Subject")
                         .HasColumnType("longtext");

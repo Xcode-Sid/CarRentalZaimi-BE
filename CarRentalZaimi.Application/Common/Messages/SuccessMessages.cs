@@ -143,4 +143,9 @@ public static class SuccessMessages
         public const string SubscriptionCreated = "Subscribe created successfully";
         public const string SubscriptionRemoved = "Subscribe removed successfully";
     }
+
+    public static class ContactMessage
+    {
+        public const string ContactMessageCreated = "Contact message created successfully";
+    }
 }

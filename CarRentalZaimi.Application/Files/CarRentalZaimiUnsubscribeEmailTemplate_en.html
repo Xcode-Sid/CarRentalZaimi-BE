@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter Unsubscription</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: rgba(26, 27, 30, 0.6); margin: 0; padding: 0; background-color: #1F2937; -webkit-font-smoothing: antialiased;">
+    <div style="max-width: 600px; margin: 40px auto; background: #374151; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); overflow: hidden;">
+
+        <div style="background: linear-gradient(135deg, #1F2937, #374151); padding: 48px 20px; text-align: center; color: white; font-size: 28px; font-weight: 700;">
+            Newsletter Unsubscription
+        </div>
+
+        <div style="padding: 48px 32px; color: white;">
+            <p style="font-size: 20px; font-weight: 600; margin-bottom: 24px; color: white;">
+                Hi Admin! 👋
+            </p>
+
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="background: rgba(249, 250, 251, 0.1); border-radius: 100%; width: 100px; height: 100px; margin: 0 auto; display: flex; justify-content: center; align-items: center; border: 4px solid #EF4444;">
+                    <div style="font-size: 32px;">📭</div>
+                </div>
+            </div>
+
+            <p style="font-size: 16px; line-height: 1.7; opacity: 0.9; margin-bottom: 24px;">
+                A user has unsubscribed and will no longer receive promotional emails and car updates from Car Rental Zaimi.
+            </p>
+
+            <div style="background: rgba(249, 250, 251, 0.1); border-radius: 12px; padding: 24px; margin: 24px 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 10px 0; color: rgba(255,255,255,0.6); font-size: 14px; width: 45%;">Subscriber Email</td>
+                        <td style="padding: 10px 0; color: white; font-weight: 600; font-size: 15px;">{{SubscriberEmail}}</td>
+                    </tr>
+                    <tr style="border-top: 1px solid rgba(255,255,255,0.08);">
+                        <td style="padding: 10px 0; color: rgba(255,255,255,0.6); font-size: 14px;">Unsubscribed On</td>
+                        <td style="padding: 10px 0;">
+                            <span style="background: rgba(239, 68, 68, 0.15); color: #EF4444; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.05em;">
+                                {{UnsubscribedDate}}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="background-color: rgba(249, 250, 251, 0.1); border-radius: 12px; padding: 20px; margin: 32px 0; border-left: 4px solid #EF4444; color: white;">
+                <div style="font-weight: 600; color: #EF4444; margin-bottom: 8px;">
+                    No Action Required
+                </div>
+                <p style="margin: 0;">This is a notification only. The user has been removed from the mailing list and will no longer receive any promotional emails.</p>
+            </div>
+
+            <div style="background: rgba(249, 250, 251, 0.05); border-radius: 12px; padding: 24px; margin-top: 32px; color: white;">
+                <h3 style="font-weight: 600; color: white; margin-bottom: 12px;">Need Assistance?</h3>
+                <p style="margin: 0;">
+                    Contact the development team at
+                    <a href="mailto:support@carrentalzaimi.com" style="color: #A5B4FC; text-decoration: none; font-weight: 500;">
+                        support@carrentalzaimi.com
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <div style="background-color: rgba(249, 250, 251, 0.05); padding: 32px 24px; text-align: center; font-size: 14px; color: rgba(255, 255, 255, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            This is an automated message. Please do not reply directly to this email.<br>
+            &copy; {{Year}} Car Rental Zaimi. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

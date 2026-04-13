@@ -19,10 +19,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class CarService(
-    IUnitOfWork _uow,
-    IMapper _mapper,
-    ILogger<CarService> _logger) : ICarService
+public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _logger, IEmailService _emailService) : ICarService
 {
 
     public async Task<Result<CarDto>> CreateCarAsync(CreateCarCommand request, CancellationToken cancellationToken)
@@ -37,132 +34,168 @@ public class CarService(
                 return Result<CarDto>.Error("A car with this license plate already exists.");
         }
 
-        var newCar = new Car
+        await _uow.BeginTransactionAsync(cancellationToken);
+        try
         {
-            Id = Guid.NewGuid(),
-            Title = request.Title,
-            Description = request.Description,
-            Year = request.Year,
-            LicensePlate = request.LicensePlate,
-            PricePerDay = request.PricePerDay,
-            Seats = request.Seats,
-            Doors = request.Doors,
-            Mileage = request.Mileage,
-            HorsePower = request.HorsePower,
+            var newCar = new Car
+            {
+                Id = Guid.NewGuid(),
+                Title = request.Title,
+                Description = request.Description,
+                Year = request.Year,
+                LicensePlate = request.LicensePlate,
+                PricePerDay = request.PricePerDay,
+                Seats = request.Seats,
+                Doors = request.Doors,
+                Mileage = request.Mileage,
+                HorsePower = request.HorsePower,
 
-            //bool properties
-            ABS = request.ABS,
-            Bluetooth = request.Bluetooth,
-            ParkingSensors = request.ParkingSensors,
-            CruiseControl = request.CruiseControl,
-            ClimateControl = request.ClimateControl,
-            LEDHeadlights = request.LEDHeadlights,
-            AppleCarPlay = request.AppleCarPlay,
-            AndroidAuto = request.AndroidAuto,
-            LaneDepartureAlert = request.LaneDepartureAlert,
-            AdaptiveCruiseControl = request.AdaptiveCruiseControl,
-            ToyotaSafetySense = request.ToyotaSafetySense,
-            HeatedSeats = request.HeatedSeats,
-            PanoramicRoof = request.PanoramicRoof,
-            ThirdRowSeats = request.ThirdRowSeats,
-            WirelessCharging = request.HeatedSeats,
-            Camera = request.Camera,
-            AirConditioner = request.AirConditioner,
-            ElectricWindows = request.ElectricWindows,
-            GPS = request.GPS,
-        };
+                //bool properties
+                ABS = request.ABS,
+                Bluetooth = request.Bluetooth,
+                ParkingSensors = request.ParkingSensors,
+                CruiseControl = request.CruiseControl,
+                ClimateControl = request.ClimateControl,
+                LEDHeadlights = request.LEDHeadlights,
+                AppleCarPlay = request.AppleCarPlay,
+                AndroidAuto = request.AndroidAuto,
+                LaneDepartureAlert = request.LaneDepartureAlert,
+                AdaptiveCruiseControl = request.AdaptiveCruiseControl,
+                ToyotaSafetySense = request.ToyotaSafetySense,
+                HeatedSeats = request.HeatedSeats,
+                PanoramicRoof = request.PanoramicRoof,
+                ThirdRowSeats = request.ThirdRowSeats,
+                WirelessCharging = request.HeatedSeats,
+                Camera = request.Camera,
+                AirConditioner = request.AirConditioner,
+                ElectricWindows = request.ElectricWindows,
+                GPS = request.GPS,
+            };
 
-        // Resolve foreign key navigation properties if IDs are provided
-        if (request.CategoryId.HasValue)
-        {
-            var category = await _uow.Repository<CarCategory>()
-                .FirstOrDefaultAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
+            // Resolve foreign key navigation properties if IDs are provided
+            if (request.CategoryId.HasValue)
+            {
+                var category = await _uow.Repository<CarCategory>()
+                    .FirstOrDefaultAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
 
-            if (category is null)
-                return Result<CarDto>.Error("Category not found.");
+                if (category is null)
+                    return Result<CarDto>.Error("Category not found.");
 
-            newCar.Category = category;
+                newCar.Category = category;
+            }
+
+            if (request.NameId.HasValue)
+            {
+                var name = await _uow.Repository<CarCompanyName>()
+                    .FirstOrDefaultAsync(n => n.Id == request.NameId.Value, cancellationToken);
+
+                if (name is null)
+                    return Result<CarDto>.Error("Car company name not found.");
+
+                newCar.Name = name;
+            }
+
+            if (request.ModelId.HasValue)
+            {
+                var model = await _uow.Repository<CarCompanyModel>()
+                    .FirstOrDefaultAsync(m => m.Id == request.ModelId.Value, cancellationToken);
+
+                if (model is null)
+                    return Result<CarDto>.Error("Car model not found.");
+
+                newCar.Model = model;
+            }
+
+            if (request.ExteriorColorTypeId.HasValue)
+            {
+                var exteriorColor = await _uow.Repository<CarExteriorColor>()
+                    .FirstOrDefaultAsync(e => e.Id == request.ExteriorColorTypeId.Value, cancellationToken);
+
+                if (exteriorColor is null)
+                    return Result<CarDto>.Error("Exterior color type not found.");
+
+                newCar.ExteriorColorType = exteriorColor;
+            }
+
+            if (request.InteriorColorTypeId.HasValue)
+            {
+                var interiorColor = await _uow.Repository<CarInteriorColor>()
+                    .FirstOrDefaultAsync(i => i.Id == request.InteriorColorTypeId.Value, cancellationToken);
+
+                if (interiorColor is null)
+                    return Result<CarDto>.Error("Interior color type not found.");
+
+                newCar.InteriorColorType = interiorColor;
+            }
+
+            if (request.TransmissionTypeId.HasValue)
+            {
+                var transmission = await _uow.Repository<CarTransmission>()
+                    .FirstOrDefaultAsync(t => t.Id == request.TransmissionTypeId.Value, cancellationToken);
+
+                if (transmission is null)
+                    return Result<CarDto>.Error("Transmission type not found.");
+
+                newCar.TransmissionType = transmission;
+            }
+
+            if (request.FuelTypeId.HasValue)
+            {
+                var fuel = await _uow.Repository<CarFuel>()
+                    .FirstOrDefaultAsync(f => f.Id == request.FuelTypeId.Value, cancellationToken);
+
+                if (fuel is null)
+                    return Result<CarDto>.Error("Fuel type not found.");
+
+                newCar.FuelType = fuel;
+            }
+
+            await _uow.Repository<Car>().AddAsync(newCar, cancellationToken);
+            await _uow.SaveChangesAsync(cancellationToken);
+
+            // Add images if provided
+            if (request.CarImages is not null && request.CarImages.Count > 0)
+                await AddCarImagesAsync(newCar, request.CarImages, cancellationToken);
+
+            await _uow.SaveChangesAsync(cancellationToken);
+            await _uow.CommitTransactionAsync(cancellationToken);
+
+            // Send emails AFTER commit
+            var subscribers = await _uow.Repository<Subscribe>().GetAllAsync(cancellationToken);
+            var activeSubscribers = subscribers.Where(s => !s.IsUnsubscribed && s.Email != null);
+
+            if (activeSubscribers.Any())
+            {
+                var carModel = newCar.Model?.Name ?? "N/A";
+                var fuelType = newCar.FuelType?.Name ?? "N/A";
+                var carUrl = $"http://localhost:5173/fleet/{newCar.Id}"; // TODO fix later
+
+                var emailTasks = activeSubscribers.Select(subscriber =>
+                    _emailService.SendNewCarNotificationEmailAsync(
+                        subscriberEmail: subscriber.Email!,
+                        carTitle: newCar.Title,
+                        carModel: carModel,
+                        carYear: newCar.Year.ToString() ?? "N/A",
+                        fuelType: fuelType,
+                        seats: newCar.Seats.ToString() ?? "N/A",
+                        pricePerDay: newCar.PricePerDay.ToString("F2"),
+                        carUrl: carUrl,
+                        cancellationToken: cancellationToken
+                    )
+                );
+
+                await Task.WhenAll(emailTasks);
+            }
+
+            return Result<CarDto>.Success(_mapper.Map<CarDto>(newCar));
         }
-
-        if (request.NameId.HasValue)
+        catch (Exception ex)
         {
-            var name = await _uow.Repository<CarCompanyName>()
-                .FirstOrDefaultAsync(n => n.Id == request.NameId.Value, cancellationToken);
-
-            if (name is null)
-                return Result<CarDto>.Error("Car company name not found.");
-
-            newCar.Name = name;
+            await _uow.RollbackTransactionAsync(cancellationToken);
+            _logger.LogError(ex, "Failed to create car.");
+            return Result<CarDto>.Error("An unexpected error occurred while creating the car.");
         }
-
-        if (request.ModelId.HasValue)
-        {
-            var model = await _uow.Repository<CarCompanyModel>()
-                .FirstOrDefaultAsync(m => m.Id == request.ModelId.Value, cancellationToken);
-
-            if (model is null)
-                return Result<CarDto>.Error("Car model not found.");
-
-            newCar.Model = model;
-        }
-
-        if (request.ExteriorColorTypeId.HasValue)
-        {
-            var exteriorColor = await _uow.Repository<CarExteriorColor>()
-                .FirstOrDefaultAsync(e => e.Id == request.ExteriorColorTypeId.Value, cancellationToken);
-
-            if (exteriorColor is null)
-                return Result<CarDto>.Error("Exterior color type not found.");
-
-            newCar.ExteriorColorType = exteriorColor;
-        }
-
-        if (request.InteriorColorTypeId.HasValue)
-        {
-            var interiorColor = await _uow.Repository<CarInteriorColor>()
-                .FirstOrDefaultAsync(i => i.Id == request.InteriorColorTypeId.Value, cancellationToken);
-
-            if (interiorColor is null)
-                return Result<CarDto>.Error("Interior color type not found.");
-
-            newCar.InteriorColorType = interiorColor;
-        }
-
-        if (request.TransmissionTypeId.HasValue)
-        {
-            var transmission = await _uow.Repository<CarTransmission>()
-                .FirstOrDefaultAsync(t => t.Id == request.TransmissionTypeId.Value, cancellationToken);
-
-            if (transmission is null)
-                return Result<CarDto>.Error("Transmission type not found.");
-
-            newCar.TransmissionType = transmission;
-        }
-
-        if (request.FuelTypeId.HasValue)
-        {
-            var fuel = await _uow.Repository<CarFuel>()
-                .FirstOrDefaultAsync(f => f.Id == request.FuelTypeId.Value, cancellationToken);
-
-            if (fuel is null)
-                return Result<CarDto>.Error("Fuel type not found.");
-
-            newCar.FuelType = fuel;
-        }
-
-        await _uow.Repository<Car>().AddAsync(newCar, cancellationToken);
-        await _uow.SaveChangesAsync(cancellationToken);
-
-        // Add images if provided
-        if (request.CarImages is not null && request.CarImages.Count > 0)
-            await AddCarImagesAsync(newCar, request.CarImages, cancellationToken);
-
-
-        await _uow.SaveChangesAsync(cancellationToken);
-        return Result<CarDto>.Success(_mapper.Map<CarDto>(newCar));
     }
-
-
     public async Task<Result<CarDto>> UpdateCarAsync(UpdateCarCommand request, CancellationToken cancellationToken)
     {
         var existingCar = await _uow.Repository<Car>()
@@ -181,124 +214,135 @@ public class CarService(
                 return Result<CarDto>.Error("A car with this license plate already exists.");
         }
 
-        // Update scalar properties
-        existingCar.Title = request.Title;
-        existingCar.Description = request.Description;
-        existingCar.Year = request.Year;
-        existingCar.LicensePlate = request.LicensePlate;
-        existingCar.PricePerDay = request.PricePerDay;
-        existingCar.Seats = request.Seats;
-        existingCar.Doors = request.Doors;
-        existingCar.Mileage = request.Mileage;
-        existingCar.HorsePower = request.HorsePower;
-
-        //bool properties
-        existingCar.ABS = request.ABS;
-        existingCar.Bluetooth = request.Bluetooth;
-        existingCar.ParkingSensors = request.ParkingSensors;
-        existingCar.CruiseControl = request.CruiseControl;
-        existingCar.ClimateControl = request.ClimateControl;
-        existingCar.LEDHeadlights = request.LEDHeadlights;
-        existingCar.AppleCarPlay = request.AppleCarPlay;
-        existingCar.AndroidAuto = request.AndroidAuto;
-        existingCar.LaneDepartureAlert = request.LaneDepartureAlert;
-        existingCar.AdaptiveCruiseControl = request.AdaptiveCruiseControl;
-        existingCar.ToyotaSafetySense = request.ToyotaSafetySense;
-        existingCar.HeatedSeats = request.HeatedSeats;
-        existingCar.PanoramicRoof = request.PanoramicRoof;
-        existingCar.ThirdRowSeats = request.ThirdRowSeats;
-        existingCar.WirelessCharging = request.HeatedSeats;
-        existingCar.Camera = request.Camera;
-        existingCar.AirConditioner = request.AirConditioner;
-        existingCar.ElectricWindows = request.ElectricWindows;
-        existingCar.GPS = request.GPS;
-
-        // Resolve navigation properties
-        if (request.CategoryId.HasValue)
+        await _uow.BeginTransactionAsync(cancellationToken);
+        try
         {
-            var category = await _uow.Repository<CarCategory>()
-                .FirstOrDefaultAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
+            // Update scalar properties
+            existingCar.Title = request.Title;
+            existingCar.Description = request.Description;
+            existingCar.Year = request.Year;
+            existingCar.LicensePlate = request.LicensePlate;
+            existingCar.PricePerDay = request.PricePerDay;
+            existingCar.Seats = request.Seats;
+            existingCar.Doors = request.Doors;
+            existingCar.Mileage = request.Mileage;
+            existingCar.HorsePower = request.HorsePower;
 
-            if (category is null)
-                return Result<CarDto>.Error("Category not found.");
+            //bool properties
+            existingCar.ABS = request.ABS;
+            existingCar.Bluetooth = request.Bluetooth;
+            existingCar.ParkingSensors = request.ParkingSensors;
+            existingCar.CruiseControl = request.CruiseControl;
+            existingCar.ClimateControl = request.ClimateControl;
+            existingCar.LEDHeadlights = request.LEDHeadlights;
+            existingCar.AppleCarPlay = request.AppleCarPlay;
+            existingCar.AndroidAuto = request.AndroidAuto;
+            existingCar.LaneDepartureAlert = request.LaneDepartureAlert;
+            existingCar.AdaptiveCruiseControl = request.AdaptiveCruiseControl;
+            existingCar.ToyotaSafetySense = request.ToyotaSafetySense;
+            existingCar.HeatedSeats = request.HeatedSeats;
+            existingCar.PanoramicRoof = request.PanoramicRoof;
+            existingCar.ThirdRowSeats = request.ThirdRowSeats;
+            existingCar.WirelessCharging = request.HeatedSeats;
+            existingCar.Camera = request.Camera;
+            existingCar.AirConditioner = request.AirConditioner;
+            existingCar.ElectricWindows = request.ElectricWindows;
+            existingCar.GPS = request.GPS;
 
-            existingCar.Category = category;
+            // Resolve navigation properties
+            if (request.CategoryId.HasValue)
+            {
+                var category = await _uow.Repository<CarCategory>()
+                    .FirstOrDefaultAsync(c => c.Id == request.CategoryId.Value, cancellationToken);
+
+                if (category is null)
+                    return Result<CarDto>.Error("Category not found.");
+
+                existingCar.Category = category;
+            }
+
+            if (request.NameId.HasValue)
+            {
+                var name = await _uow.Repository<CarCompanyName>()
+                    .FirstOrDefaultAsync(n => n.Id == request.NameId.Value, cancellationToken);
+
+                if (name is null)
+                    return Result<CarDto>.Error("Car company name not found.");
+
+                existingCar.Name = name;
+            }
+
+            if (request.ModelId.HasValue)
+            {
+                var model = await _uow.Repository<CarCompanyModel>()
+                    .FirstOrDefaultAsync(m => m.Id == request.ModelId.Value, cancellationToken);
+
+                if (model is null)
+                    return Result<CarDto>.Error("Car model not found.");
+
+                existingCar.Model = model;
+            }
+
+            if (request.ExteriorColorTypeId.HasValue)
+            {
+                var exteriorColor = await _uow.Repository<CarExteriorColor>()
+                    .FirstOrDefaultAsync(e => e.Id == request.ExteriorColorTypeId.Value, cancellationToken);
+
+                if (exteriorColor is null)
+                    return Result<CarDto>.Error("Exterior color type not found.");
+
+                existingCar.ExteriorColorType = exteriorColor;
+            }
+
+            if (request.InteriorColorTypeId.HasValue)
+            {
+                var interiorColor = await _uow.Repository<CarInteriorColor>()
+                    .FirstOrDefaultAsync(i => i.Id == request.InteriorColorTypeId.Value, cancellationToken);
+
+                if (interiorColor is null)
+                    return Result<CarDto>.Error("Interior color type not found.");
+
+                existingCar.InteriorColorType = interiorColor;
+            }
+
+            if (request.TransmissionTypeId.HasValue)
+            {
+                var transmission = await _uow.Repository<CarTransmission>()
+                    .FirstOrDefaultAsync(t => t.Id == request.TransmissionTypeId.Value, cancellationToken);
+
+                if (transmission is null)
+                    return Result<CarDto>.Error("Transmission type not found.");
+
+                existingCar.TransmissionType = transmission;
+            }
+
+            if (request.FuelTypeId.HasValue)
+            {
+                var fuel = await _uow.Repository<CarFuel>()
+                    .FirstOrDefaultAsync(f => f.Id == request.FuelTypeId.Value, cancellationToken);
+
+                if (fuel is null)
+                    return Result<CarDto>.Error("Fuel type not found.");
+
+                existingCar.FuelType = fuel;
+            }
+
+            // Handle image replacement if new images are provided
+            if (request.CarImages is not null && request.CarImages.Count > 0)
+                await UpdateCarImagesAsync(existingCar, request.CarImages, cancellationToken);
+
+            await _uow.Repository<Car>().UpdateAsync(existingCar, cancellationToken);
+            await _uow.SaveChangesAsync(cancellationToken);
+            await _uow.CommitTransactionAsync(cancellationToken);
+
+            return Result<CarDto>.Success(_mapper.Map<CarDto>(existingCar));
         }
-
-        if (request.NameId.HasValue)
+        catch (Exception ex)
         {
-            var name = await _uow.Repository<CarCompanyName>()
-                .FirstOrDefaultAsync(n => n.Id == request.NameId.Value, cancellationToken);
-
-            if (name is null)
-                return Result<CarDto>.Error("Car company name not found.");
-
-            existingCar.Name = name;
+            await _uow.RollbackTransactionAsync(cancellationToken);
+            _logger.LogError(ex, "Failed to update car with ID {CarId}.", request.CarId);
+            return Result<CarDto>.Error("An unexpected error occurred while updating the car.");
         }
-
-        if (request.ModelId.HasValue)
-        {
-            var model = await _uow.Repository<CarCompanyModel>()
-                .FirstOrDefaultAsync(m => m.Id == request.ModelId.Value, cancellationToken);
-
-            if (model is null)
-                return Result<CarDto>.Error("Car model not found.");
-
-            existingCar.Model = model;
-        }
-
-        if (request.ExteriorColorTypeId.HasValue)
-        {
-            var exteriorColor = await _uow.Repository<CarExteriorColor>()
-                .FirstOrDefaultAsync(e => e.Id == request.ExteriorColorTypeId.Value, cancellationToken);
-
-            if (exteriorColor is null)
-                return Result<CarDto>.Error("Exterior color type not found.");
-
-            existingCar.ExteriorColorType = exteriorColor;
-        }
-
-        if (request.InteriorColorTypeId.HasValue)
-        {
-            var interiorColor = await _uow.Repository<CarInteriorColor>()
-                .FirstOrDefaultAsync(i => i.Id == request.InteriorColorTypeId.Value, cancellationToken);
-
-            if (interiorColor is null)
-                return Result<CarDto>.Error("Interior color type not found.");
-
-            existingCar.InteriorColorType = interiorColor;
-        }
-
-        if (request.TransmissionTypeId.HasValue)
-        {
-            var transmission = await _uow.Repository<CarTransmission>()
-                .FirstOrDefaultAsync(t => t.Id == request.TransmissionTypeId.Value, cancellationToken);
-
-            if (transmission is null)
-                return Result<CarDto>.Error("Transmission type not found.");
-
-            existingCar.TransmissionType = transmission;
-        }
-
-        if (request.FuelTypeId.HasValue)
-        {
-            var fuel = await _uow.Repository<CarFuel>()
-                .FirstOrDefaultAsync(f => f.Id == request.FuelTypeId.Value, cancellationToken);
-
-            if (fuel is null)
-                return Result<CarDto>.Error("Fuel type not found.");
-
-            existingCar.FuelType = fuel;
-        }
-
-        // Handle image replacement if new images are provided
-        if (request.CarImages is not null && request.CarImages.Count > 0)
-            await UpdateCarImagesAsync(existingCar, request.CarImages, cancellationToken);
-
-        await _uow.Repository<Car>().UpdateAsync(existingCar, cancellationToken);
-        await _uow.SaveChangesAsync(cancellationToken);
-
-        return Result<CarDto>.Success(_mapper.Map<CarDto>(existingCar));
     }
 
     public async Task<Result<bool>> DeleteCarAsync(DeleteCarCommand request, CancellationToken cancellationToken)

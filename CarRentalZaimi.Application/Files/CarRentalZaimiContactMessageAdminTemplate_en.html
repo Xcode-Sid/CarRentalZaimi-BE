@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Contact Message</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: rgba(26, 27, 30, 0.6); margin: 0; padding: 0; background-color: #1F2937; -webkit-font-smoothing: antialiased;">
+    <div style="max-width: 600px; margin: 40px auto; background: #374151; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); overflow: hidden;">
+
+        <div style="background: linear-gradient(135deg, #1F2937, #374151); padding: 48px 20px; text-align: center; color: white; font-size: 28px; font-weight: 700;">
+            New Contact Message 📬
+        </div>
+
+        <div style="padding: 48px 32px; color: white;">
+            <p style="font-size: 20px; font-weight: 600; margin-bottom: 24px; color: white;">
+                Hi Admin 👋
+            </p>
+
+            <p style="font-size: 16px; line-height: 1.7; opacity: 0.9; margin-bottom: 24px;">
+                A new contact message has been submitted on <strong>Car Rental Zaimi</strong>. Here are the details:
+            </p>
+
+            <div style="background: rgba(249, 250, 251, 0.1); border-radius: 12px; padding: 24px; margin: 24px 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 10px 0; color: rgba(255,255,255,0.6); font-size: 14px; width: 35%;">Full Name</td>
+                        <td style="padding: 10px 0; color: white; font-weight: 600; font-size: 15px;">{{FullName}}</td>
+                    </tr>
+                    <tr style="border-top: 1px solid rgba(255,255,255,0.08);">
+                        <td style="padding: 10px 0; color: rgba(255,255,255,0.6); font-size: 14px;">Email</td>
+                        <td style="padding: 10px 0; color: white; font-weight: 600; font-size: 15px;">
+                            <a href="mailto:{{Email}}" style="color: #10B981; text-decoration: none;">{{Email}}</a>
+                        </td>
+                    </tr>
+                    <tr style="border-top: 1px solid rgba(255,255,255,0.08);">
+                        <td style="padding: 10px 0; color: rgba(255,255,255,0.6); font-size: 14px;">Phone</td>
+                        <td style="padding: 10px 0; color: white; font-weight: 600; font-size: 15px;">{{Phone}}</td>
+                    </tr>
+                    <tr style="border-top: 1px solid rgba(255,255,255,0.08);">
+                        <td style="padding: 10px 0; color: rgba(255,255,255,0.6); font-size: 14px;">Subject</td>
+                        <td style="padding: 10px 0; color: white; font-weight: 600; font-size: 15px;">{{Subject}}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="background: rgba(249, 250, 251, 0.1); border-radius: 12px; padding: 24px; margin: 24px 0;">
+                <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin: 0 0 12px 0;">Message</p>
+                <p style="color: white; font-size: 15px; line-height: 1.8; margin: 0;">{{Message}}</p>
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="mailto:{{Email}}" style="background: #10B981; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 16px; display: inline-block;">
+                    Reply to {{FullName}}
+                </a>
+            </div>
+        </div>
+
+        <div style="background-color: rgba(249, 250, 251, 0.05); padding: 32px 24px; text-align: center; font-size: 14px; color: rgba(255, 255, 255, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            This is an automated message from the contact form.<br>
+            &copy; {{Year}} Car Rental Zaimi. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

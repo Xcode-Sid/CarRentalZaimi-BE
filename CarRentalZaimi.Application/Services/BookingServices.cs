@@ -9,6 +9,7 @@ using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllBookings;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllUserBookings;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
+using CarRentalZaimi.Domain.Common.Constants;
 using CarRentalZaimi.Domain.Entities;
 using CarRentalZaimi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -74,7 +75,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // Notify admin
-            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+            var adminUsers = await _userManager.GetUsersInRoleAsync(SystemPolicies.Admin);
             var admin = adminUsers.FirstOrDefault();
 
             if (admin is not null)
@@ -148,7 +149,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // Notify admin
-            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+            var adminUsers = await _userManager.GetUsersInRoleAsync(SystemPolicies.Admin);
             var admin = adminUsers.FirstOrDefault();
 
             if (admin is not null)

@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<ITermsService, TermsService>();
         services.AddScoped<IPrivacyService, PrivacyService>();
         services.AddScoped<ISubscribeService, SubscribeService>();
+        services.AddScoped<IContactMessageService, ContactMessageService>();
         return services;
     }
 }

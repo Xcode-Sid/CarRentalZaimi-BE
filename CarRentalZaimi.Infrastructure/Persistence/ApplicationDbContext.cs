@@ -78,7 +78,6 @@ public class ApplicationDbContext(
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<SavedCar> SavedCars { get; set; }
     public DbSet<UserImage> UserImages { get; set; }
-    public DbSet<UserNotification> UserNotifications { get; set; }
     public DbSet<AppLog> AppLogs { get; set; }
     public DbSet<UserDevice> UserDevices { get; set; }
     public DbSet<StatePrefix> StatePrefixes { get; set; }
@@ -87,7 +86,8 @@ public class ApplicationDbContext(
     public DbSet<Privacy> Privacies { get; set; }
     public DbSet<Terms> Terms { get; set; }
     public DbSet<Subscribe> Subscribes { get; set; }
-    
+    public DbSet<UserNotification> UserNotifications { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder builder)

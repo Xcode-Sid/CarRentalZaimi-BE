@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPromotionService
+public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailService _emailService) : IPromotionService
 {
     public async Task<Result<PromotionDto>> CreateAsync(CreatePromotionCommand request, CancellationToken cancellationToken = default)
     {
@@ -64,6 +64,40 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPromo
 
         await _unitOfWork.Repository<Promotion>().AddAsync(newPromotion, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Send emails AFTER save
+        var subscribers = await _unitOfWork.Repository<Subscribe>().GetAllAsync(cancellationToken);
+        var activeSubscribers = subscribers.Where(s => !s.IsUnsubscribed && s.Email != null);
+
+        if (activeSubscribers.Any())
+        {
+            // Determine what the promotion applies to
+            string appliesTo = (car, category) switch
+            {
+                ({ } c, _) => c.Title ?? "Specific Car",
+                (_, { } cat) => $"{cat.Name} category",
+                _ => "All Cars"
+            };
+
+            var fleetUrl = "http://localhost:5173/fleet"; // TODO fix later
+
+            var emailTasks = activeSubscribers.Select(subscriber =>
+                _emailService.SendNewPromotionNotificationEmailAsync(
+                    subscriberEmail: subscriber.Email!,
+                    title: newPromotion.Title,
+                    description: newPromotion.Description ?? string.Empty,
+                    code: newPromotion.Code,
+                    discountPercentage: newPromotion.DiscountPercentage.ToString("F0"),
+                    numberOfDays: newPromotion.NumberOfDays.ToString(),
+                    appliesTo: appliesTo,
+                    fleetUrl: fleetUrl,
+                    cancellationToken: cancellationToken
+                )
+            );
+
+            await Task.WhenAll(emailTasks);
+        }
+
 
         return Result<PromotionDto>.Success(_mapper.Map<PromotionDto>(newPromotion));
     }
