@@ -4,6 +4,7 @@ using CarRentalZaimi.Application.Features.AdditionalService.Commands.CreateAddit
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.DeleteAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.UpdateAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllAdditionalServices;
+using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllPagedAdditionalServices;
 
 namespace CarRentalZaimi.Application.Interfaces.Services;
 
@@ -13,4 +14,5 @@ public interface IAdditionalServicesService
     Task<Result<AdditionalServiceDto>> UpdateAsync(UpdateAdditionalServiceCommand request, CancellationToken cancellationToken = default);
     Task<Result<bool>> DeleteAsync(DeleteAdditionalServiceCommand request, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<AdditionalServiceDto>>> GetAllAsync(GetAllAdditionalServicesQuery request, CancellationToken cancellationToken = default);
+    Task<Result<PagedResponse<AdditionalServiceDto>>> GetAllPagedAsync(GetAllPagedAdditionalServicesQuery request, CancellationToken cancellationToken = default);
 }

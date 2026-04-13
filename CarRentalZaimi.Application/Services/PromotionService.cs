@@ -114,14 +114,33 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<IEnumerable<PromotionDto>>> GetAllAsync(GetAllPromotionQuery request, CancellationToken cancellationToken = default)
+    public async Task<Result<PagedResponse<PromotionDto>>> GetAllAsync(GetAllPromotionQuery request, CancellationToken cancellationToken = default)
     {
-        var carColors = await _unitOfWork.Repository<Promotion>()
-           .AsQueryable()
-           .ToListAsync(cancellationToken);
+        var query = _unitOfWork.Repository<Promotion>()
+             .AsQueryable()
+             .Where(c => !c.IsDeleted);
 
-        var mapped = _mapper.Map<IEnumerable<PromotionDto>>(carColors);
-        return Result.Success(mapped);
+        // Search
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToLower();
+            query = query.Where(c =>
+                (c.Title! != null && c.Title.ToLower().Contains(search)) ||
+                (c.Description! != null && c.Description.ToLower().Contains(search)));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var promotions = await query
+            .Skip((request.PageNr - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var mapped = _mapper.Map<List<PromotionDto>>(promotions);
+
+        var pagedResponse = new PagedResponse<PromotionDto>(mapped, totalCount, request.PageNr, request.PageSize);
+
+        return Result<PagedResponse<PromotionDto>>.Success(pagedResponse);
     }
 
     public async Task<Result<decimal>> GetPromotionByCarIdAsync(GetPromotionByCarIdQuery request, CancellationToken cancellationToken = default)

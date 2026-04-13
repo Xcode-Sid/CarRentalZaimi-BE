@@ -13,6 +13,6 @@ public interface IPromotionService
     Task<Result<PromotionDto>> CreateAsync(CreatePromotionCommand request, CancellationToken cancellationToken = default);
     Task<Result<PromotionDto>> UpdateAsync(UpdatePromotionCommand request, CancellationToken cancellationToken = default);
     Task<Result<bool>> DeleteAsync(DeletePromotionCommand request, CancellationToken cancellationToken = default);
-    Task<Result<IEnumerable<PromotionDto>>> GetAllAsync(GetAllPromotionQuery request, CancellationToken cancellationToken = default);
+    Task<Result<PagedResponse<PromotionDto>>> GetAllAsync(GetAllPromotionQuery request, CancellationToken cancellationToken = default);
     Task<Result<decimal>> GetPromotionByCarIdAsync(GetPromotionByCarIdQuery request, CancellationToken cancellationToken = default);
 }

@@ -1,10 +1,12 @@
 ﻿using CarRentalZaimi.API.Controllers.Base;
 using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Messages;
+using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.CreateAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.DeleteAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.UpdateAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllAdditionalServices;
+using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllPagedAdditionalServices;
 using CarRentalZaimi.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -51,5 +53,13 @@ public class AdditionalServiceController(IMediator _mediator) : ApiControllerBas
     public async Task<IActionResult> GetAllAdditionalServices()
     {
         return await SendQuery(new GetAllAdditionalServicesQuery(), null, StatusCodes.Status404NotFound);
+    }
+
+    [HttpGet("getAllPaged", Name = nameof(GetAllPagedAdditionalServices))]
+    [ProducesResponseType(typeof(Result<PagedResponse<AdditionalServiceDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAllPagedAdditionalServices([FromQuery] GetAllPagedAdditionalServicesQuery query)
+    {
+        return await SendQuery(query, null, StatusCodes.Status404NotFound);
     }
 }

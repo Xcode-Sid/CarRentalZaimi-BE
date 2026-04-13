@@ -3,6 +3,7 @@ using CarRentalZaimi.Domain.Common;
 using CarRentalZaimi.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace CarRentalZaimi.Infrastructure.Persistence;
 
@@ -93,6 +94,11 @@ public class ApplicationDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<User>()
+            .HasOne(u => u.Image)
+            .WithOne(ui => ui.User)
+            .HasForeignKey<UserImage>(ui => ui.UserId);
 
         builder.Entity<CompanyProfile>()
          .Property(e => e.WhyChooseUs)

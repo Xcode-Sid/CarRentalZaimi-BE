@@ -1,6 +1,7 @@
 ﻿using CarRentalZaimi.API.Controllers.Base;
 using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.Common.Messages;
+using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Promotion.Commands.CreatePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Commands.DeletePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Commands.UpdatePromotion;
@@ -47,11 +48,11 @@ public class PromotionController(IMediator _mediator) : ApiControllerBase(_media
     }
 
     [HttpGet("getAll", Name = nameof(GetAllPromotion))]
-    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<PagedResponse<PromotionDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetAllPromotion()
+    public async Task<IActionResult> GetAllPromotion([FromQuery] GetAllPromotionQuery query)
     {
-        return await SendQuery(new GetAllPromotionQuery(), null, StatusCodes.Status404NotFound);
+        return await SendQuery(query, null, StatusCodes.Status404NotFound);
     }
 
     [HttpGet("getPromotionForCar", Name = nameof(GetPromotion))]

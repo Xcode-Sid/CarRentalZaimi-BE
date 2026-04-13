@@ -7,6 +7,7 @@ using CarRentalZaimi.Application.Features.AdditionalService.Commands.UpdateAddit
 using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllAdditionalServices;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.AcceptBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.CancelBooking;
+using CarRentalZaimi.Application.Features.BookingRequest.Commands.CloseBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.CreateBookingRequest;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.RefuseBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllBookings;
@@ -47,6 +48,16 @@ public class BookingController(IMediator _mediator) : ApiControllerBase(_mediato
     {
         var command = new AcceptBookingCommand() { BookingId = id };
         return await SendCommand(command, SuccessMessages.BookingRequest.BookingRequestAccepted);
+    }
+
+    [HttpPut("close/{id}", Name = nameof(CloseBookingRequest))]
+    [Authorize(SystemPolicies.Admin)]
+    [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CloseBookingRequest([FromRoute] string id)
+    {
+        var command = new CloseBookingCommand() { BookingId = id };
+        return await SendCommand(command, SuccessMessages.BookingRequest.BookingRequestClosed);
     }
 
     [HttpPut("cancel/{id}", Name = nameof(CancelBooking))]

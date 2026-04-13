@@ -3,6 +3,7 @@ using CarRentalZaimi.Application.Common;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.AcceptBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.CancelBooking;
+using CarRentalZaimi.Application.Features.BookingRequest.Commands.CloseBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.CreateBookingRequest;
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.RefuseBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllBookings;
@@ -338,6 +339,48 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         }
     }
 
+    public async Task<Result<BookingDto>> CloseBookingRequestAsync(CloseBookingCommand request, CancellationToken cancellationToken = default)
+    {
+        var booking = await _unitOfWork.Repository<Booking>()
+            .AsQueryable()
+            .Include(b => b.Car)
+            .Include(b => b.Car!.Model)
+            .Include(b => b.Car!.Name)
+            .Include(b => b.User)
+            .FirstOrDefaultAsync(p => p.Id.ToString() == request.BookingId, cancellationToken);
+
+        if (booking is null)
+            return Result<BookingDto>.Error("Booking not found");
+
+        if (booking.IsCanceled)
+            return Result<BookingDto>.Error("This booking has been cancelled and can't be closed");
+
+        if (booking.Status == BookingStatus.Refused)
+            return Result<BookingDto>.Error("This booking has been refused and can't be closed");
+
+        if (booking.Status == BookingStatus.Done)
+            return Result<BookingDto>.Error("This booking is already closed");
+
+        if (booking.Status != BookingStatus.Accepted)
+            return Result<BookingDto>.Error("Only accepted bookings can be closed");
+
+        try
+        {
+            booking.Status = BookingStatus.Done;
+
+            await _unitOfWork.Repository<Booking>().UpdateAsync(booking, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var bookingDto = _mapper.Map<BookingDto>(booking);
+            return Result<BookingDto>.Success(bookingDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to close booking {BookingId}", request.BookingId);
+            return Result<BookingDto>.Error("Failed to close booking.");
+        }
+    }
+
     public async Task<Result<PagedResponse<BookingDto>>> GetAllBookingsAsync(GetAllBookingsQuery request, CancellationToken cancellationToken = default)
     {
         var query = _unitOfWork.Repository<Booking>()
@@ -345,6 +388,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
             .Include(b => b.Car)
                 .ThenInclude(c => c.CarImages)
             .Include(b => b.User)
+                .ThenInclude(u => u.Image)
             .Include(b => b.BookingServices)
             .ThenInclude(bs => bs.AdditionalService)
             .Where(c => !c.IsDeleted);
@@ -404,6 +448,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
             .Include(b => b.Car)
                 .ThenInclude(c => c.CarImages)
             .Include(b => b.User)
+                .ThenInclude(u => u.Image)
             .Include(b => b.BookingServices)
                 .ThenInclude(bs => bs.AdditionalService)
            .Where(b => b.User!.Id == request.UserId)
@@ -412,4 +457,5 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         var mapped = _mapper.Map<IEnumerable<BookingDto>>(bookings);
         return Result.Success(mapped);
     }
+
 }

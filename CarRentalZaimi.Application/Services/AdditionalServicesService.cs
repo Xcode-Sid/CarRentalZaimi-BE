@@ -5,6 +5,7 @@ using CarRentalZaimi.Application.Features.AdditionalService.Commands.CreateAddit
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.DeleteAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.UpdateAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllAdditionalServices;
+using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllPagedAdditionalServices;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
@@ -55,6 +56,34 @@ public class AdditionalServicesService(IUnitOfWork _unitOfWork, IMapper _mapper)
 
         var mapped = _mapper.Map<IEnumerable<AdditionalServiceDto>>(services);
         return Result.Success(mapped);
+    }
+
+    public async Task<Result<PagedResponse<AdditionalServiceDto>>> GetAllPagedAsync(GetAllPagedAdditionalServicesQuery request, CancellationToken cancellationToken = default)
+    {
+        var query = _unitOfWork.Repository<AdditionalService>()
+             .AsQueryable()
+             .Where(c => !c.IsDeleted);
+
+        // Search
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToLower();
+            query = query.Where(c =>
+                (c.Name! != null && c.Name.ToLower().Contains(search)));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var services = await query
+            .Skip((request.PageNr - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var mapped = _mapper.Map<List<AdditionalServiceDto>>(services);
+
+        var pagedResponse = new PagedResponse<AdditionalServiceDto>(mapped, totalCount, request.PageNr, request.PageSize);
+
+        return Result<PagedResponse<AdditionalServiceDto>>.Success(pagedResponse);
     }
 
     public async Task<Result<AdditionalServiceDto>> UpdateAsync(UpdateAdditionalServiceCommand request, CancellationToken cancellationToken = default)

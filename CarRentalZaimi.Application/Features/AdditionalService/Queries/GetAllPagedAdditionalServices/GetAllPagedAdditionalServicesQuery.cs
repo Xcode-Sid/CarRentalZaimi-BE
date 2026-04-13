@@ -1,9 +1,9 @@
 ﻿using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Interfaces.Query;
 
-namespace CarRentalZaimi.Application.Features.Promotion.Queries.GetAllPromotion;
+namespace CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllPagedAdditionalServices;
 
-public class GetAllPromotionQuery : IQuery<PagedResponse<PromotionDto>>
+public class GetAllPagedAdditionalServicesQuery : IQuery<PagedResponse<AdditionalServiceDto>>
 {
     public string? Search { get; set; }
     public int PageNr { get; set; } = 1;

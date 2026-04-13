@@ -74,6 +74,7 @@ public class UserService : IUserService
     {
         var query = _unitOfWork.Repository<User>()
             .AsQueryable()
+            .Include(u => u.Image)
             .Where(c => !c.IsDeleted);
 
         // Search

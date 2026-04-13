@@ -110,6 +110,7 @@ public static class SuccessMessages
         public const string BookingRequestAccepted = "Booking request accepted successfully";
         public const string BookingRequestRefused = "Booking request refused successfully";
         public const string BookingRequestCanceled = "Booking request canceled successfully";
+        public const string BookingRequestClosed = "Booking request closed successfully";
     }
 
     public static class CompanyProfile
