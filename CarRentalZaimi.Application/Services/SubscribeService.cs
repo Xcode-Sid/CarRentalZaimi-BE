@@ -50,16 +50,28 @@ public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserMana
         var subscription = await _unitOfWork.Repository<Subscribe>()
             .FirstOrDefaultAsync(p => p.Email == request.Email, cancellationToken);
 
-        if (subscription is not null)
+        // Already actively subscribed — block duplicate
+        if (subscription is not null && !subscription.IsUnsubscribed)
             return Result<SubscribeDto>.Error("This email has already subscribed");
 
-        var newSubscription = new Subscribe
+        if (subscription is null)
         {
-            Id = Guid.NewGuid(),
-            Email = request.Email,
-        };
+            // New subscriber
+            subscription = new Subscribe
+            {
+                Id = Guid.NewGuid(),
+                Email = request.Email,
+            };
 
-        await _unitOfWork.Repository<Subscribe>().AddAsync(newSubscription, cancellationToken);
+            await _unitOfWork.Repository<Subscribe>().AddAsync(subscription, cancellationToken);
+        }
+        else if (subscription.IsUnsubscribed)
+        {
+            // Re-subscribing after having unsubscribed
+            subscription.IsUnsubscribed = false;
+            await _unitOfWork.Repository<Subscribe>().UpdateAsync(subscription, cancellationToken);
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Notify admin
@@ -72,7 +84,7 @@ public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserMana
             {
                 Id = Guid.NewGuid(),
                 User = admin,
-                Message = $"{request.Email} has subscribed to get new cars latest promotiotions informations.",
+                Message = $"{request.Email} has subscribed to get new cars latest promotions information.",
                 IsRead = false,
                 UserNotificationType = UserNotificationType.NewSubscribe
             };
@@ -83,7 +95,7 @@ public class SubscribeService(IUnitOfWork _unitOfWork, IMapper _mapper, UserMana
             await _emailService.SendNewSubscriptionEmailToAdminAsync(admin.Email!, request.Email, cancellationToken);
         }
 
-        return Result<SubscribeDto>.Success(_mapper.Map<SubscribeDto>(newSubscription));
+        return Result<SubscribeDto>.Success(_mapper.Map<SubscribeDto>(subscription));
     }
 
     public async Task<Result<bool>> UsubscribeAsync(RemoveSubscriptionCommand request, CancellationToken cancellationToken = default)
