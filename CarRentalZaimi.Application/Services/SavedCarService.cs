@@ -17,6 +17,7 @@ public class SavedCarService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISavedC
         var query = _unitOfWork.Repository<SavedCar>()
              .AsQueryable()
              .Include(c => c.Car)
+             .ThenInclude(sc => sc.CarImages)
              .Include(c => c.User)
              .Where(c => c.User!.Id == request.UserId && !c.IsDeleted);
 
