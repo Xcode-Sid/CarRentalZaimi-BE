@@ -10,4 +10,7 @@ public enum UserNotificationType
     NewPromotion = 6,        
     NewMessage = 7,
     NewBookingRequest = 8,
+    NewSubscribe = 9,
+    Unsubscribe = 10,
+    NewContactMessage = 11
 }

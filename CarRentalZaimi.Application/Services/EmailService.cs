@@ -7,11 +7,12 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
+using Twilio.Jwt.AccessToken;
 
 namespace CarRentalZaimi.Application.Services;
 
 public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
-    ILogger<EmailService> logger,IErrorService errorService) : IEmailService
+    ILogger<EmailService> logger,IErrorService errorService, IOptions<EmailSettings> _emailSettings, IErrorService _errorService, IJwtTokenService _jwtTokenService) : IEmailService
 {
 
     private readonly EmailSettings _emailSettings = emailSettingsOptions.Value;
@@ -66,6 +67,255 @@ public class EmailService(IOptions<EmailSettings> emailSettingsOptions,
 
         return await SendEmailAsync(adminEmail, "New Booking Request", body, isHtml: true, cancellationToken);
     }
+
+    public async Task<Result<bool>> SendBookingCancellationEmailToAdminAsync(string adminEmail, string userName, string carName, string bookingReference,
+        string cancellationDate, string cancellationReason, CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiBookingCancellationEmailTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("Booking cancellation email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        body = body
+            .Replace("{{UserName}}", userName)
+            .Replace("{{CarName}}", carName)
+            .Replace("{{BookingReference}}", bookingReference)
+            .Replace("{{CancellationDate}}", cancellationDate)
+            .Replace("{{CancellationReason}}", cancellationReason)
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(adminEmail, "Booking Cancellation", body, isHtml: true, cancellationToken);
+    }
+
+    public async Task<Result<bool>> SendBookingAcceptanceEmailToUserAsync(string userEmail, string userName, string carTitle, string carName, string startDate, string endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiBookingAcceptanceEmailTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("Booking acceptance email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        body = body
+            .Replace("{{UserName}}", userName)
+            .Replace("{{CarTitle}}", carTitle)
+            .Replace("{{CarName}}", carName)
+            .Replace("{{StartDate}}", startDate)
+            .Replace("{{EndDate}}", endDate)
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(userEmail, "Booking Accepted", body, isHtml: true, cancellationToken);
+    }
+
+    public async Task<Result<bool>> SendBookingRefusalEmailToUserAsync(string userEmail, string userName, string carTitle, string carName, string reason,
+        CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiBookingRefusalEmailTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("Booking refusal email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        body = body
+            .Replace("{{UserName}}", userName)
+            .Replace("{{CarTitle}}", carTitle)
+            .Replace("{{CarName}}", carName)
+            .Replace("{{RefusalReason}}", reason)
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(userEmail, "Booking Refused", body, isHtml: true, cancellationToken);
+    }
+
+    public async Task<Result<bool>> SendNewSubscriptionEmailToAdminAsync(string adminEmail, string subscriberEmail,
+        CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiNewSubscriptionEmailTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("New subscription email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        body = body
+            .Replace("{{SubscriberEmail}}", subscriberEmail)
+            .Replace("{{SubscribedDate}}", DateTime.UtcNow.ToString("MMMM dd, yyyy"))
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(adminEmail, "New Newsletter Subscription", body, isHtml: true, cancellationToken);
+    }
+
+    public async Task<Result<bool>> SendUnsubscribeEmailToAdminAsync(string adminEmail, string subscriberEmail,
+        CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiUnsubscribeEmailTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("Unsubscribe email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        body = body
+            .Replace("{{SubscriberEmail}}", subscriberEmail)
+            .Replace("{{UnsubscribedDate}}", DateTime.UtcNow.ToString("MMMM dd, yyyy"))
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(adminEmail, "Newsletter Unsubscription", body, isHtml: true, cancellationToken);
+    }
+
+    public async Task<Result<bool>> SendNewCarNotificationEmailAsync(string subscriberEmail, string carTitle, string carModel, string carYear, string fuelType,
+        string seats, string pricePerDay, Guid carId, CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiNewCarEmailTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("New car notification email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        var rawBaseUrl = _emailSettings.BaseUrl;
+        if (!Uri.TryCreate(rawBaseUrl, UriKind.Absolute, out var parsedBaseUrl))
+        {
+            _logger.LogError("Email BaseUrl is missing or invalid in configuration.");
+            return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        var token = _jwtTokenService.GenerateUnsubscribeToken(subscriberEmail);
+        var baseUrl = parsedBaseUrl.ToString().TrimEnd('/');
+        var unsubscribeLink = $"{baseUrl}/unsubscribe?token={token}";
+
+        var carUrl = $"{baseUrl}/fleet/{carId}"; 
+
+        body = body
+            .Replace("{{CarTitle}}", carTitle)
+            .Replace("{{CarModel}}", carModel)
+            .Replace("{{CarYear}}", carYear)
+            .Replace("{{FuelType}}", fuelType)
+            .Replace("{{Seats}}", seats)
+            .Replace("{{PricePerDay}}", pricePerDay)
+            .Replace("{{CarUrl}}", carUrl)
+            .Replace("{{UnsubscribeUrl}}", unsubscribeLink)
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(subscriberEmail, "New Car Available at Car Rental Zaimi!", body, isHtml: true, cancellationToken);
+    }
+
+    public async Task<Result<bool>> SendNewPromotionNotificationEmailAsync(string subscriberEmail, string title, string code, string discountPercentage,
+        string numberOfDays, string appliesTo, CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiNewPromotionEmailTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("New promotion notification email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        var rawBaseUrl = _emailSettings.BaseUrl;
+        if (!Uri.TryCreate(rawBaseUrl, UriKind.Absolute, out var parsedBaseUrl))
+        {
+            _logger.LogError("Email BaseUrl is missing or invalid in configuration.");
+            return _errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        var token = _jwtTokenService.GenerateUnsubscribeToken(subscriberEmail);
+        var baseUrl = parsedBaseUrl.ToString().TrimEnd('/');
+        var unsubscribeLink = $"{baseUrl}/unsubscribe?token={token}";
+
+        var fleetUrl = $"{baseUrl}/fleet";
+
+        body = body
+            .Replace("{{Title}}", title)
+            .Replace("{{Code}}", code)
+            .Replace("{{DiscountPercentage}}", discountPercentage)
+            .Replace("{{NumberOfDays}}", numberOfDays)
+            .Replace("{{AppliesTo}}", appliesTo)
+            .Replace("{{FleetUrl}}", fleetUrl)
+            .Replace("{{UnsubscribeUrl}}", unsubscribeLink)
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(subscriberEmail, "New Promotion at Car Rental Zaimi!", body, isHtml: true, cancellationToken);
+    }
+
+    public async Task<Result<bool>> SendContactMessageAdminNotificationAsync(string fullName, string email, string phone, string subject, string message, string adminEmail,
+        CancellationToken cancellationToken = default)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("CarRentalZaimiContactMessageAdminTemplate_en.html"));
+
+        if (resourceName == null)
+        {
+            _logger.LogError("Contact message admin email template not found in embedded resources.");
+            return errorService.CreateFailure<bool>(ErrorCodes.EXTERNAL_SERVICE_ERROR);
+        }
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        using var reader = new StreamReader(stream);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+
+        body = body
+            .Replace("{{FullName}}", fullName)
+            .Replace("{{Email}}", email)
+            .Replace("{{Phone}}", phone ?? "N/A")
+            .Replace("{{Subject}}", subject)
+            .Replace("{{Message}}", message)
+            .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+        return await SendEmailAsync(adminEmail, $"New Contact Message: {subject}", body, isHtml: true, cancellationToken);
+    }
+
 
     private async Task<Result<bool>> SendEmailAsync(string to, string subject, string body, bool isHtml = true, CancellationToken cancellationToken = default)
     {

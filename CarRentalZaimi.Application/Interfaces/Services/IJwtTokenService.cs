@@ -9,4 +9,5 @@ public interface IJwtTokenService
     ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
     bool ValidateToken(string token);
     DateTime GetTokenExpiration(string token);
+    string GenerateUnsubscribeToken(string email);
 }

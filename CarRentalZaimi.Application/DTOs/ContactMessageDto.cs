@@ -9,6 +9,4 @@ public class ContactMessageDto : BaseDto<Guid>
     public string? Phone { get; set; }
     public string? Subject { get; set; }
     public string? Message { get; set; }
-    public bool IsRead { get; set; }
-    public DateTime? ReadAt { get; set; }
 }

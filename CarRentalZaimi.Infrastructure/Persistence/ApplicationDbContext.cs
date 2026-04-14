@@ -3,6 +3,7 @@ using CarRentalZaimi.Domain.Common;
 using CarRentalZaimi.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace CarRentalZaimi.Infrastructure.Persistence;
 
@@ -78,17 +79,26 @@ public class ApplicationDbContext(
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<SavedCar> SavedCars { get; set; }
     public DbSet<UserImage> UserImages { get; set; }
-    public DbSet<UserNotification> UserNotifications { get; set; }
     public DbSet<AppLog> AppLogs { get; set; }
     public DbSet<UserDevice> UserDevices { get; set; }
     public DbSet<StatePrefix> StatePrefixes { get; set; }
     public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public DbSet<Partner> Partners { get; set; }
+    public DbSet<Privacy> Privacies { get; set; }
+    public DbSet<Terms> Terms { get; set; }
+    public DbSet<Subscribe> Subscribes { get; set; }
+    public DbSet<UserNotification> UserNotifications { get; set; }
 
 
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<User>()
+            .HasOne(u => u.Image)
+            .WithOne(ui => ui.User)
+            .HasForeignKey<UserImage>(ui => ui.UserId);
 
         builder.Entity<CompanyProfile>()
          .Property(e => e.WhyChooseUs)

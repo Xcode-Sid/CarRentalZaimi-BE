@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPromotionService
+public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailService _emailService) : IPromotionService
 {
     public async Task<Result<PromotionDto>> CreateAsync(CreatePromotionCommand request, CancellationToken cancellationToken = default)
     {
@@ -65,6 +65,36 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPromo
         await _unitOfWork.Repository<Promotion>().AddAsync(newPromotion, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // Send emails AFTER save
+        var subscribers = await _unitOfWork.Repository<Subscribe>().GetAllAsync(cancellationToken);
+        var activeSubscribers = subscribers.Where(s => !s.IsUnsubscribed && s.Email != null);
+
+        if (activeSubscribers.Any())
+        {
+            // Determine what the promotion applies to
+            string appliesTo = (car, category) switch
+            {
+                ({ } c, _) => c.Title ?? "Specific Car",
+                (_, { } cat) => $"{cat.Name} category",
+                _ => "All Cars"
+            };
+
+            var emailTasks = activeSubscribers.Select(subscriber =>
+                _emailService.SendNewPromotionNotificationEmailAsync(
+                    subscriberEmail: subscriber.Email!,
+                    title: newPromotion.Title,
+                    code: newPromotion.Code,
+                    discountPercentage: newPromotion.DiscountPercentage.ToString("F0"),
+                    numberOfDays: newPromotion.NumberOfDays.ToString(),
+                    appliesTo: appliesTo,
+                    cancellationToken: cancellationToken
+                )
+            );
+
+            await Task.WhenAll(emailTasks);
+        }
+
+
         return Result<PromotionDto>.Success(_mapper.Map<PromotionDto>(newPromotion));
     }
 
@@ -84,50 +114,75 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPromo
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<IEnumerable<PromotionDto>>> GetAllAsync(GetAllPromotionQuery request, CancellationToken cancellationToken = default)
+    public async Task<Result<PagedResponse<PromotionDto>>> GetAllAsync(GetAllPromotionQuery request, CancellationToken cancellationToken = default)
     {
-        var carColors = await _unitOfWork.Repository<Promotion>()
-           .AsQueryable()
-           .ToListAsync(cancellationToken);
+        var query = _unitOfWork.Repository<Promotion>()
+             .AsQueryable()
+             .Where(c => !c.IsDeleted);
 
-        var mapped = _mapper.Map<IEnumerable<PromotionDto>>(carColors);
-        return Result.Success(mapped);
+        // Search
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToLower();
+            query = query.Where(c =>
+                (c.Title! != null && c.Title.ToLower().Contains(search)) ||
+                (c.Description! != null && c.Description.ToLower().Contains(search)));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var promotions = await query
+            .Skip((request.PageNr - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var mapped = _mapper.Map<List<PromotionDto>>(promotions);
+
+        var pagedResponse = new PagedResponse<PromotionDto>(mapped, totalCount, request.PageNr, request.PageSize);
+
+        return Result<PagedResponse<PromotionDto>>.Success(pagedResponse);
     }
 
     public async Task<Result<decimal>> GetPromotionByCarIdAsync(GetPromotionByCarIdQuery request, CancellationToken cancellationToken = default)
     {
+        // Parse once, outside the query
+        if (!Guid.TryParse(request.CarId, out var carGuid))
+            return Result<decimal>.Error("Invalid car ID format.");
+
+        // 1️⃣ Try to find a promotion tied directly to this car
         var promotion = await _unitOfWork.Repository<Promotion>()
             .AsQueryable()
             .Include(c => c.Car)
             .Include(c => c.CarCategory)
-            .FirstOrDefaultAsync(c => c.Car.Id.ToString() == request.CarId
+            .FirstOrDefaultAsync(c => c.Car.Id == carGuid
                                       && !c.IsDeleted
-                                      && c.IsActive,cancellationToken);
+                                      && c.IsActive, cancellationToken);
 
         // 2️⃣ Fallback: look for an active promotion for the car's category
         if (promotion is null)
         {
             var car = await _unitOfWork.Repository<Car>()
                 .AsQueryable()
-                .FirstOrDefaultAsync(c => c.Id.ToString() == request.CarId && !c.IsDeleted, cancellationToken);
+                .Include(c => c.Category)
+                .FirstOrDefaultAsync(c => c.Id == carGuid && !c.IsDeleted, cancellationToken);
 
             if (car is null)
                 return Result<decimal>.Error("Car not found.");
+
+            var categoryId = car.Category.Id; 
 
             promotion = await _unitOfWork.Repository<Promotion>()
                 .AsQueryable()
                 .Include(c => c.Car)
                 .Include(c => c.CarCategory)
-                .FirstOrDefaultAsync(c => c.CarCategory.Id == car.Category.Id
-                                          && c.Car.Id == null          // category-level promotion (not tied to a specific car)
+                .FirstOrDefaultAsync(c => c.CarCategory.Id == categoryId
+                                          && c.Car.Id == null   
                                           && !c.IsDeleted
                                           && c.IsActive, cancellationToken);
         }
 
         if (promotion is null)
             return Result<decimal>.Error("No active promotion found for this car.");
-
-        var promotionDto = _mapper.Map<PromotionDto>(promotion);
 
         return Result<decimal>.Success(promotion.DiscountPercentage);
     }

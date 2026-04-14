@@ -20,4 +20,8 @@ public class CompanyProfileDto : BaseDto<Guid>
     public string? TwiterUrl { get; set; }
     public string? YoutubeUrl { get; set; }
     public string? WhatsAppNumber { get; set; }
+    public int Years { get; set; }
+    public int Cars { get; set; }
+    public int Cities { get; set; }
+    public int Clients { get; set; }
 }

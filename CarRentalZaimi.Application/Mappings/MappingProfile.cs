@@ -36,6 +36,10 @@ public class MappingProfile : Profile
         CreateMap<AppLog, AppLogDto>().ReverseMap();
         CreateMap<UserDevice, UserDeviceDto>().ReverseMap();
         CreateMap<StatePrefix, StatePrefixDto>().ReverseMap();
+        CreateMap<Partner, PartnerDto>().ReverseMap();
+        CreateMap<Terms, TermsDto>().ReverseMap();
+        CreateMap<Privacy, PrivacyDto>().ReverseMap();
+        CreateMap<Subscribe, SubscribeDto>().ReverseMap();
         CreateMap<Result<List<StatePrefix>>, Result<List<StatePrefixDto>>>();
         CreateMap<Result<List<CarFuel>>, Result<List<CarFuelDto>>>();
         CreateMap<Result<List<CarTransmission>>, Result<List<CarTransmissionDto>>>();
@@ -49,5 +53,10 @@ public class MappingProfile : Profile
         CreateMap<Result<List<AdditionalService>>, Result<List<AdditionalServiceDto>>>();
         CreateMap<Result<List<CarReview>>, Result<List<CarReviewDto>>>();
         CreateMap<Result<List<Booking>>, Result<List<BookingDto>>>();
+        CreateMap<Result<List<User>>, Result<List<UserDto>>>();
+        CreateMap<Result<List<Partner>>, Result<List<PartnerDto>>>();
+        CreateMap<Result<List<Terms>>, Result<List<TermsDto>>>();
+        CreateMap<Result<List<Privacy>>, Result<List<PrivacyDto>>>();
+        CreateMap<Result<List<Subscribe>>, Result<List<SubscribeDto>>>();
     }
 }

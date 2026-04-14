@@ -32,5 +32,6 @@ public class User : IdentityUser, IAuditedEntity<string>
     public string? ExternalProviderId { get; set; }
     public string? Location { get; set; }
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public virtual UserImage? Image { get; set; }
 
 }

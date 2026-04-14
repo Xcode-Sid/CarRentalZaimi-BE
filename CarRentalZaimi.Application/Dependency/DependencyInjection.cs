@@ -34,6 +34,12 @@ public static class DependencyInjection
         services.AddScoped<ICarReviewService, CarReviewService>();
         services.AddScoped<ISavedCarService, SavedCarService>();
         services.AddScoped<IBookingServices, BookingServices>();
+        services.AddScoped<ICompanyProfileService, CompanyProfileService>();
+        services.AddScoped<IPartnerService, PartnerService>();
+        services.AddScoped<ITermsService, TermsService>();
+        services.AddScoped<IPrivacyService, PrivacyService>();
+        services.AddScoped<ISubscribeService, SubscribeService>();
+        services.AddScoped<IContactMessageService, ContactMessageService>();
         return services;
     }
 }

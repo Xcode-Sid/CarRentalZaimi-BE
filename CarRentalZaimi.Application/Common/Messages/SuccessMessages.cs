@@ -107,6 +107,46 @@ public static class SuccessMessages
     public static class BookingRequest
     {
         public const string BookingRequestCreated = "Booking request created successfully";
-        public const string BookingRequestUpdated = "Booking request updated successfully";
+        public const string BookingRequestAccepted = "Booking request accepted successfully";
+        public const string BookingRequestRefused = "Booking request refused successfully";
+        public const string BookingRequestCanceled = "Booking request canceled successfully";
+        public const string BookingRequestClosed = "Booking request closed successfully";
+    }
+
+    public static class CompanyProfile
+    {
+        public const string CompanyProfileAdded = "Company profile data added successfully";
+    }
+
+    public static class Partner
+    {
+        public const string PartnerCreated = "Partner created successfully";
+        public const string PartnerUpdated = "Partner updated successfully";
+        public const string PartnerDeleted = "Partner deleted successfully";
+    }
+
+    public static class Term
+    {
+        public const string TermCreated = "Term created successfully";
+        public const string TermUpdated = "Term updated successfully";
+        public const string TermDeleted = "Term deleted successfully";
+    }
+
+    public static class Privacy
+    {
+        public const string PrivacyCreated = "Privacy created successfully";
+        public const string PrivacyUpdated = "Privacy updated successfully";
+        public const string PrivacyDeleted = "Privacy deleted successfully";
+    }
+
+    public static class Subscribe
+    {
+        public const string SubscriptionCreated = "Subscribe created successfully";
+        public const string SubscriptionRemoved = "Subscribe removed successfully";
+    }
+
+    public static class ContactMessage
+    {
+        public const string ContactMessageCreated = "Contact message created successfully";
     }
 }

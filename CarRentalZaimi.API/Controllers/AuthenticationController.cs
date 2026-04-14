@@ -12,6 +12,7 @@ using CarRentalZaimi.Application.Features.Authentication.Command.Register;
 using CarRentalZaimi.Application.Features.Authentication.Command.ResetPassword;
 using CarRentalZaimi.Application.Features.Authentication.Command.Yahoo;
 using CarRentalZaimi.Application.Features.Authentication.Logout;
+using CarRentalZaimi.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +71,7 @@ public class AuthenticationController(IMediator _mediator) : ApiControllerBase(_
     }
 
     [HttpPost("change-password")]
-    [Authorize]
+    [Authorize(SystemPolicies.User)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
