@@ -8,6 +8,7 @@ using CarRentalZaimi.Application.Features.BookingRequest.Commands.CreateBookingR
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.RefuseBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllBookings;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllUserBookings;
+using CarRentalZaimi.Application.Features.CreateOccupiedCarDays.Commands.CreateOccupiedCarDays;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Common.Constants;
@@ -20,7 +21,7 @@ using Microsoft.Extensions.Logging;
 namespace CarRentalZaimi.Application.Services;
 
 public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailService _emailService, 
-    ILogger<BookingServices> _logger, UserManager<User> _userManager) : IBookingServices
+    ILogger<BookingServices> _logger, UserManager<User> _userManager, IOccupiedCarDaysService _occupiedCarDaysService) : IBookingServices
 {
     public async Task<Result<BookingDto>> CreateBookingRequestAsync(CreateBookingRequestCommand request, CancellationToken cancellationToken = default)
     {
@@ -93,6 +94,15 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
                 await _unitOfWork.Repository<UserNotification>().AddAsync(notification, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
+
+            var occDayRequest = new CreateOccupiedCarDaysCommand
+            {
+                CarId = car.Id.ToString(),
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Type = CarBlockedDateType.Booking.ToString(),
+            };
+            await _occupiedCarDaysService.CreateAsync(occDayRequest);
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 

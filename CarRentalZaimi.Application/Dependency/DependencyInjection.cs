@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<ISubscribeService, SubscribeService>();
         services.AddScoped<IContactMessageService, ContactMessageService>();
         services.AddScoped<IAdsService, AdsService>();
+        services.AddScoped<IOccupiedCarDaysService, OccupiedCarDaysService>();
         return services;
     }
 }

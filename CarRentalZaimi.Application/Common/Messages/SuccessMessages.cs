@@ -156,4 +156,11 @@ public static class SuccessMessages
         public const string AdsUpdated = "Ads updated successfully";
         public const string AdsDeleted = "Ads deleted successfully";
     }
+
+    public static class OccupiedCarDays
+    {
+        public const string OccupiedCarDaysCreated = "Occupied car days created successfully";
+        public const string OccupiedCarDaysUpdated = "Occupied car days updated successfully";
+        public const string OccupiedCarDaysDeleted = "Occupied car days deleted successfully";
+    }
 }

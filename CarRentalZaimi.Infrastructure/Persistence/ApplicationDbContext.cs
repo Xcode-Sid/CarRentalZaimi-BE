@@ -89,7 +89,8 @@ public class ApplicationDbContext(
     public DbSet<Subscribe> Subscribes { get; set; }
     public DbSet<UserNotification> UserNotifications { get; set; }
     public DbSet<Ads> Ads { get; set; }
-    
+    public DbSet<OccupiedCarDays> OccupiedCarDays { get; set; }
+
 
 
 
