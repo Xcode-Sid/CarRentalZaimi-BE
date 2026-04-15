@@ -40,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<IPrivacyService, PrivacyService>();
         services.AddScoped<ISubscribeService, SubscribeService>();
         services.AddScoped<IContactMessageService, ContactMessageService>();
+        services.AddScoped<IAdsService, AdsService>();
         return services;
     }
 }

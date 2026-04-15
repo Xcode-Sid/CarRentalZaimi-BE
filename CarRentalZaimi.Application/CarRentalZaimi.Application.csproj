@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -21,14 +21,6 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Files\CarRentalZaimiBookingAcceptanceEmailTemplate_en.html" />
-		<EmbeddedResource Include="Files\CarRentalZaimiBookingRefusalEmailTemplate_en.html" />
-		<EmbeddedResource Include="Files\CarRentalZaimiBookingCancellationEmailTemplate_en.html" />
-		<EmbeddedResource Include="Files\CarRentalZaimiNewPromotionEmailTemplate_en.html" />
-		<EmbeddedResource Include="Files\CarRentalZaimiNewCarEmailTemplate_en.html" />
-		<EmbeddedResource Include="Files\CarRentalZaimiContactMessageAdminTemplate_en.html" />
-		<EmbeddedResource Include="Files\CarRentalZaimiUnsubscribeEmailTemplate_en.html" />
-		<EmbeddedResource Include="Files\CarRentalZaimiNewSubscriptionEmailTemplate_en.html" />
 		<EmbeddedResource Include="Files\CarRentalZaimiNewBookingRequestEmailTemplate_en.html" />
 		<EmbeddedResource Include="Files\CarRentalZaimiForgotPasswordEmailTemplate_en.html" />
 	</ItemGroup>

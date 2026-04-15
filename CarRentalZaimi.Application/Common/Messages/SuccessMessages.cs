@@ -149,4 +149,11 @@ public static class SuccessMessages
     {
         public const string ContactMessageCreated = "Contact message created successfully";
     }
+
+    public static class Ads
+    {
+        public const string AdsCreated = "Ads created successfully";
+        public const string AdsUpdated = "Ads updated successfully";
+        public const string AdsDeleted = "Ads deleted successfully";
+    }
 }

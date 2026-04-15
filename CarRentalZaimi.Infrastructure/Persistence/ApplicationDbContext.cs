@@ -88,6 +88,8 @@ public class ApplicationDbContext(
     public DbSet<Terms> Terms { get; set; }
     public DbSet<Subscribe> Subscribes { get; set; }
     public DbSet<UserNotification> UserNotifications { get; set; }
+    public DbSet<Ads> Ads { get; set; }
+    
 
 
 
