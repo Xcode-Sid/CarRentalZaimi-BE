@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Privacy.Commands.CreatePrivacy;
 using CarRentalZaimi.Application.Features.Privacy.Commands.DeletePrivacy;
@@ -9,26 +10,28 @@ using CarRentalZaimi.Application.Features.Privacy.Queries.GetAllPrivacies;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class PrivacyService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPrivacyService
+public class PrivacyService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : IPrivacyService
 {
     public async Task<Result<PrivacyDto>> CreateAsync(CreatePrivacyCommand request, CancellationToken cancellationToken = default)
     {
         var newPrivacy = new Privacy
         {
-            Id = Guid.NewGuid(),
             Title = request.Title,
             Description = request.Description,
             Color = request.Color,
             Icon = request.Icon,
-            IsActive = request.IsActive,
+            IsActive = request.IsActive
         };
 
         await _unitOfWork.Repository<Privacy>().AddAsync(newPrivacy, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New privacy policy added: {newPrivacy.Title}", UserNotificationType.EntityAdded);
 
         return Result<PrivacyDto>.Success(_mapper.Map<PrivacyDto>(newPrivacy));
     }
@@ -39,12 +42,14 @@ public class PrivacyService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPrivacy
             .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingPrivacy is null)
-            return Result<bool>.Error("This privacy id does not exist");
+            return Result<bool>.Error(ServiceErrorMessages.Privacy.NotFound);
 
         existingPrivacy.IsDeleted = true;
 
         await _unitOfWork.Repository<Privacy>().UpdateAsync(existingPrivacy, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Privacy policy deleted: {existingPrivacy.Title}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -94,7 +99,7 @@ public class PrivacyService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPrivacy
            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingPrivacy is null)
-            return Result<PrivacyDto>.Error("This privacy id does not exists");
+            return Result<PrivacyDto>.Error(ServiceErrorMessages.Privacy.NotFoundUpdate);
 
         existingPrivacy.Title = request.Title;
         existingPrivacy.Description = request.Description;
@@ -104,6 +109,8 @@ public class PrivacyService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPrivacy
 
         await _unitOfWork.Repository<Privacy>().UpdateAsync(existingPrivacy, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Privacy policy updated: {existingPrivacy.Title}", UserNotificationType.EntityUpdated);
 
         return Result<PrivacyDto>.Success(_mapper.Map<PrivacyDto>(existingPrivacy));
     }

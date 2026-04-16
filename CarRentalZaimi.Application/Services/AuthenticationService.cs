@@ -29,6 +29,7 @@ public class AuthenticationService : IAuthenticationService
     private readonly UserManager<User> _userManager; 
     private readonly RoleManager<Role> _roleManager;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notificationService;
 
     public AuthenticationService(
         IUserRepository userRepository, 
@@ -40,7 +41,8 @@ public class AuthenticationService : IAuthenticationService
         IJwtTokenService jwtTokenService,
         UserManager<User> userManager,
         RoleManager<Role> roleManager,
-        IMapper mapper)
+        IMapper mapper,
+        INotificationService notificationService)
     {
         _userRepository = userRepository;   
         _errorService = errorService;
@@ -52,6 +54,7 @@ public class AuthenticationService : IAuthenticationService
         _userManager = userManager;
         _roleManager = roleManager;
         _mapper = mapper;
+        _notificationService = notificationService;
     }
 
     public async Task<Result<UserDto>> RegisterAsync(string firstname, string lastname, DateTime? dateOfBirth, string username, string email, 
@@ -79,7 +82,6 @@ public class AuthenticationService : IAuthenticationService
             // Create new user with PendingVerification status (will be activated after email confirmation)
             var user = new User
             {
-                Id = Guid.NewGuid().ToString(),
                 FirstName = firstname,
                 LastName = lastname,
                 DateOfBirth =  dateOfBirth,
@@ -147,9 +149,11 @@ public class AuthenticationService : IAuthenticationService
             _logger.LogInformation("User {UserId} registered successfully", user.Id);
             await _unitOfWork.CommitTransactionAsync();
 
+            // Notify admins
+            await _notificationService.SendNotificationToAdminsAsync($"New user registered: {user.FirstName} {user.LastName} ({user.Email})", UserNotificationType.UserRegistered);
+
             var response = new UserDto
             {
-                Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 DateOfBirth = user.DateOfBirth,
@@ -233,6 +237,9 @@ public class AuthenticationService : IAuthenticationService
 
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Google user {UserId} created successfully", user.Id);
+
+                // Notify admins about new user registration via Google
+                await _notificationService.SendNotificationToAdminsAsync($"New user registered via Google: {user.FirstName} {user.LastName} ({user.Email})", UserNotificationType.UserRegistered);
             }
             else
             {
@@ -252,7 +259,7 @@ public class AuthenticationService : IAuthenticationService
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Email, user.Email),
+                new(ClaimTypes.Email, user.Email!),
                 new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
                 new(ClaimTypes.Role, SystemPolicies.User.ToString()),
                 new(ClaimNames.UserStatus, user.Status.ToString())
@@ -364,6 +371,9 @@ public class AuthenticationService : IAuthenticationService
 
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Facebook user {UserId} created successfully", user.Id);
+
+                // Notify admins about new user registration via Facebook
+                await _notificationService.SendNotificationToAdminsAsync($"New user registered via Facebook: {user.FirstName} {user.LastName} ({user.Email})", UserNotificationType.UserRegistered);
             }
             else
             {
@@ -448,7 +458,6 @@ public class AuthenticationService : IAuthenticationService
             {
                 user = new User
                 {
-                    Id = Guid.NewGuid().ToString(),
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
@@ -476,6 +485,9 @@ public class AuthenticationService : IAuthenticationService
                 await _unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation("New Microsoft user {UserId} created successfully", user.Id);
+
+                // Notify admins about new user registration via Microsoft
+                await _notificationService.SendNotificationToAdminsAsync($"New user registered via Microsoft: {user.FirstName} {user.LastName} ({user.Email})", UserNotificationType.UserRegistered);
             }
             else
             {
@@ -559,7 +571,6 @@ public class AuthenticationService : IAuthenticationService
 
                 user = new User
                 {
-                    Id = Guid.NewGuid().ToString(),
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
@@ -586,6 +597,9 @@ public class AuthenticationService : IAuthenticationService
 
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("New Yahoo user {UserId} created successfully", user.Id);
+
+                // Notify admins about new user registration via Yahoo
+                await _notificationService.SendNotificationToAdminsAsync($"New user registered via Yahoo: {user.FirstName} {user.LastName} ({user.Email})", UserNotificationType.UserRegistered);
             }
             else
             {
@@ -721,7 +735,6 @@ public class AuthenticationService : IAuthenticationService
 
             var newUser = new UserDto
             {
-                Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 DateOfBirth = user.DateOfBirth,

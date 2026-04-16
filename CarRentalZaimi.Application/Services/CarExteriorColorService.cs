@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.CarExteriorColor.Commands.CreateCarExteriorColor;
 using CarRentalZaimi.Application.Features.CarExteriorColor.Commands.DeleteCarExteriorColor;
@@ -9,11 +10,12 @@ using CarRentalZaimi.Application.Features.CarInterior.Queries.GetAllCarInteriorC
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class CarExteriorColorService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarExteriorColorService
+public class CarExteriorColorService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ICarExteriorColorService
 {
     public async Task<Result<CarExteriorColorDto>> CreateAsync(CreateCarExteriorColorCommand request, CancellationToken cancellationToken = default)
     {
@@ -25,12 +27,13 @@ public class CarExteriorColorService(IUnitOfWork _unitOfWork, IMapper _mapper) :
 
         var newFuel = new CarExteriorColor
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
+            Name = request.Name!
         };
 
         await _unitOfWork.Repository<CarExteriorColor>().AddAsync(newFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New car exterior color added: {newFuel.Name}", UserNotificationType.EntityAdded);
 
         return Result<CarExteriorColorDto>.Success(_mapper.Map<CarExteriorColorDto>(newFuel));
     }
@@ -53,6 +56,8 @@ public class CarExteriorColorService(IUnitOfWork _unitOfWork, IMapper _mapper) :
 
         await _unitOfWork.Repository<CarExteriorColor>().UpdateAsync(existingColor, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car exterior color deleted: {existingColor.Name}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -81,10 +86,12 @@ public class CarExteriorColorService(IUnitOfWork _unitOfWork, IMapper _mapper) :
         if (color is not null)
             return Result<CarExteriorColorDto>.Error("This exterior color already exists");
 
-        existingColor.Name = request.Name;
+        existingColor.Name = request.Name!;
 
         await _unitOfWork.Repository<CarExteriorColor>().UpdateAsync(existingColor, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car exterior color updated: {existingColor.Name}", UserNotificationType.EntityUpdated);
 
         return Result<CarExteriorColorDto>.Success(_mapper.Map<CarExteriorColorDto>(existingColor));
     }

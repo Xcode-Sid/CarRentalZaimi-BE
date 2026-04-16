@@ -51,6 +51,17 @@ try
            ValidAudience = "CarRentalZaimiUsers",
            ValidateLifetime = true,
        };
+       options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+       {
+           OnMessageReceived = context =>
+           {
+               var accessToken = context.Request.Query["access_token"];
+               var path = context.HttpContext.Request.Path;
+               if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
+                   context.Token = accessToken;
+               return Task.CompletedTask;
+           }
+       };
    })
    .AddCookie("GoogleAuth", options =>
    {
@@ -118,9 +129,10 @@ try
     {
         options.AddPolicy("AllowAll", policy =>
         {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
+            policy.AllowAnyMethod()
                   .AllowAnyHeader()
+                  .AllowCredentials()
+                  .SetIsOriginAllowed(_ => true)
                   .WithExposedHeaders("X-Pagination", "X-Request-Id");
         });
     });
@@ -159,6 +171,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
+    app.MapHub<CarRentalZaimi.Infrastructure.Hubs.NotificationHub>("/hubs/notifications");
     app.Run();
 }
 catch (Exception ex)

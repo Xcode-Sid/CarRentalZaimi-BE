@@ -8,11 +8,12 @@ using CarRentalZaimi.Application.Features.CarFuel.Queries.GetAllCarFuels;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class CarFuelService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarFuelService
+public class CarFuelService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ICarFuelService
 {
     public async Task<Result<CarFuelDto>> CreateAsync(CreateCarFuelCommand request, CancellationToken cancellationToken = default)
     {
@@ -24,12 +25,13 @@ public class CarFuelService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarFuel
 
         var newFuel = new CarFuel
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
+            Name = request.Name!
         };
 
         await _unitOfWork.Repository<CarFuel>().AddAsync(newFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New car fuel type added: {newFuel.Name}", UserNotificationType.EntityAdded);
 
         return Result<CarFuelDto>.Success(_mapper.Map<CarFuelDto>(newFuel));
     }
@@ -52,6 +54,8 @@ public class CarFuelService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarFuel
 
         await _unitOfWork.Repository<CarFuel>().UpdateAsync(existingFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car fuel type deleted: {existingFuel.Name}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -80,10 +84,12 @@ public class CarFuelService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarFuel
         if (fuel is not null)
             return Result<CarFuelDto>.Error("This fuel type already exists");
 
-        existingFuel.Name = request.Name;
+        existingFuel.Name = request.Name!;
 
         await _unitOfWork.Repository<CarFuel>().UpdateAsync(existingFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car fuel type updated: {existingFuel.Name}", UserNotificationType.EntityUpdated);
 
         return Result<CarFuelDto>.Success(_mapper.Map<CarFuelDto>(existingFuel));
     }
