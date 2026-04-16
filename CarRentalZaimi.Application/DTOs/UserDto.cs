@@ -4,7 +4,6 @@ namespace CarRentalZaimi.Application.DTOs;
 
 public class UserDto : BaseDto<Guid>
 {
-    public string? Id { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? Username { get; set; }

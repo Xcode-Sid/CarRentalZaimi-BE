@@ -1,6 +1,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.Common.Model;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Cars.Commands.AddFeaturedCar;
@@ -17,9 +18,11 @@ using CarRentalZaimi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using CarRentalZaimi.Domain.Enums;
+
 namespace CarRentalZaimi.Application.Services;
 
-public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _logger, IEmailService _emailService) : ICarService
+public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _logger, IEmailService _emailService, INotificationService _notificationService) : ICarService
 {
 
     public async Task<Result<CarDto>> CreateCarAsync(CreateCarCommand request, CancellationToken cancellationToken)
@@ -31,7 +34,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
                 .FirstOrDefaultAsync(c => c.LicensePlate == request.LicensePlate, cancellationToken);
 
             if (existingCar is not null)
-                return Result<CarDto>.Error("A car with this license plate already exists.");
+                return Result<CarDto>.Error(ServiceErrorMessages.Car.LicensePlateExists);
         }
 
         await _uow.BeginTransactionAsync(cancellationToken);
@@ -39,7 +42,6 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
         {
             var newCar = new Car
             {
-                Id = Guid.NewGuid(),
                 Title = request.Title,
                 Description = request.Description,
                 Year = request.Year,
@@ -160,6 +162,10 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
             await _uow.SaveChangesAsync(cancellationToken);
             await _uow.CommitTransactionAsync(cancellationToken);
 
+            // Notify admins and all users
+            await _notificationService.SendNotificationToAdminsAsync($"New car added: {newCar.Title}", UserNotificationType.NewCar);
+            await _notificationService.SendNotificationToAllAsync($"Check out our new car: {newCar.Title}!", UserNotificationType.NewCar);
+
             // Send emails AFTER commit
             var subscribers = await _uow.Repository<Subscribe>().GetAllAsync(cancellationToken);
             var activeSubscribers = subscribers.Where(s => !s.IsUnsubscribed && s.Email != null);
@@ -172,7 +178,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
                 var emailTasks = activeSubscribers.Select(subscriber =>
                     _emailService.SendNewCarNotificationEmailAsync(
                         subscriberEmail: subscriber.Email!,
-                        carTitle: newCar.Title,
+                        carTitle: newCar.Title!,
                         carModel: carModel,
                         carYear: newCar.Year.ToString() ?? "N/A",
                         fuelType: fuelType,
@@ -201,7 +207,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.CarId, cancellationToken);
 
         if (existingCar is null)
-            return Result<CarDto>.Error("Car not found.");
+            return Result<CarDto>.Error(ServiceErrorMessages.Car.NotFound);
 
         // Check license plate uniqueness against other cars
         if (request.LicensePlate is not null)
@@ -210,7 +216,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
                 .FirstOrDefaultAsync(c => c.LicensePlate == request.LicensePlate && c.Id.ToString() != request.CarId, cancellationToken);
 
             if (plateExists is not null)
-                return Result<CarDto>.Error("A car with this license plate already exists.");
+                return Result<CarDto>.Error(ServiceErrorMessages.Car.LicensePlateExists);
         }
 
         await _uow.BeginTransactionAsync(cancellationToken);
@@ -334,6 +340,9 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
             await _uow.SaveChangesAsync(cancellationToken);
             await _uow.CommitTransactionAsync(cancellationToken);
 
+            // Notify admins
+            await _notificationService.SendNotificationToAdminsAsync($"Car updated: {existingCar.Title}", UserNotificationType.CarUpdated);
+
             return Result<CarDto>.Success(_mapper.Map<CarDto>(existingCar));
         }
         catch (Exception ex)
@@ -350,7 +359,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id, cancellationToken);
 
         if (existingCar is null)
-            return Result<bool>.Error("Car not found.");
+            return Result<bool>.Error(ServiceErrorMessages.Car.NotFound);
 
         // Soft-delete all associated images and remove files from disk
         var carImages = await _uow.Repository<CarImages>()
@@ -375,6 +384,9 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
         await _uow.Repository<Car>().UpdateAsync(existingCar, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
 
+        // Notify admins
+        await _notificationService.SendNotificationToAdminsAsync($"Car deleted: {existingCar.Title}", UserNotificationType.CarDeleted);
+
         return Result<bool>.Success(true);
     }
 
@@ -394,7 +406,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
             .FirstOrDefaultAsync(c => c.Id.ToString() == request.Id && !c.IsDeleted, cancellationToken);
 
         if (car is null)
-            return Result<CarDto>.Error("Car not found.");
+            return Result<CarDto>.Error(ServiceErrorMessages.Car.NotFound);
 
         var carDto = _mapper.Map<CarDto>(car);
         carDto.TotalReviews = car.CarReviews?.Count;
@@ -502,7 +514,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
          .FirstOrDefaultAsync(c => c.Id.ToString() == request.CarId, cancellationToken);
 
         if (existingCar is null)
-            return Result<bool>.Error("Car not found.");
+            return Result<bool>.Error(ServiceErrorMessages.Car.NotFound);
 
         existingCar.IsRecommended = request.IsRecommended;
 
@@ -515,20 +527,18 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
     public async Task<Result<IEnumerable<CarDto>>> GetFeaturedCarsAsync(GetFeaturedCarsQuery request, CancellationToken cancellationToken = default)
     {
         var cars = await GetBaseCarQuery()
-            .Where(c => c.CarReviews.Any(r => !r.IsDeleted))
-            .OrderByDescending(c => c.CarReviews.Count(r => !r.IsDeleted))
+            .Where(c => c.CarReviews!.Any(r => !r.IsDeleted))
+            .OrderByDescending(c => c.CarReviews!.Count(r => !r.IsDeleted))
             .ProjectTo<CarDto>(_mapper.ConfigurationProvider)
             .Take(request.Limit)
             .ToListAsync(cancellationToken);
 
         if (cars.Count == 0)
-        {
             cars = await GetBaseCarQuery()
                 .Where(c => c.IsRecommended)
                 .ProjectTo<CarDto>(_mapper.ConfigurationProvider)
                 .Take(request.Limit)
                 .ToListAsync(cancellationToken);
-        }
 
         return Result<IEnumerable<CarDto>>.Success(cars);
     }
@@ -541,7 +551,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
             .AnyAsync(c => c.Id.ToString() == request.CarId, cancellationToken);
 
         if (!carExists)
-            return Result<IEnumerable<BookedDateRangeDto>>.Error("Car not found.");
+            return Result<IEnumerable<BookedDateRangeDto>>.Error(ServiceErrorMessages.Car.NotFound);
 
         var today = DateTime.UtcNow.Date;
 
@@ -549,7 +559,7 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
             .AsQueryable()
             .Where(b => b.Car!.Id.ToString() == request.CarId
                      && b.EndDate >= today
-                     && b.Status == Domain.Enums.BookingStatus.Accepted)
+                     && b.Status == BookingStatus.Accepted)
             .Select(b => new BookedDateRangeDto
             {
                 StartDate = b.StartDate,
@@ -604,11 +614,10 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
 
             carImages.Add(new CarImages
             {
-                Id = Guid.NewGuid(),
                 Car = car,
                 ImageName = image.Name,
                 ImagePath = relativePath,
-                IsPrimary = image.Name == primaryImageName,
+                IsPrimary = image.Name == primaryImageName
             });
         }
 
@@ -720,11 +729,10 @@ public class CarService(IUnitOfWork _uow, IMapper _mapper, ILogger<CarService> _
 
                 var newImage = new CarImages
                 {
-                    Id = Guid.NewGuid(),
                     Car = car,
                     ImageName = image.Name,
                     ImagePath = relativePath,
-                    IsPrimary = isPrimary,
+                    IsPrimary = isPrimary
                 };
 
                 await _uow.Repository<CarImages>().AddAsync(newImage, cancellationToken);
