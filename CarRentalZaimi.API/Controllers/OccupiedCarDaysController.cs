@@ -7,6 +7,7 @@ using CarRentalZaimi.Application.Features.CreateOccupiedCarDays.Commands.DeleteO
 using CarRentalZaimi.Application.Features.CreateOccupiedCarDays.Commands.UpdateOccupiedCarDays;
 using CarRentalZaimi.Application.Features.CreateOccupiedCarDays.Queries.GetCarCalendarData;
 using CarRentalZaimi.Application.Features.CreateOccupiedCarDays.Queries.GetOccupiedCarDays;
+using CarRentalZaimi.Application.Features.Terms.Queries.GetAllPagedTerms;
 using CarRentalZaimi.Domain.Common.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -48,6 +49,7 @@ public class OccupiedCarDaysController(IMediator _mediator) : ApiControllerBase(
     }
 
     [HttpGet("car/occupied-days", Name = nameof(GetOccupiedDays))]
+    [Authorize(SystemPolicies.Admin)]
     [ProducesResponseType(typeof(Result<PagedResponse<OccupiedCarDaysDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOccupiedDays([FromQuery] GetOccupiedCarDaysQuery query)
@@ -56,13 +58,13 @@ public class OccupiedCarDaysController(IMediator _mediator) : ApiControllerBase(
     }
 
     [HttpGet("get/calendarData", Name = nameof(GetCalendarData))]
-    [Authorize(SystemPolicies.Admin)]
     [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCalendarData([FromQuery] GetCarCalendarDataQuery query)
     {
         return await SendQuery(query, null, StatusCodes.Status404NotFound);
     }
+
 }
 
 

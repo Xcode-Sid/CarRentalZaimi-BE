@@ -40,6 +40,24 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         if (car is null)
             return Result<BookingDto>.Error("Car not found");
 
+
+        // ✅ Duplicate booking check
+        var duplicateExists = await _unitOfWork.Repository<Booking>()
+            .AsQueryable()
+            .Include(b => b.User)
+            .Include(b => b.Car)
+            .AnyAsync(b =>
+                b.User!.Id == request.UserId &&
+                b.Car!.Id.ToString() == request.CarId &&
+                b.Status == BookingStatus.Accepted &&
+                b.StartDate == request.StartDate &&
+                b.EndDate == request.EndDate,
+                cancellationToken);
+
+        if (duplicateExists)
+            return Result<BookingDto>.Error("You already have a booking for this car on the selected dates.");
+
+
         Enum.TryParse<PaymentMethod>(request.PaymentMethod, ignoreCase: true, out var paymentMethod);
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -94,15 +112,6 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
                 await _unitOfWork.Repository<UserNotification>().AddAsync(notification, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
-
-            var occDayRequest = new CreateOccupiedCarDaysCommand
-            {
-                CarId = car.Id.ToString(),
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                Type = CarBlockedDateType.Booking.ToString(),
-            };
-            await _occupiedCarDaysService.CreateAsync(occDayRequest);
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
@@ -374,6 +383,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         if (booking.Status != BookingStatus.Accepted)
             return Result<BookingDto>.Error("Only accepted bookings can be closed");
 
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
             booking.Status = BookingStatus.Done;
@@ -381,11 +391,23 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
             await _unitOfWork.Repository<Booking>().UpdateAsync(booking, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            var occDayRequest = new CreateOccupiedCarDaysCommand
+            {
+                CarId = booking.Car?.Id.ToString(),
+                StartDate = booking.StartDate,
+                EndDate = booking.EndDate,
+                Type = CarBlockedDateType.Booking.ToString(),
+            };
+            await _occupiedCarDaysService.CreateAsync(occDayRequest);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
             var bookingDto = _mapper.Map<BookingDto>(booking);
             return Result<BookingDto>.Success(bookingDto);
         }
         catch (Exception ex)
         {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             _logger.LogError(ex, "Failed to close booking {BookingId}", request.BookingId);
             return Result<BookingDto>.Error("Failed to close booking.");
         }
