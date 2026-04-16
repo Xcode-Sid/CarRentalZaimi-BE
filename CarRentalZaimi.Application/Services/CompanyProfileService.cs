@@ -6,22 +6,23 @@ using CarRentalZaimi.Application.Features.CompanyProfile.Queries.GetCompanyProfi
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class CompanyProfileService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICompanyProfileService
+public class CompanyProfileService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ICompanyProfileService
 {
     public async Task<Result<CompanyProfileDto>> AddCompanyProfileDataAsync(AddCompanyProfileDataCommand request, CancellationToken cancellationToken = default)
     {
         // Save the logo and get its relative path
         string? logoPath = null;
         if (!string.IsNullOrEmpty(request.LogoUrl))
-        {
             logoPath = await SaveCompanyLogoAsync( request.LogoUrl, cancellationToken);
-        }
 
         var existingProfile = await _unitOfWork.Repository<CompanyProfile>()
             .FirstOrDefaultAsync(x => !x.IsDeleted, cancellationToken);
+
+        string actionType = existingProfile is null ? "added" : "updated";
 
         if (existingProfile is null)
         {
@@ -86,6 +87,8 @@ public class CompanyProfileService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _notificationService.SendNotificationToAdminsAsync($"Company profile {actionType} successfully.", UserNotificationType.EntityUpdated);
+
         var result = existingProfile is null
             ? await _unitOfWork.Repository<CompanyProfile>().FirstOrDefaultAsync(x => !x.IsDeleted, cancellationToken)
             : existingProfile;
@@ -101,9 +104,7 @@ public class CompanyProfileService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
 
         var fullPath = Path.Combine("wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
         if (File.Exists(fullPath))
-        {
             File.Delete(fullPath);
-        }
     }
 
     public async Task<Result<CompanyProfileDto>> GetCompanyProfileDataAsync(GetCompanyProfileDataQuery request, CancellationToken cancellationToken = default)

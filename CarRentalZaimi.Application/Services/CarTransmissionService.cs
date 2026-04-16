@@ -8,11 +8,12 @@ using CarRentalZaimi.Application.Features.CarTransmission.Queries.GetAllCarFuels
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class CarTransmissionService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarTransmissionService
+public class CarTransmissionService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ICarTransmissionService
 {
     public async Task<Result<CarTransmissionDto>> CreateAsync(CreateCarTransmissionCommand request, CancellationToken cancellationToken = default)
     {
@@ -24,12 +25,13 @@ public class CarTransmissionService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
 
         var newFuel = new CarTransmission
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
+            Name = request.Name!
         };
 
         await _unitOfWork.Repository<CarTransmission>().AddAsync(newFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New car transmission type added: {newFuel.Name}", UserNotificationType.EntityAdded);
 
         return Result<CarTransmissionDto>.Success(_mapper.Map<CarTransmissionDto>(newFuel));
     }
@@ -52,6 +54,8 @@ public class CarTransmissionService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
 
         await _unitOfWork.Repository<CarTransmission>().UpdateAsync(existingTransmission, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car transmission type deleted: {existingTransmission.Name}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -80,10 +84,12 @@ public class CarTransmissionService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
         if (fuel is not null)
             return Result<CarTransmissionDto>.Error("This transmission type already exists");
 
-        existingTransmission.Name = request.Name;
+        existingTransmission.Name = request.Name!;
 
         await _unitOfWork.Repository<CarTransmission>().UpdateAsync(existingTransmission, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car transmission type updated: {existingTransmission.Name}", UserNotificationType.EntityUpdated);
 
         return Result<CarTransmissionDto>.Success(_mapper.Map<CarTransmissionDto>(existingTransmission));
     }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.CarCompanyModel.Commands.CreateCarCompanyModel;
 using CarRentalZaimi.Application.Features.CarCompanyModel.Commands.DeleteCarCompanyModel;
@@ -8,11 +9,12 @@ using CarRentalZaimi.Application.Features.CarCompanyModel.Queries.GetAllCarCompa
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class CarCompanyModelService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarCompanyModelService
+public class CarCompanyModelService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ICarCompanyModelService
 {
     public async Task<Result<CarCompanyModelDto>> CreateAsync(CreateCarCompanyModelCommand request, CancellationToken cancellationToken = default)
     {
@@ -33,11 +35,13 @@ public class CarCompanyModelService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
         {
             Id = Guid.NewGuid(),
             CarCompanyName = companyName,
-            Name = request.Name,
+            Name = request.Name!,
         };
 
         await _unitOfWork.Repository<CarCompanyModel>().AddAsync(newFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New car model added: {newFuel.Name}", UserNotificationType.EntityAdded);
 
         return Result<CarCompanyModelDto>.Success(_mapper.Map<CarCompanyModelDto>(newFuel));
     }
@@ -60,6 +64,8 @@ public class CarCompanyModelService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
 
         await _unitOfWork.Repository<CarCompanyModel>().UpdateAsync(existingCompany, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car model deleted: {existingCompany.Name}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -95,6 +101,8 @@ public class CarCompanyModelService(IUnitOfWork _unitOfWork, IMapper _mapper) : 
 
         await _unitOfWork.Repository<CarCompanyModel>().UpdateAsync(existingCompany, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car model updated: {existingCompany.Name}", UserNotificationType.EntityUpdated);
 
         return Result<CarCompanyModelDto>.Success(_mapper.Map<CarCompanyModelDto>(existingCompany));
     }

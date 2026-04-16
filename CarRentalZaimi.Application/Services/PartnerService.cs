@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Partner.Commands.CreatePartner;
 using CarRentalZaimi.Application.Features.Partner.Commands.DeletePartner;
@@ -9,14 +10,12 @@ using CarRentalZaimi.Application.Features.Partner.Queries.GetAllPartners;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class PartnerService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPartnerService
+public class PartnerService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : IPartnerService
 {
     public async Task<Result<PartnerDto>> CreateAsync(CreatePartnerCommand request, CancellationToken cancellationToken = default)
     {
@@ -24,19 +23,20 @@ public class PartnerService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPartner
            .FirstOrDefaultAsync(p => p.Name == request.Name, cancellationToken);
 
         if (partner is not null)
-            return Result<PartnerDto>.Error("This partner already exists");
+            return Result<PartnerDto>.Error(ServiceErrorMessages.Partner.NotFoundUpdate);
 
         var newPartner = new Partner
         {
-            Id = Guid.NewGuid(),
             Name = request.Name,
             Color = request.Color,
             Initials = request.Initials,
-            IsActive = request.IsActive,
+            IsActive = request.IsActive
         };
 
         await _unitOfWork.Repository<Partner>().AddAsync(newPartner, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New partner added: {newPartner.Name}", UserNotificationType.EntityAdded);
 
         return Result<PartnerDto>.Success(_mapper.Map<PartnerDto>(newPartner));
     }
@@ -47,12 +47,14 @@ public class PartnerService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPartner
             .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingPartner is null)
-            return Result<bool>.Error("This partner id does not exist");
+            return Result<bool>.Error(ServiceErrorMessages.Partner.NotFound);
 
         existingPartner.IsDeleted = true;
 
         await _unitOfWork.Repository<Partner>().UpdateAsync(existingPartner, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Partner deleted: {existingPartner.Name}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -101,13 +103,13 @@ public class PartnerService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPartner
            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingPartner is null)
-            return Result<PartnerDto>.Error("This partner id does not exists");
+            return Result<PartnerDto>.Error(ServiceErrorMessages.Partner.NotFoundUpdate);
 
         var partner = await _unitOfWork.Repository<Partner>()
             .FirstOrDefaultAsync(p => p.Name == request.Name && p.Id.ToString() != request.Id, cancellationToken);
 
         if (partner is not null)
-            return Result<PartnerDto>.Error("This partnere already exists");
+            return Result<PartnerDto>.Error(ServiceErrorMessages.Partner.NotFoundUpdate);
 
         existingPartner.Name = request.Name;
         existingPartner.Color = request.Color;
@@ -116,6 +118,8 @@ public class PartnerService(IUnitOfWork _unitOfWork, IMapper _mapper) : IPartner
 
         await _unitOfWork.Repository<Partner>().UpdateAsync(existingPartner, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Partner updated: {existingPartner.Name}", UserNotificationType.EntityUpdated);
 
         return Result<PartnerDto>.Success(_mapper.Map<PartnerDto>(existingPartner));
     }

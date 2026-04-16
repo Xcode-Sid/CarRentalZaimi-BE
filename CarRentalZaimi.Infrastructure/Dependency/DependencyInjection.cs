@@ -51,6 +51,10 @@ public static class DependencyInjection
         services.Configure<PhoneSettings>(configuration.GetSection(ConfigurationKeys.Sections.Sms));
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IPasswordResetService, PasswordResetService>();
+        
+        services.AddSignalR();
+        services.AddScoped<INotificationService, Services.NotificationService>();
+        services.AddScoped<INotificationQueryService, Services.NotificationQueryService>();
 
         return services;
     }

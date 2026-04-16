@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.CarCategory.Command.CreateCarCategory;
 using CarRentalZaimi.Application.Features.CarCategory.Command.DeleteCarCategory;
@@ -8,11 +9,12 @@ using CarRentalZaimi.Application.Features.CarCategory.Queries;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class CarCategoryService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarCategoryService
+public class CarCategoryService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ICarCategoryService
 {
     public async Task<Result<CarCategoryDto>> CreateAsync(CreateCarCategoryCommand request, CancellationToken cancellationToken = default)
     {
@@ -24,13 +26,14 @@ public class CarCategoryService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICar
 
         var newFuel = new CarCategory
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
+            Name = request.Name!,
             Description = request.Description
         };
 
         await _unitOfWork.Repository<CarCategory>().AddAsync(newFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New car category added: {newFuel.Name}", UserNotificationType.EntityAdded);
 
         return Result<CarCategoryDto>.Success(_mapper.Map<CarCategoryDto>(newFuel));
     }
@@ -53,6 +56,8 @@ public class CarCategoryService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICar
 
         await _unitOfWork.Repository<CarCategory>().UpdateAsync(existingCategory, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car category deleted: {existingCategory.Name}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -81,11 +86,13 @@ public class CarCategoryService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICar
         if (category is not null)
             return Result<CarCategoryDto>.Error("This category already exists");
 
-        existingCategory.Name = request.Name;
+        existingCategory.Name = request.Name!;
         existingCategory.Description = request.Description;
 
         await _unitOfWork.Repository<CarCategory>().UpdateAsync(existingCategory, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car category updated: {existingCategory.Name}", UserNotificationType.EntityUpdated);
 
         return Result<CarCategoryDto>.Success(_mapper.Map<CarCategoryDto>(existingCategory));
     }

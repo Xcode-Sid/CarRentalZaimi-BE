@@ -9,11 +9,12 @@ using CarRentalZaimi.Application.Features.StatePrefixes.Queries.GetAllStatePrefi
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper) : IStatePrefixService
+public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : IStatePrefixService
 {
     public async Task<Result<StatePrefixDto>> CreateAsync(CreateStatePrefixCommand request, CancellationToken cancellationToken = default)
     {
@@ -25,15 +26,16 @@ public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISta
 
         var newPrefix = new StatePrefix
         {
-            Id = Guid.NewGuid(),
             PhonePrefix = request.PhonePrefix,
             CountryName = request.CountryName,
             Flag = request.Flag,
-            PhoneRegex = request.PhoneRegex,
+            PhoneRegex = request.PhoneRegex
         };
 
         await _unitOfWork.Repository<StatePrefix>().AddAsync(newPrefix, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New state prefix added: {newPrefix.CountryName} ({newPrefix.PhonePrefix})", UserNotificationType.EntityAdded);
 
         return Result<StatePrefixDto>.Success(_mapper.Map<StatePrefixDto>(newPrefix));
     }
@@ -60,6 +62,8 @@ public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISta
         await _unitOfWork.Repository<StatePrefix>().UpdateAsync(existingPrefixId, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _notificationService.SendNotificationToAdminsAsync($"State prefix updated: {existingPrefixId.CountryName}", UserNotificationType.EntityUpdated);
+
         return Result<StatePrefixDto>.Success(_mapper.Map<StatePrefixDto>(existingPrefixId));
     }
 
@@ -75,6 +79,8 @@ public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISta
 
         await _unitOfWork.Repository<StatePrefix>().UpdateAsync(existingPrefix, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"State prefix deleted: {existingPrefix.CountryName}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }

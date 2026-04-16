@@ -163,4 +163,12 @@ public static class SuccessMessages
         public const string OccupiedCarDaysUpdated = "Occupied car days updated successfully";
         public const string OccupiedCarDaysDeleted = "Occupied car days deleted successfully";
     }
+  
+    public static class Notification
+    {
+        public const string NotificationMarkedRead = "Notification marked as read successfully";
+        public const string NotificationMarkedUnread = "Notification marked as unread successfully";
+        public const string AllNotificationsMarkedRead = "All notifications marked as read successfully";
+        public const string NotificationDeleted = "Notification deleted successfully";
+    }
 }

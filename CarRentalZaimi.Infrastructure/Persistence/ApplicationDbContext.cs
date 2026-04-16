@@ -3,7 +3,6 @@ using CarRentalZaimi.Domain.Common;
 using CarRentalZaimi.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace CarRentalZaimi.Infrastructure.Persistence;
 

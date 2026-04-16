@@ -8,11 +8,12 @@ using CarRentalZaimi.Application.Features.CarCompanyName.Queries.GetAllCarCompan
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class CarCompanyNameService(IUnitOfWork _unitOfWork, IMapper _mapper) : ICarCompanyNameService
+public class CarCompanyNameService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ICarCompanyNameService
 {
     public async Task<Result<CarCompanyNameDto>> CreateAsync(CreateCarCompanyNameCommand request, CancellationToken cancellationToken = default)
     {
@@ -24,12 +25,13 @@ public class CarCompanyNameService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
 
         var newFuel = new CarCompanyName
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
+            Name = request.Name!
         };
 
         await _unitOfWork.Repository<CarCompanyName>().AddAsync(newFuel, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New car company added: {newFuel.Name}", UserNotificationType.EntityAdded);
 
         return Result<CarCompanyNameDto>.Success(_mapper.Map<CarCompanyNameDto>(newFuel));
     }
@@ -59,6 +61,8 @@ public class CarCompanyNameService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
         await _unitOfWork.Repository<CarCompanyName>().UpdateAsync(existingCompany, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _notificationService.SendNotificationToAdminsAsync($"Car company deleted: {existingCompany.Name}", UserNotificationType.EntityDeleted);
+
         return Result<bool>.Success(true);
     }
 
@@ -86,10 +90,12 @@ public class CarCompanyNameService(IUnitOfWork _unitOfWork, IMapper _mapper) : I
         if (company is not null)
             return Result<CarCompanyNameDto>.Error("This car company already exists");
 
-        existingCompany.Name = request.Name;
+        existingCompany.Name = request.Name!;
 
         await _unitOfWork.Repository<CarCompanyName>().UpdateAsync(existingCompany, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Car company updated: {existingCompany.Name}", UserNotificationType.EntityUpdated);
 
         return Result<CarCompanyNameDto>.Success(_mapper.Map<CarCompanyNameDto>(existingCompany));
     }

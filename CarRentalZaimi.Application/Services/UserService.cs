@@ -23,19 +23,22 @@ public class UserService : IUserService
     private readonly UserManager<User> _userManager;
     private readonly RoleManager<Role> _roleManager;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notificationService;
 
     public UserService(
         IErrorService errorService, 
         IUnitOfWork unitOfWork,
         UserManager<User> userManager,
         RoleManager<Role> roleManager,
-        IMapper mapper)
+        IMapper mapper,
+        INotificationService notificationService)
     {
         _errorService = errorService;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _roleManager = roleManager;
         _mapper = mapper;
+        _notificationService = notificationService;
     }
 
     public async Task<Result<UserDto>> GetUserByIdAsync(GetUserByIdQuery request, CancellationToken cancellationToken = default)
@@ -53,7 +56,6 @@ public class UserService : IUserService
 
         var response = new UserDto
         {
-            Id = user.Id,
             FirstName = user.FirstName,
             LastName = user.LastName,
             DateOfBirth = user.DateOfBirth,
@@ -63,7 +65,7 @@ public class UserService : IUserService
             Location = user.Location,
             Role =  await GetRoleDtoAsync(user),
             Image = _mapper.Map<UserImageDto>(userImage),
-            Status = user.Status.ToString(),
+            Status = user.Status.ToString()
         };
 
         return Result<UserDto>.Success(response);
@@ -90,9 +92,7 @@ public class UserService : IUserService
 
 
         if (Enum.TryParse<UserStatus>(request.Status, ignoreCase: true, out var status))
-        {
             query = query.Where(c => c.Status == status);
-        }
 
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -122,7 +122,6 @@ public class UserService : IUserService
 
         var response = new UserDto
         {
-            Id = user.Id,
             FirstName = user.FirstName,
             LastName = user.LastName,
             DateOfBirth = user.DateOfBirth,
@@ -165,7 +164,7 @@ public class UserService : IUserService
 
             if (existingImage is not null)
             {
-                var oldImageFullPath = Path.Combine("wwwroot", existingImage.ImagePath);
+                var oldImageFullPath = Path.Combine("wwwroot", existingImage.ImagePath!);
                 if (File.Exists(oldImageFullPath))
                     File.Delete(oldImageFullPath);
 
@@ -197,12 +196,13 @@ public class UserService : IUserService
         await _unitOfWork.Repository<User>().UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _notificationService.SendNotificationToAdminsAsync($"User {user.FirstName} {user.LastName} updated their profile.", UserNotificationType.ProfileUpdated);
+
         var userImage = await _unitOfWork.Repository<UserImage>()
             .FirstOrDefaultAsync(p => p.User!.Id == command.UserId, cancellationToken);
 
         var response = new UserDto
         {
-            Id = user.Id,
             FirstName = user.FirstName,
             LastName = user.LastName,
             DateOfBirth = user.DateOfBirth,
@@ -212,7 +212,7 @@ public class UserService : IUserService
             Location = user.Location,
             Role = await GetRoleDtoAsync(user),
             Image = _mapper.Map<UserImageDto>(userImage),
-            Status = user.Status.ToString(),
+            Status = user.Status.ToString()
         };
 
         return Result<UserDto>.Success(response);
@@ -237,9 +237,10 @@ public class UserService : IUserService
         await _unitOfWork.Repository<User>().UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await _notificationService.SendNotificationToAdminsAsync($"User {user.FirstName} {user.LastName} added a phone number.", UserNotificationType.ProfileUpdated);
+
         var response = new UserDto
         {
-            Id = user.Id,
             FirstName = user.FirstName,
             LastName = user.LastName,
             DateOfBirth = user.DateOfBirth,
@@ -248,7 +249,7 @@ public class UserService : IUserService
             PhoneNumber = user.PhoneNumber,
             Location = user.Location,
             Role = await GetRoleDtoAsync(user),
-            Status = user.Status.ToString(),
+            Status = user.Status.ToString()
         };
 
         return Result<UserDto>.Success(response);

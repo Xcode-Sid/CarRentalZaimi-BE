@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Promotion.Commands.CreatePromotion;
 using CarRentalZaimi.Application.Features.Promotion.Commands.DeletePromotion;
@@ -9,11 +10,12 @@ using CarRentalZaimi.Application.Features.Promotion.Queries.GetPromotionByCarId;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailService _emailService) : IPromotionService
+public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailService _emailService, INotificationService _notificationService) : IPromotionService
 {
     public async Task<Result<PromotionDto>> CreateAsync(CreatePromotionCommand request, CancellationToken cancellationToken = default)
     {
@@ -21,13 +23,13 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
             .FirstOrDefaultAsync(p => p.Code == request.Code, cancellationToken);
 
         if (existing is not null)
-            return Result<PromotionDto>.Error("A promotion with this code already exists.");
+            return Result<PromotionDto>.Error(ServiceErrorMessages.Promotion.CodeAlreadyExists);
 
         bool hasCarId = !string.IsNullOrWhiteSpace(request.CarId);
         bool hasCategoryId = !string.IsNullOrWhiteSpace(request.CarCategoryId);
 
         if (hasCarId && hasCategoryId)
-            return Result<PromotionDto>.Error("A promotion can target either a specific car or a category, not both.");
+            return Result<PromotionDto>.Error(ServiceErrorMessages.Promotion.CannotTargetBoth);
 
         Car? car = null;
         if (hasCarId)
@@ -36,7 +38,7 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
                 .FirstOrDefaultAsync(p => p.Id.ToString() == request.CarId, cancellationToken);
 
             if (car is null)
-                return Result<PromotionDto>.Error("The specified car was not found.");
+                return Result<PromotionDto>.Error(ServiceErrorMessages.Promotion.CarNotFound);
         }
 
         CarCategory? category = null;
@@ -46,12 +48,11 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
                 .FirstOrDefaultAsync(p => p.Id.ToString() == request.CarCategoryId, cancellationToken);
 
             if (category is null)
-                return Result<PromotionDto>.Error("The specified car category was not found.");
+                return Result<PromotionDto>.Error(ServiceErrorMessages.Promotion.CategoryNotFound);
         }
 
         var newPromotion = new Promotion
         {
-            Id                 = Guid.NewGuid(),
             Title              = request.Title,
             Description        = request.Description,
             Code               = request.Code,
@@ -64,6 +65,11 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
 
         await _unitOfWork.Repository<Promotion>().AddAsync(newPromotion, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Notify all users about new promotion
+        await _notificationService.SendNotificationToAllAsync(
+            string.Format(NotificationMessages.Promotion.Created, newPromotion.Title, newPromotion.Code, newPromotion.DiscountPercentage),
+            UserNotificationType.NewPromotion);
 
         // Send emails AFTER save
         var subscribers = await _unitOfWork.Repository<Subscribe>().GetAllAsync(cancellationToken);
@@ -82,8 +88,8 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
             var emailTasks = activeSubscribers.Select(subscriber =>
                 _emailService.SendNewPromotionNotificationEmailAsync(
                     subscriberEmail: subscriber.Email!,
-                    title: newPromotion.Title,
-                    code: newPromotion.Code,
+                    title: newPromotion.Title!,
+                    code: newPromotion.Code!,
                     discountPercentage: newPromotion.DiscountPercentage.ToString("F0"),
                     numberOfDays: newPromotion.NumberOfDays.ToString(),
                     appliesTo: appliesTo,
@@ -104,12 +110,16 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
         .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingCategory is null)
-            return Result<bool>.Error("This promotion id does not exist");
+            return Result<bool>.Error(ServiceErrorMessages.Promotion.NotFound);
 
         existingCategory.IsDeleted = true;
 
         await _unitOfWork.Repository<Promotion>().UpdateAsync(existingCategory, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync(
+            string.Format(NotificationMessages.Promotion.Deleted, existingCategory.Title),
+            UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -147,14 +157,14 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
     {
         // Parse once, outside the query
         if (!Guid.TryParse(request.CarId, out var carGuid))
-            return Result<decimal>.Error("Invalid car ID format.");
+            return Result<decimal>.Error(ServiceErrorMessages.Promotion.InvalidCarId);
 
         // 1️⃣ Try to find a promotion tied directly to this car
         var promotion = await _unitOfWork.Repository<Promotion>()
             .AsQueryable()
             .Include(c => c.Car)
             .Include(c => c.CarCategory)
-            .FirstOrDefaultAsync(c => c.Car.Id == carGuid
+            .FirstOrDefaultAsync(c => c.Car!.Id == carGuid
                                       && !c.IsDeleted
                                       && c.IsActive, cancellationToken);
 
@@ -167,22 +177,21 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
                 .FirstOrDefaultAsync(c => c.Id == carGuid && !c.IsDeleted, cancellationToken);
 
             if (car is null)
-                return Result<decimal>.Error("Car not found.");
+                return Result<decimal>.Error(ServiceErrorMessages.Car.NotFound);
 
-            var categoryId = car.Category.Id; 
+            var categoryId = car.Category!.Id; 
 
             promotion = await _unitOfWork.Repository<Promotion>()
                 .AsQueryable()
                 .Include(c => c.Car)
                 .Include(c => c.CarCategory)
-                .FirstOrDefaultAsync(c => c.CarCategory.Id == categoryId
-                                          && c.Car.Id == null   
+                .FirstOrDefaultAsync(c => c.CarCategory!.Id == categoryId
                                           && !c.IsDeleted
                                           && c.IsActive, cancellationToken);
         }
 
         if (promotion is null)
-            return Result<decimal>.Error("No active promotion found for this car.");
+            return Result<decimal>.Error(ServiceErrorMessages.Promotion.NoActivePromotion);
 
         return Result<decimal>.Success(promotion.DiscountPercentage);
     }
@@ -193,13 +202,13 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingCategory is null)
-            return Result<PromotionDto>.Error("This promotion id does not exists");
+            return Result<PromotionDto>.Error(ServiceErrorMessages.Promotion.NotFoundById);
 
         var category = await _unitOfWork.Repository<Promotion>()
             .FirstOrDefaultAsync(p => p.Code == request.Code && p.Id.ToString() != request.Id, cancellationToken);
 
         if (category is not null)
-            return Result<PromotionDto>.Error("This promotion already exists");
+            return Result<PromotionDto>.Error(ServiceErrorMessages.Promotion.DuplicateCode);
 
         existingCategory.Title = request.Title;
         existingCategory.Description = request.Description;
@@ -209,6 +218,10 @@ public class PromotionService(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSe
 
         await _unitOfWork.Repository<Promotion>().UpdateAsync(existingCategory, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync(
+            string.Format(NotificationMessages.Promotion.Updated, existingCategory.Title),
+            UserNotificationType.EntityUpdated);
 
         return Result<PromotionDto>.Success(_mapper.Map<PromotionDto>(existingCategory));
     }

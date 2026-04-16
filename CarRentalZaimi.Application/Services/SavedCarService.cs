@@ -6,18 +6,19 @@ using CarRentalZaimi.Application.Features.SavedCar.Queries;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class SavedCarService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISavedCarService
+public class SavedCarService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ISavedCarService
 {
     public async Task<Result<PagedResponse<SavedCarDto>>> GetAllSavedCarsAsync(GetAllSavedCarsQuery request, CancellationToken cancellationToken = default)
     {
         var query = _unitOfWork.Repository<SavedCar>()
              .AsQueryable()
              .Include(c => c.Car)
-             .ThenInclude(sc => sc.CarImages)
+             .ThenInclude(sc => sc!.CarImages)
              .Include(c => c.User)
              .Where(c => c.User!.Id == request.UserId && !c.IsDeleted);
 
@@ -74,8 +75,10 @@ public class SavedCarService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISavedC
             .Include(c => c.User)
             .FirstOrDefaultAsync(p => p.Car!.Id == car.Id && p.User!.Id == user.Id, cancellationToken);
 
+        string actionType = "";
         if (savedCar is null)
         {
+            actionType = "saved";
             //save
             var newSavedCar = new SavedCar() { 
                 User = user,
@@ -85,12 +88,15 @@ public class SavedCarService(IUnitOfWork _unitOfWork, IMapper _mapper) : ISavedC
         }
         else
         {
+            actionType = "unsaved";
             //unsave
-            savedCar.IsDeleted = true;
+            savedCar.IsDeleted = !savedCar.IsDeleted;
             await _unitOfWork.Repository<SavedCar>().UpdateAsync(savedCar, cancellationToken);
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"User {user.FirstName} {user.LastName} {actionType} car: {car.Title}", UserNotificationType.EntityAdded);
 
         return Result<bool>.Success(true);
     }

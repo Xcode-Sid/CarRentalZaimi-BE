@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.CreateAdditionalService;
 using CarRentalZaimi.Application.Features.AdditionalService.Commands.DeleteAdditionalService;
@@ -9,17 +10,17 @@ using CarRentalZaimi.Application.Features.AdditionalService.Queries.GetAllPagedA
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class AdditionalServicesService(IUnitOfWork _unitOfWork, IMapper _mapper) : IAdditionalServicesService
+public class AdditionalServicesService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : IAdditionalServicesService
 {
     public async Task<Result<AdditionalServiceDto>> CreateAsync(CreateAdditionalServiceCommand request, CancellationToken cancellationToken = default)
     {
         var service = new AdditionalService
         {
-            Id = Guid.NewGuid(),
             Icon = request.Icon,
             Name = request.Name,
             PricePerDay = request.PricePerDay,
@@ -28,6 +29,8 @@ public class AdditionalServicesService(IUnitOfWork _unitOfWork, IMapper _mapper)
 
         await _unitOfWork.Repository<AdditionalService>().AddAsync(service, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New additional service added: {service.Name}", UserNotificationType.EntityAdded);
 
         return Result<AdditionalServiceDto>.Success(_mapper.Map<AdditionalServiceDto>(service));
     }
@@ -38,12 +41,14 @@ public class AdditionalServicesService(IUnitOfWork _unitOfWork, IMapper _mapper)
         .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingService is null)
-            return Result<bool>.Error("This service id does not exist");
+            return Result<bool>.Error(ServiceErrorMessages.AdditionalService.NotFound);
 
         existingService.IsDeleted = true;
 
         await _unitOfWork.Repository<AdditionalService>().UpdateAsync(existingService, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Additional service deleted: {existingService.Name}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -92,7 +97,7 @@ public class AdditionalServicesService(IUnitOfWork _unitOfWork, IMapper _mapper)
            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingService is null)
-            return Result<AdditionalServiceDto>.Error("This service id does not exists");
+            return Result<AdditionalServiceDto>.Error(ServiceErrorMessages.AdditionalService.NotFoundUpdate);
 
 
         existingService.Name = request.Name;
@@ -102,6 +107,8 @@ public class AdditionalServicesService(IUnitOfWork _unitOfWork, IMapper _mapper)
 
         await _unitOfWork.Repository<AdditionalService>().UpdateAsync(existingService, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Additional service updated: {existingService.Name}", UserNotificationType.EntityUpdated);
 
         return Result<AdditionalServiceDto>.Success(_mapper.Map<AdditionalServiceDto>(existingService));
     }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CarRentalZaimi.Application.Common;
+using CarRentalZaimi.Application.Common.Messages;
 using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.Terms.Commands.CreateTerm;
 using CarRentalZaimi.Application.Features.Terms.Commands.DeleteTerm;
@@ -9,26 +10,28 @@ using CarRentalZaimi.Application.Features.Terms.Queries.GetAllTerms;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
+using CarRentalZaimi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentalZaimi.Application.Services;
 
-public class TermsService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITermsService
+public class TermsService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationService _notificationService) : ITermsService
 {
     public async Task<Result<TermsDto>> CreateAsync(CreateTermCommand request, CancellationToken cancellationToken = default)
     {
         var newTerm = new Terms
         {
-            Id = Guid.NewGuid(),
             Title = request.Title,
             Description = request.Description,
             Color = request.Color,
             Icon = request.Icon,
-            IsActive = request.IsActive,
+            IsActive = request.IsActive
         };
 
         await _unitOfWork.Repository<Terms>().AddAsync(newTerm, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"New term added: {newTerm.Title}", UserNotificationType.EntityAdded);
 
         return Result<TermsDto>.Success(_mapper.Map<TermsDto>(newTerm));
     }
@@ -39,12 +42,14 @@ public class TermsService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITermsServ
             .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingTerm is null)
-            return Result<bool>.Error("This term id does not exist");
+            return Result<bool>.Error(ServiceErrorMessages.Term.NotFound);
 
         existingTerm.IsDeleted = true;
 
         await _unitOfWork.Repository<Terms>().UpdateAsync(existingTerm, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Term deleted: {existingTerm.Title}", UserNotificationType.EntityDeleted);
 
         return Result<bool>.Success(true);
     }
@@ -94,7 +99,7 @@ public class TermsService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITermsServ
            .FirstOrDefaultAsync(p => p.Id.ToString() == request.Id, cancellationToken);
 
         if (existingTerm is null)
-            return Result<TermsDto>.Error("This term id does not exists");
+            return Result<TermsDto>.Error(ServiceErrorMessages.Term.NotFoundUpdate);
 
         existingTerm.Title = request.Title;
         existingTerm.Description = request.Description;
@@ -104,6 +109,8 @@ public class TermsService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITermsServ
 
         await _unitOfWork.Repository<Terms>().UpdateAsync(existingTerm, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationToAdminsAsync($"Term updated: {existingTerm.Title}", UserNotificationType.EntityUpdated);
 
         return Result<TermsDto>.Success(_mapper.Map<TermsDto>(existingTerm));
     }
