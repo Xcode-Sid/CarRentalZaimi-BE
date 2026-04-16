@@ -9,6 +9,7 @@ using CarRentalZaimi.Application.Features.BookingRequest.Commands.CreateBookingR
 using CarRentalZaimi.Application.Features.BookingRequest.Commands.RefuseBooking;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllBookings;
 using CarRentalZaimi.Application.Features.BookingRequest.Queries.GetAllUserBookings;
+using CarRentalZaimi.Application.Features.CreateOccupiedCarDays.Commands.CreateOccupiedCarDays;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Common.Constants;
@@ -21,7 +22,7 @@ using Microsoft.Extensions.Logging;
 namespace CarRentalZaimi.Application.Services;
 
 public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailService _emailService, 
-    ILogger<BookingServices> _logger, UserManager<User> _userManager, INotificationService _notificationService) : IBookingServices
+    ILogger<BookingServices> _logger, UserManager<User> _userManager, IOccupiedCarDaysService _occupiedCarDaysService, INotificationService _notificationService) : IBookingServices
 {
     public async Task<Result<BookingDto>> CreateBookingRequestAsync(CreateBookingRequestCommand request, CancellationToken cancellationToken = default)
     {
@@ -39,6 +40,24 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
 
         if (car is null)
             return Result<BookingDto>.Error(ServiceErrorMessages.Car.NotFound);
+
+
+        // ✅ Duplicate booking check
+        var duplicateExists = await _unitOfWork.Repository<Booking>()
+            .AsQueryable()
+            .Include(b => b.User)
+            .Include(b => b.Car)
+            .AnyAsync(b =>
+                b.User!.Id == request.UserId &&
+                b.Car!.Id.ToString() == request.CarId &&
+                b.Status == BookingStatus.Accepted &&
+                b.StartDate == request.StartDate &&
+                b.EndDate == request.EndDate,
+                cancellationToken);
+
+        if (duplicateExists)
+            return Result<BookingDto>.Error("You already have a booking for this car on the selected dates.");
+
 
         Enum.TryParse<PaymentMethod>(request.PaymentMethod, ignoreCase: true, out var paymentMethod);
 
@@ -326,6 +345,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         if (booking.Status != BookingStatus.Accepted)
             return Result<BookingDto>.Error(ServiceErrorMessages.Booking.MustBeAcceptedToClose);
 
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
             booking.Status = BookingStatus.Done;
@@ -333,6 +353,16 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
             await _unitOfWork.Repository<Booking>().UpdateAsync(booking, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            var occDayRequest = new CreateOccupiedCarDaysCommand
+            {
+                CarId = booking.Car?.Id.ToString(),
+                StartDate = booking.StartDate,
+                EndDate = booking.EndDate,
+                Type = CarBlockedDateType.Booking.ToString(),
+            };
+            await _occupiedCarDaysService.CreateAsync(occDayRequest);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
             await _notificationService.SendNotificationToUserAsync(
                 Guid.Parse(booking.User!.Id),
                 $"Your booking for {booking.Car!.Name?.Name} {booking.Car.Model?.Name} has been completed.",
@@ -347,6 +377,7 @@ public class BookingServices(IUnitOfWork _unitOfWork, IMapper _mapper, IEmailSer
         }
         catch (Exception ex)
         {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             _logger.LogError(ex, "Failed to close booking {BookingId}", request.BookingId);
             return Result<BookingDto>.Error(ServiceErrorMessages.Booking.CloseFailed);
         }

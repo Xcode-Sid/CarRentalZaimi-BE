@@ -4,7 +4,8 @@ using CarRentalZaimi.Application.DTOs;
 using CarRentalZaimi.Application.Features.StatePrefixes.Commands.CreateStatePrefix;
 using CarRentalZaimi.Application.Features.StatePrefixes.Commands.DeleteStatePrefix;
 using CarRentalZaimi.Application.Features.StatePrefixes.Commands.UpdateStatePrefix;
-using CarRentalZaimi.Application.Features.StatePrefixes.Queries;
+using CarRentalZaimi.Application.Features.StatePrefixes.Queries.GetAllPagedStatePrefixes;
+using CarRentalZaimi.Application.Features.StatePrefixes.Queries.GetAllStatePrefixes;
 using CarRentalZaimi.Application.Interfaces.Services;
 using CarRentalZaimi.Application.Interfaces.UnitOfWork;
 using CarRentalZaimi.Domain.Entities;
@@ -92,5 +93,33 @@ public class StatePrefixService(IUnitOfWork _unitOfWork, IMapper _mapper, INotif
 
         var mapped = _mapper.Map<IEnumerable<StatePrefixDto>>(statePrefixes);
         return Result.Success(mapped);
+    }
+
+    public async Task<Result<PagedResponse<StatePrefixDto>>> GetAllPagedAsync(GetAllPagedStatePrefixesQuery request, CancellationToken cancellationToken = default)
+    {
+        var query = _unitOfWork.Repository<StatePrefix>()
+             .AsQueryable()
+             .Where(c => !c.IsDeleted);
+
+        // Search
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToLower();
+            query = query.Where(c =>
+                (c.CountryName! != null && c.CountryName.ToLower().Contains(search)));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var prefixes = await query
+            .Skip((request.PageNr - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var mapped = _mapper.Map<List<StatePrefixDto>>(prefixes);
+
+        var pagedResponse = new PagedResponse<StatePrefixDto>(mapped, totalCount, request.PageNr, request.PageSize);
+
+        return Result<PagedResponse<StatePrefixDto>>.Success(pagedResponse);
     }
 }
